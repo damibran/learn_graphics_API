@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="MainHpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainHpp.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -27,7 +27,19 @@
     <None Include="Shaders\shader.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GLFWwindowWraper.h">
+    <ClInclude Include="Wrappers\GLFWwindowWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\InstanceWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\SurfaceWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\PhysicalDeviceWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\LogicalDeviceWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

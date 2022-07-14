@@ -143,7 +143,11 @@
     <None Include="Shaders\shader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GLFWwindowWraper.h" />
+    <ClInclude Include="Wrappers\GLFWwindowWrapper.h" />
+    <ClInclude Include="Wrappers\InstanceWrapper.h" />
+    <ClInclude Include="Wrappers\LogicalDeviceWrapper.h" />
+    <ClInclude Include="Wrappers\PhysicalDeviceWrapper.h" />
+    <ClInclude Include="Wrappers\SurfaceWrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
