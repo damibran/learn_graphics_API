@@ -31,6 +31,13 @@ public:
 		glfwTerminate();
 	}
 
+	std::pair<int, int> getFrameBufferSize()const
+	{
+		std::pair<int,int> res;
+		glfwGetFramebufferSize(window, &res.first, &res.second);
+		return res;
+	}
+
 private:
 	GLFWwindow* window;
 public:

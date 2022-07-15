@@ -24,6 +24,7 @@ public:
 				physical_device_ = std::make_unique<vk::raii::PhysicalDevice>(device);
 				finded = true;
 				queue_family_indices_ = findQueueFamilies(*physical_device_, surface);
+				swap_chain_details_ = querySwapChainSupport(*physical_device_,surface);
 				break;
 			}
 		}
@@ -43,7 +44,13 @@ public:
 		return physical_device_.get();
 	}
 
-	struct QueueFamilyIndices {
+
+	const std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
+	struct QueueFamilyIndices
+	{
 		std::optional<uint32_t> graphicsFamily;
 		std::optional<uint32_t> presentFamily;
 
@@ -52,24 +59,27 @@ public:
 		}
 	};
 
-	const std::vector<const char*> deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
-	};
-
 	QueueFamilyIndices getQueueFamilyIndices()const
 	{
 		return queue_family_indices_;
 	}
 
-private:
-	std::unique_ptr<vk::raii::PhysicalDevice> physical_device_;
-	QueueFamilyIndices queue_family_indices_;
-
-	struct SwapChainSupportDetails {
+	struct SwapChainSupportDetails
+	{
 		vk::SurfaceCapabilitiesKHR capabilities;
 		std::vector<vk::SurfaceFormatKHR> formats;
 		std::vector<vk::PresentModeKHR> presentModes;
 	};
+
+	SwapChainSupportDetails getSwapChainSupportDetails()const
+	{
+		return swap_chain_details_;
+	}
+
+private:
+	std::unique_ptr<vk::raii::PhysicalDevice> physical_device_;
+	QueueFamilyIndices queue_family_indices_;
+	SwapChainSupportDetails swap_chain_details_;
 
 	bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const SurfaceWrapper& surface)
 	{

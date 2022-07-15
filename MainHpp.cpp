@@ -12,6 +12,7 @@
 #include "Wrappers/SurfaceWrapper.h"
 #include "Wrappers/PhysicalDeviceWrapper.h"
 #include "Wrappers/LogicalDeviceWrapper.h"
+#include "Wrappers/SwapChain.h"
 
 class HelloTriangleApplication
 {
@@ -24,7 +25,8 @@ public:
 		physical_device_(instance_, surface_),
 		device_(physical_device_, surface_),
 		gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
-		present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0))
+		present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
+		swap_chain_(physical_device_, device_, surface_, window_)
 	{
 		//createSwapChain();
 		//createImageViews();
@@ -58,6 +60,7 @@ private:
 	LogicalDeviceWrapper device_;
 	vk::raii::Queue gragraphics_queue_;
 	vk::raii::Queue present_queue_;
+	SwapChain swap_chain_;
 };
 
 int main()
