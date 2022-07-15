@@ -212,9 +212,9 @@ private:
 		createImageViews();//
 		createRenderPass();//
 		createDescriptorSetLayout();//
-		createGraphicsPipeline();
-		createFramebuffers();
-		createCommandPool();
+		createGraphicsPipeline();//
+		createFramebuffers();//
+		createCommandPool();//
 		createTextureImage();
 		createTextureImageView();
 		createTextureSampler();

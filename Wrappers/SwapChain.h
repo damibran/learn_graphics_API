@@ -73,9 +73,19 @@ namespace dmbrn
 			return swap_chain_.get();
 		}
 
-		vk::Format getImageFormat()const
+		const vk::Extent2D& getExtent()const
+		{
+			return extent_;
+		}
+
+		const vk::Format& getImageFormat()const
 		{
 			return image_format_;
+		}
+
+		const std::vector<vk::raii::ImageView>& getImageViews()const
+		{
+			return image_views_;
 		}
 
 	private:

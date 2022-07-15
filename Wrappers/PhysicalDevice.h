@@ -61,7 +61,7 @@ namespace dmbrn
 			}
 		};
 
-		QueueFamilyIndices getQueueFamilyIndices()const
+		const QueueFamilyIndices& getQueueFamilyIndices()const
 		{
 			return queue_family_indices_;
 		}
