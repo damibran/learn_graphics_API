@@ -14,59 +14,62 @@
 #include "Wrappers/LogicalDeviceWrapper.h"
 #include "Wrappers/SwapChain.h"
 
-class HelloTriangleApplication
+namespace dmbrn
 {
-public:
-
-	HelloTriangleApplication(uint32_t width, uint32_t height) :
-		window_(width, height),
-		instance_(context_),
-		surface_(instance_, window_),
-		physical_device_(instance_, surface_),
-		device_(physical_device_, surface_),
-		gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
-		present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
-		swap_chain_(physical_device_, device_, surface_, window_)
+	class HelloTriangleApplication
 	{
-		//createSwapChain();
-		//createImageViews();
-		//createRenderPass();
-		//createDescriptorSetLayout();
-		//createGraphicsPipeline();
-		//createFramebuffers();
-		//createCommandPool();
-		//createTextureImage();
-		//createTextureImageView();
-		//createTextureSampler();
-		//createVertexBuffer();
-		//createIndexBuffer();
-		//createUniformBuffers();
-		//createDescriptorPool();
-		//createDescriptorSets();
-		//createCommandBuffers();
-		//createSyncObjects();
-	}
+	public:
 
-	void run() {
+		HelloTriangleApplication(uint32_t width, uint32_t height) :
+			window_(width, height),
+			instance_(context_),
+			surface_(instance_, window_),
+			physical_device_(instance_, surface_),
+			device_(physical_device_, surface_),
+			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
+			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
+			swap_chain_(physical_device_, device_, surface_, window_)
+		{
+			//createSwapChain();
+			//createImageViews();
+			//createRenderPass();
+			//createDescriptorSetLayout();
+			//createGraphicsPipeline();
+			//createFramebuffers();
+			//createCommandPool();
+			//createTextureImage();
+			//createTextureImageView();
+			//createTextureSampler();
+			//createVertexBuffer();
+			//createIndexBuffer();
+			//createUniformBuffers();
+			//createDescriptorPool();
+			//createDescriptorSets();
+			//createCommandBuffers();
+			//createSyncObjects();
+		}
 
-	}
+		void run() {
 
-private:
-	GLFWwindowWrapper window_;
-	vk::raii::Context context_;
-	InstanceWrapper instance_;
-	SurfaceWrapper surface_;
-	PhysicalDeviceWrapper physical_device_;
-	LogicalDeviceWrapper device_;
-	vk::raii::Queue gragraphics_queue_;
-	vk::raii::Queue present_queue_;
-	SwapChain swap_chain_;
-};
+		}
+
+	private:
+		GLFWwindowWrapper window_;
+		vk::raii::Context context_;
+		InstanceWrapper instance_;
+		SurfaceWrapper surface_;
+		PhysicalDeviceWrapper physical_device_;
+		LogicalDeviceWrapper device_;
+		vk::raii::Queue gragraphics_queue_;
+		vk::raii::Queue present_queue_;
+		SwapChain swap_chain_;
+	};
+}
 
 int main()
 {
 	try {
-		HelloTriangleApplication app(800, 600);
+		dmbrn::HelloTriangleApplication app(800, 600);
 		app.run();
 	}
 	catch (const std::exception& e) {
