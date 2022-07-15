@@ -13,6 +13,7 @@
 #include "Wrappers/PhysicalDevice.h"
 #include "Wrappers/LogicalDevice.h"
 #include "Wrappers/SwapChain.h"
+#include "Wrappers/RenderPass.h"
 
 namespace dmbrn
 {
@@ -28,9 +29,9 @@ namespace dmbrn
 			device_(physical_device_, surface_),
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
-			swap_chain_(physical_device_, device_, surface_, window_)
+			swap_chain_(physical_device_, device_, surface_, window_),
+			render_pass_(device_,swap_chain_)
 		{
-			//createRenderPass();
 			//createDescriptorSetLayout();
 			//createGraphicsPipeline();
 			//createFramebuffers();
@@ -61,6 +62,7 @@ namespace dmbrn
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
 		SwapChain swap_chain_;
+		RenderPass render_pass_;
 	};
 }
 
