@@ -7,6 +7,8 @@
 #include <optional>
 #include <set>
 
+#include <glm/glm.hpp>
+
 #include "Wrappers/GLFWwindowWrapper.h"
 #include "Wrappers/Instance.h"
 #include "Wrappers/Surface.h"
@@ -14,6 +16,9 @@
 #include "Wrappers/LogicalDevice.h"
 #include "Wrappers/SwapChain.h"
 #include "Wrappers/RenderPass.h"
+#include "Wrappers/DescriptorSetLayout.h"
+#include "Wrappers/GraphicsPipeline.h"
+
 
 namespace dmbrn
 {
@@ -30,10 +35,10 @@ namespace dmbrn
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			swap_chain_(physical_device_, device_, surface_, window_),
-			render_pass_(device_,swap_chain_)
+			render_pass_(device_, swap_chain_),
+			descriptor_set_layout_(device_),
+			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_)
 		{
-			//createDescriptorSetLayout();
-			//createGraphicsPipeline();
 			//createFramebuffers();
 			//createCommandPool();
 			//createTextureImage();
@@ -63,6 +68,8 @@ namespace dmbrn
 		vk::raii::Queue present_queue_;
 		SwapChain swap_chain_;
 		RenderPass render_pass_;
+		DescriptorSetLayout descriptor_set_layout_;
+		GraphicsPipeline graphics_pipeline_;
 	};
 }
 

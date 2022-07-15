@@ -203,15 +203,15 @@ private:
 	}
 
 	void initVulkan() {
-		createInstance();
-		setupDebugMessenger();
-		createSurface();
-		pickPhysicalDevice();
-		createLogicalDevice();
-		createSwapChain();
-		createImageViews();
-		createRenderPass();
-		createDescriptorSetLayout();
+		createInstance();//
+		setupDebugMessenger();//
+		createSurface();//
+		pickPhysicalDevice();//
+		createLogicalDevice();//
+		createSwapChain();//
+		createImageViews();//
+		createRenderPass();//
+		createDescriptorSetLayout();//
 		createGraphicsPipeline();
 		createFramebuffers();
 		createCommandPool();
