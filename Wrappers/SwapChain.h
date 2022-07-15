@@ -62,17 +62,28 @@ namespace dmbrn
 
 			images_ = swap_chain_->getImages();
 
-			swap_chain_image_format_ = surfaceFormat.format;
-			swap_chain_extent_ = extent;
+			image_format_ = surfaceFormat.format;
+			extent_ = extent;
 
 			createImageViews(device);
 		}
+
+		vk::raii::SwapchainKHR* operator->()
+		{
+			return swap_chain_.get();
+		}
+
+		vk::Format getImageFormat()const
+		{
+			return image_format_;
+		}
+
 	private:
 		std::unique_ptr<vk::raii::SwapchainKHR> swap_chain_;
 		std::vector<VkImage> images_;
 		std::vector<vk::raii::ImageView> image_views_;
-		vk::Format swap_chain_image_format_;
-		vk::Extent2D swap_chain_extent_;
+		vk::Format image_format_;
+		vk::Extent2D extent_;
 
 		vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
 		{
@@ -91,7 +102,7 @@ namespace dmbrn
 		{
 			for (size_t i = 0; i < images_.size(); i++)
 			{
-				image_views_.push_back(createImageView(device, images_[i], swap_chain_image_format_));
+				image_views_.push_back(createImageView(device, images_[i], image_format_));
 			}
 		}
 
