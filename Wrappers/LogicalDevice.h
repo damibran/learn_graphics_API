@@ -58,12 +58,12 @@ namespace dmbrn
 			device_ = std::make_unique<vk::raii::Device>(physical_device->createDevice(createInfo));
 		}
 
-		vk::raii::Device& operator*()const
+		const vk::raii::Device& operator*()const
 		{
 			return *device_;
 		}
 
-		vk::raii::Device* operator->()const
+		const vk::raii::Device* operator->()const
 		{
 			return device_.get();
 		}

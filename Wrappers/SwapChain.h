@@ -68,7 +68,7 @@ namespace dmbrn
 			createImageViews(device);
 		}
 
-		vk::raii::SwapchainKHR* operator->()
+		vk::raii::SwapchainKHR* operator->()const
 		{
 			return swap_chain_.get();
 		}

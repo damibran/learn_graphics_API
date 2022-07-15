@@ -19,12 +19,12 @@ namespace dmbrn
 			surface_ = std::make_unique<vk::raii::SurfaceKHR>(*instance, raw_surface, nullptr);
 		}
 
-		vk::raii::SurfaceKHR& operator*()const
+		const vk::raii::SurfaceKHR& operator*()const
 		{
 			return *surface_;
 		}
 
-		vk::raii::SurfaceKHR* operator->()const
+		const vk::raii::SurfaceKHR* operator->()const
 		{
 			return surface_.get();
 		}

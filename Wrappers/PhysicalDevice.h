@@ -36,12 +36,12 @@ namespace dmbrn
 			}
 		}
 
-		vk::raii::PhysicalDevice& operator*()const
+		const vk::raii::PhysicalDevice& operator*()const
 		{
 			return *physical_device_;
 		}
 
-		vk::raii::PhysicalDevice* operator->()const
+		const vk::raii::PhysicalDevice* operator->()const
 		{
 			return physical_device_.get();
 		}

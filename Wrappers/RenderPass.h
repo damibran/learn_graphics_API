@@ -60,7 +60,12 @@ namespace dmbrn
 			render_pass_ = std::make_unique<vk::raii::RenderPass>(device->createRenderPass(renderPassInfo));
 		}
 
-		vk::raii::RenderPass* operator->()
+		const vk::raii::RenderPass& operator*()const
+		{
+			return *render_pass_;
+		}
+
+		vk::raii::RenderPass* operator->()const
 		{
 			return render_pass_.get();
 		}

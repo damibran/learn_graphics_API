@@ -57,12 +57,12 @@ namespace dmbrn
 				(instance_->createDebugUtilsMessengerEXT(debug_create_info));
 		}
 
-		vk::raii::Instance& operator*()const
+		const vk::raii::Instance& operator*()const
 		{
 			return *instance_;
 		}
 
-		vk::raii::Instance* operator->()const
+		const vk::raii::Instance* operator->()const
 		{
 			return instance_.get();
 		}
