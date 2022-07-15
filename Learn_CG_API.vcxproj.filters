@@ -30,16 +30,16 @@
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\InstanceWrapper.h">
+    <ClInclude Include="Wrappers\Instance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\SurfaceWrapper.h">
+    <ClInclude Include="Wrappers\Surface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\PhysicalDeviceWrapper.h">
+    <ClInclude Include="Wrappers\PhysicalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\LogicalDeviceWrapper.h">
+    <ClInclude Include="Wrappers\LogicalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\SwapChain.h">

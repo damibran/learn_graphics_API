@@ -9,18 +9,18 @@
 #include <set>
 
 #include "GLFWwindowWrapper.h"
-#include "InstanceWrapper.h"
-#include "SurfaceWrapper.h"
-#include "PhysicalDeviceWrapper.h"
+#include "Instance.h"
+#include "Surface.h"
+#include "PhysicalDevice.h"
 
 namespace dmbrn
 {
-	class LogicalDeviceWrapper
+	class LogicalDevice
 	{
 	public:
-		LogicalDeviceWrapper(const PhysicalDeviceWrapper& physical_device, const SurfaceWrapper& surface)
+		LogicalDevice(const PhysicalDevice& physical_device, const Surface& surface)
 		{
-			PhysicalDeviceWrapper::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
+			PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
 
 			std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
 			std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };

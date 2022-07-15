@@ -6,21 +6,21 @@
 #include <optional>
 
 #include "GLFWwindowWrapper.h"
-#include "SurfaceWrapper.h"
-#include "PhysicalDeviceWrapper.h"
-#include "LogicalDeviceWrapper.h"
+#include "Surface.h"
+#include "PhysicalDevice.h"
+#include "LogicalDevice.h"
 
 namespace dmbrn
 {
 	class SwapChain
 	{
 	public:
-		SwapChain(const PhysicalDeviceWrapper& physical_device,
-			const LogicalDeviceWrapper& device,
-			const SurfaceWrapper& surface,
+		SwapChain(const PhysicalDevice& physical_device,
+			const LogicalDevice& device,
+			const Surface& surface,
 			const GLFWwindowWrapper& window)
 		{
-			PhysicalDeviceWrapper::SwapChainSupportDetails swapChainSupport = physical_device.getSwapChainSupportDetails();
+			PhysicalDevice::SwapChainSupportDetails swapChainSupport = physical_device.getSwapChainSupportDetails();
 
 			vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 			vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -41,7 +41,7 @@ namespace dmbrn
 			createInfo.imageArrayLayers = 1;
 			createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
 
-			PhysicalDeviceWrapper::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
+			PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
 			uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 			if (indices.graphicsFamily != indices.presentFamily) {
@@ -87,7 +87,7 @@ namespace dmbrn
 			return availableFormats[0];
 		}
 
-		void createImageViews(const LogicalDeviceWrapper& device)
+		void createImageViews(const LogicalDevice& device)
 		{
 			for (size_t i = 0; i < images_.size(); i++)
 			{
@@ -95,7 +95,7 @@ namespace dmbrn
 			}
 		}
 
-		vk::raii::ImageView createImageView(const LogicalDeviceWrapper& device, VkImage image, vk::Format format)
+		vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
 		{
 			vk::ImageViewCreateInfo viewInfo{};
 			viewInfo.image = image;

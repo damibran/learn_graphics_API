@@ -16,10 +16,10 @@ namespace dmbrn
 		"VK_LAYER_KHRONOS_validation"
 	};
 
-	class InstanceWrapper
+	class Instance
 	{
 	public:
-		InstanceWrapper(const vk::raii::Context& context)
+		Instance(const vk::raii::Context& context)
 		{
 			vk::ApplicationInfo application_info =
 				vk::ApplicationInfo("First Vulkan",

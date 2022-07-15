@@ -8,15 +8,15 @@
 #include <optional>
 #include <set>
 
-#include "InstanceWrapper.h"
-#include "SurfaceWrapper.h"
+#include "Instance.h"
+#include "Surface.h"
 
 namespace dmbrn
 {
-	class PhysicalDeviceWrapper
+	class PhysicalDevice
 	{
 	public:
-		PhysicalDeviceWrapper(const InstanceWrapper& instance, const SurfaceWrapper& surface)
+		PhysicalDevice(const Instance& instance, const Surface& surface)
 		{
 			vk::raii::PhysicalDevices physical_devices(*instance);
 
@@ -83,7 +83,7 @@ namespace dmbrn
 		QueueFamilyIndices queue_family_indices_;
 		SwapChainSupportDetails swap_chain_details_;
 
-		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const SurfaceWrapper& surface)
+		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
 			QueueFamilyIndices indices = findQueueFamilies(device, surface);
 
@@ -100,7 +100,7 @@ namespace dmbrn
 			return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 		}
 
-		static QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& device, const SurfaceWrapper& surface)
+		static QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
 			QueueFamilyIndices indices;
 
@@ -140,7 +140,7 @@ namespace dmbrn
 			return requiredExtensions.empty();
 		}
 
-		static SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice& device, const SurfaceWrapper& surface)
+		static SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
 			SwapChainSupportDetails details;
 

@@ -4,15 +4,15 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "InstanceWrapper.h"
+#include "Instance.h"
 #include "GLFWwindowWrapper.h"
 
 namespace dmbrn
 {
-	class SurfaceWrapper
+	class Surface
 	{
 	public:
-		SurfaceWrapper(const InstanceWrapper& instance, const GLFWwindowWrapper& window)
+		Surface(const Instance& instance, const GLFWwindowWrapper& window)
 		{
 			VkSurfaceKHR raw_surface;
 			glfwCreateWindowSurface(**instance, window.data(), nullptr, &raw_surface);

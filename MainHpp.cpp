@@ -8,10 +8,10 @@
 #include <set>
 
 #include "Wrappers/GLFWwindowWrapper.h"
-#include "Wrappers/InstanceWrapper.h"
-#include "Wrappers/SurfaceWrapper.h"
-#include "Wrappers/PhysicalDeviceWrapper.h"
-#include "Wrappers/LogicalDeviceWrapper.h"
+#include "Wrappers/Instance.h"
+#include "Wrappers/Surface.h"
+#include "Wrappers/PhysicalDevice.h"
+#include "Wrappers/LogicalDevice.h"
 #include "Wrappers/SwapChain.h"
 
 namespace dmbrn
@@ -30,8 +30,6 @@ namespace dmbrn
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			swap_chain_(physical_device_, device_, surface_, window_)
 		{
-			//createSwapChain();
-			//createImageViews();
 			//createRenderPass();
 			//createDescriptorSetLayout();
 			//createGraphicsPipeline();
@@ -56,10 +54,10 @@ namespace dmbrn
 	private:
 		GLFWwindowWrapper window_;
 		vk::raii::Context context_;
-		InstanceWrapper instance_;
-		SurfaceWrapper surface_;
-		PhysicalDeviceWrapper physical_device_;
-		LogicalDeviceWrapper device_;
+		Instance instance_;
+		Surface surface_;
+		PhysicalDevice physical_device_;
+		LogicalDevice device_;
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
 		SwapChain swap_chain_;
