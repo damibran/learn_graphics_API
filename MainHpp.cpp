@@ -108,7 +108,8 @@ namespace dmbrn
 
 			uint32_t imageIndex = result.second;
 
-			if (result.first == vk::Result::eErrorOutOfDateKHR) {
+			if (result.first == vk::Result::eErrorOutOfDateKHR)
+			{
 				swap_chain_.recreate(physical_device_, device_, surface_, window_);
 				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
 				return;
@@ -155,17 +156,24 @@ namespace dmbrn
 
 			presentInfo.pImageIndices = &imageIndex;
 
-			vk::Result result1 = present_queue_.presentKHR(presentInfo);
-
-			if (result1 == vk::Result::eErrorOutOfDateKHR || result1 == vk::Result::eSuboptimalKHR || window_.framebufferResized) {
+			try
+			{
+				vk::Result result1 = present_queue_.presentKHR(presentInfo);
+			}
+			catch (vk::OutOfDateKHRError e)
+			{
 				window_.framebufferResized = false;
 				swap_chain_.recreate(physical_device_, device_, surface_, window_);
 				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
 				return;
 			}
-			else if (result1 != vk::Result::eSuccess) {
-				throw std::runtime_error("failed to present swap chain image!");
-			}
+
+			//if (result1 == vk::Result::eErrorOutOfDateKHR || result1 == vk::Result::eSuboptimalKHR || window_.framebufferResized) {
+			//
+			//}
+			//else if (result1 != vk::Result::eSuccess) {
+			//	throw std::runtime_error("failed to present swap chain image!");
+			//}
 
 			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
 		}

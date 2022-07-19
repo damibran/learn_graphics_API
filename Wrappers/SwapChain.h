@@ -84,7 +84,7 @@ namespace dmbrn
 			const Surface& surface,
 			const GLFWwindowWrapper& window)
 		{
-			PhysicalDevice::SwapChainSupportDetails swapChainSupport = physical_device.getSwapChainSupportDetails();
+			PhysicalDevice::SwapChainSupportDetails swapChainSupport = PhysicalDevice::querySwapChainSupport(*physical_device,surface);
 
 			vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 			vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -121,6 +121,8 @@ namespace dmbrn
 			createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 			createInfo.presentMode = presentMode;
 			createInfo.clipped = VK_TRUE;
+			if (swap_chain_.get())
+				createInfo.oldSwapchain = **swap_chain_;
 
 			swap_chain_ = std::make_unique<vk::raii::SwapchainKHR>(device->createSwapchainKHR(createInfo));
 
@@ -137,7 +139,7 @@ namespace dmbrn
 				image_views_.push_back(createImageView(device, images_[i], image_format_));
 			}
 		}
-		
+
 		vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
 		{
 			vk::ImageViewCreateInfo viewInfo{};
@@ -155,7 +157,7 @@ namespace dmbrn
 
 		vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
 			for (const auto& availableFormat : availableFormats) {
-				if (availableFormat.format == vk::Format::eB8G8R8A8Srgb&& availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+				if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
 					return availableFormat;
 				}
 			}

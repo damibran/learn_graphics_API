@@ -86,9 +86,18 @@ namespace dmbrn
 			std::vector<vk::PresentModeKHR> presentModes;
 		};
 
-		SwapChainSupportDetails getSwapChainSupportDetails()const
+
+		static SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
-			return swap_chain_details_;
+			SwapChainSupportDetails details;
+
+			details.capabilities = device.getSurfaceCapabilitiesKHR(**surface);
+
+			details.formats = device.getSurfaceFormatsKHR(**surface);
+
+			details.presentModes = device.getSurfacePresentModesKHR(**surface);
+
+			return details;
 		}
 
 	private:
@@ -151,19 +160,6 @@ namespace dmbrn
 			}
 
 			return requiredExtensions.empty();
-		}
-
-		static SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice& device, const Surface& surface)
-		{
-			SwapChainSupportDetails details;
-
-			details.capabilities = device.getSurfaceCapabilitiesKHR(**surface);
-
-			details.formats = device.getSurfaceFormatsKHR(**surface);
-
-			details.presentModes = device.getSurfacePresentModesKHR(**surface);
-
-			return details;
 		}
 	};
 }
