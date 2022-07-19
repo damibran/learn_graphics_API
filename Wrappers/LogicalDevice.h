@@ -18,6 +18,8 @@ namespace dmbrn
 	class LogicalDevice
 	{
 	public:
+		const int MAX_FRAMES_IN_FLIGHT = 2;
+
 		LogicalDevice(const PhysicalDevice& physical_device, const Surface& surface)
 		{
 			PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();

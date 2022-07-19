@@ -1,4 +1,5 @@
 #define GLFW_INCLUDE_VULKAN
+#include <chrono>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
@@ -7,8 +8,9 @@
 #include <optional>
 #include <set>
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
-#include <stb_image.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Wrappers/GLFWwindowWrapper.h"
 #include "Wrappers/Instance.h"
@@ -21,6 +23,11 @@
 #include "Wrappers/GraphicsPipeline.h"
 #include "Wrappers/FrameBuffers.h"
 #include "Wrappers/CommandPool.h"
+#include "Wrappers/Texture.h"
+#include "Wrappers/VertexIndexBuffers.h"
+#include "Wrappers/UniformBuffers.h"
+#include "Wrappers/DescriptorSets.h"
+#include "Wrappers/CommandBuffers.h"
 
 namespace dmbrn
 {
@@ -36,27 +43,36 @@ namespace dmbrn
 			device_(physical_device_, surface_),
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
-			swap_chain_(physical_device_, device_, surface_, window_),
 			render_pass_(device_, swap_chain_),
+			swap_chain_(physical_device_, device_, surface_, window_),
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			frame_buffers_(device_, swap_chain_, render_pass_),
-			command_pool_(physical_device_, device_)
+			command_pool_(physical_device_, device_),
+			texture_(physical_device_, device_, command_pool_, gragraphics_queue_),
+			vertex_index_buffers_(physical_device_, device_, command_pool_, gragraphics_queue_),
+			uniform_buffers_(physical_device_, device_),
+			descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_, texture_),
+			command_buffers_(device_, command_pool_)
 		{
-			//createTextureImage();
-			//createTextureImageView();
-			//createTextureSampler();
-			//createVertexBuffer();
-			//createIndexBuffer();
-			//createUniformBuffers();
-			//createDescriptorPool();
-			//createDescriptorSets();
-			//createCommandBuffers();
-			//createSyncObjects();
+			vk::SemaphoreCreateInfo semaphoreInfo{};
+
+			vk::FenceCreateInfo fenceInfo{};
+			fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+
+			for (size_t i = 0; i < device_.MAX_FRAMES_IN_FLIGHT; i++) {
+				image_available_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
+				render_finished_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
+				in_flight_fences_.push_back(device_->createFence(fenceInfo));
+			}
 		}
 
 		void run() {
-
+			while (!window_.windowShouldClose()) {
+				glfwPollEvents();
+				drawFrame();
+			}
+			device_->waitIdle();
 		}
 
 	private:
@@ -74,100 +90,103 @@ namespace dmbrn
 		GraphicsPipeline graphics_pipeline_;
 		FrameBuffers frame_buffers_;
 		CommandPool command_pool_;
+		Texture texture_;
+		VertexIndexBuffers vertex_index_buffers_;
+		UniformBuffers uniform_buffers_;
+		DescriptorSets descriptor_sets_;
+		CommandBuffers command_buffers_;
+		std::vector<vk::raii::Semaphore> image_available_semaphores_;
+		std::vector<vk::raii::Semaphore> render_finished_semaphores_;
+		std::vector<vk::raii::Fence> in_flight_fences_;
 
-		void createTextureImage()
-		{
-			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = stbi_load("Textures/Tutorial/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-			vk::DeviceSize imageSize = texWidth * texHeight * 4;
+		uint32_t currentFrame = 0;
 
-			if (!pixels) {
-				throw std::runtime_error("failed to load texture image!");
+		void drawFrame() {
+			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
+
+			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);
+
+			uint32_t imageIndex = result.second;
+
+			if (result.first == vk::Result::eErrorOutOfDateKHR) {
+				swap_chain_.recreate(physical_device_, device_, surface_, window_);
+				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
+				return;
+			}
+			else if (result.first != vk::Result::eSuccess && result.first != vk::Result::eSuboptimalKHR) {
+				throw std::runtime_error("failed to acquire swap chain image!");
 			}
 
-			vk::BufferCreateInfo bufferInfo{};
-			bufferInfo.size = imageSize;
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-			bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+			updateUniformBuffer(currentFrame);
 
-			vk::raii::Buffer stagingBuffer = device_->createBuffer(bufferInfo);
+			device_->resetFences(*in_flight_fences_[currentFrame]);
 
-			vk::MemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
+			command_buffers_[currentFrame].reset();
 
-			vk::MemoryAllocateInfo allocInfo{};
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+			command_buffers_.recordCommandBuffer(render_pass_, graphics_pipeline_,
+				swap_chain_, frame_buffers_, vertex_index_buffers_, descriptor_sets_,
+				currentFrame, imageIndex);
 
-			vk::raii::DeviceMemory stagingBufferMemory = device_->allocateMemory(allocInfo);
+			vk::SubmitInfo submitInfo{};
 
-			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
+			vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
+			vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = waitSemaphores;
+			submitInfo.pWaitDstStageMask = waitStages;
 
-			void* data;
-			data = stagingBufferMemory.mapMemory(0, imageSize);
-			memcpy(data, pixels, static_cast<size_t>(imageSize));
-			stagingBufferMemory.unmapMemory();
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &*command_buffers_[currentFrame];
 
-			stbi_image_free(pixels);
+			vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = signalSemaphores;
 
-			createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
+			gragraphics_queue_.submit(submitInfo, *in_flight_fences_[currentFrame]);
 
-			transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-			copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-			transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			vk::PresentInfoKHR presentInfo{};
+
+			presentInfo.waitSemaphoreCount = 1;
+			presentInfo.pWaitSemaphores = signalSemaphores;
+
+			vk::SwapchainKHR swapChains[] = { **swap_chain_ };
+			presentInfo.swapchainCount = 1;
+			presentInfo.pSwapchains = swapChains;
+
+			presentInfo.pImageIndices = &imageIndex;
+
+			vk::Result result1 = present_queue_.presentKHR(presentInfo);
+
+			if (result1 == vk::Result::eErrorOutOfDateKHR || result1 == vk::Result::eSuboptimalKHR || window_.framebufferResized) {
+				window_.framebufferResized = false;
+				swap_chain_.recreate(physical_device_, device_, surface_, window_);
+				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
+				return;
+			}
+			else if (result1 != vk::Result::eSuccess) {
+				throw std::runtime_error("failed to present swap chain image!");
+			}
+
+			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
 		}
 
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
-			VkImageCreateInfo imageInfo{};
-			imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			imageInfo.imageType = VK_IMAGE_TYPE_2D;
-			imageInfo.extent.width = width;
-			imageInfo.extent.height = height;
-			imageInfo.extent.depth = 1;
-			imageInfo.mipLevels = 1;
-			imageInfo.arrayLayers = 1;
-			imageInfo.format = format;
-			imageInfo.tiling = tiling;
-			imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageInfo.usage = usage;
-			imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-			if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
-				throw std::runtime_error("failed to create image!");
-			}
-
-			VkMemoryRequirements memRequirements;
-			vkGetImageMemoryRequirements(device, image, &memRequirements);
-
-			VkMemoryAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-			if (vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-				throw std::runtime_error("failed to allocate image memory!");
-			}
-
-			vkBindImageMemory(device, image, imageMemory, 0);
-		}
-
-		void createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Buffer& buffer, vk::raii::DeviceMemory& bufferMemory)
+		void updateUniformBuffer(uint32_t currentImage)
 		{
+			static auto startTime = std::chrono::high_resolution_clock::now();
 
-		}
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-		uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
-		{
-			vk::PhysicalDeviceMemoryProperties memProperties = physical_device_->getMemoryProperties();
+			UniformBuffers::UniformBufferObject ubo{};
+			ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.proj = glm::perspective(glm::radians(45.0f), swap_chain_.getExtent().width / (float)swap_chain_.getExtent().height, 0.1f, 10.0f);
+			ubo.proj[1][1] *= -1;
 
-
-			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-				if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-					return i;
-				}
-			}
-
-			throw std::runtime_error("failed to find suitable memory type!");
+			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
+			memcpy(data, &ubo, sizeof(ubo));
+			uniform_buffers_.getUBMemory(currentImage).unmapMemory();
 		}
 	};
 }

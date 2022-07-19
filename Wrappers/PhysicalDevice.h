@@ -36,6 +36,19 @@ namespace dmbrn
 			}
 		}
 
+		uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)const
+		{
+			vk::PhysicalDeviceMemoryProperties memProperties = physical_device_->getMemoryProperties();
+
+			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+				if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+					return i;
+				}
+			}
+
+			throw std::runtime_error("failed to find suitable memory type!");
+		}
+
 		const vk::raii::PhysicalDevice& operator*()const
 		{
 			return *physical_device_;

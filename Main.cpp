@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <iostream>
@@ -215,14 +214,14 @@ private:
 		createGraphicsPipeline();//
 		createFramebuffers();//
 		createCommandPool();//
-		createTextureImage();
-		createTextureImageView();
-		createTextureSampler();
-		createVertexBuffer();
-		createIndexBuffer();
-		createUniformBuffers();
-		createDescriptorPool();
-		createDescriptorSets();
+		createTextureImage();//
+		createTextureImageView();//
+		createTextureSampler();//
+		createVertexBuffer();//
+		createIndexBuffer();//
+		createUniformBuffers();//
+		createDescriptorPool();//
+		createDescriptorSets();//
 		createCommandBuffers();
 		createSyncObjects();
 	}

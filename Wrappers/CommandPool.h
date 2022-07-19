@@ -38,9 +38,43 @@ namespace dmbrn
 			command_pool_ = std::make_unique<vk::raii::CommandPool>(device->createCommandPool(poolInfo));
 		}
 
+		const vk::raii::CommandPool& operator*() const
+		{
+			return *command_pool_;
+		}
+
 		const vk::raii::CommandPool* operator->() const
 		{
 			return command_pool_.get();
+		}
+
+		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device)const
+		{
+			vk::CommandBufferAllocateInfo allocInfo{};
+			allocInfo.level = vk::CommandBufferLevel::ePrimary;
+			allocInfo.commandPool = **command_pool_;
+			allocInfo.commandBufferCount = 1;
+
+			vk::raii::CommandBuffer commandBuffer = std::move(device->allocateCommandBuffers(allocInfo).front());
+
+			vk::CommandBufferBeginInfo beginInfo{};
+			beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+			commandBuffer.begin(beginInfo);
+
+			return commandBuffer;
+		}
+
+		void endSingleTimeCommands(vk::raii::Queue& gragraphics_queue, vk::raii::CommandBuffer& commandBuffer)const
+		{
+			commandBuffer.end();
+
+			vk::SubmitInfo submitInfo{};
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &*commandBuffer;
+
+			gragraphics_queue.submit(submitInfo);
+			gragraphics_queue.waitIdle();
 		}
 
 	private:

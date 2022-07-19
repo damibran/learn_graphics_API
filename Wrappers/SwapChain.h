@@ -17,6 +17,70 @@ namespace dmbrn
 	public:
 		SwapChain(const PhysicalDevice& physical_device,
 			const LogicalDevice& device,
+			const Surface& surface, const GLFWwindowWrapper& window)
+		{
+			createSwapChain(physical_device, device, surface, window);
+			createImageViews(device);
+		}
+
+		void recreate(const PhysicalDevice& physical_device,
+			const LogicalDevice& device,
+			const Surface& surface,
+			const GLFWwindowWrapper& window)
+		{
+			int width = 0, height = 0;
+			auto rec_size = window.getFrameBufferSize();
+			width = rec_size.first;
+			height = rec_size.second;
+			while (width == 0 || height == 0) {
+				auto rec_size = window.getFrameBufferSize();
+				width = rec_size.first;
+				height = rec_size.second;
+				glfwWaitEvents();
+			}
+
+			device->waitIdle();
+
+			image_views_.clear();
+
+			createSwapChain(physical_device, device, surface, window);
+			createImageViews(device);
+		}
+
+		const vk::raii::SwapchainKHR& operator*()const
+		{
+			return *swap_chain_;
+		}
+
+		const vk::raii::SwapchainKHR* operator->()const
+		{
+			return swap_chain_.get();
+		}
+
+		const vk::Extent2D& getExtent()const
+		{
+			return extent_;
+		}
+
+		const vk::Format& getImageFormat()const
+		{
+			return image_format_;
+		}
+
+		const std::vector<vk::raii::ImageView>& getImageViews()const
+		{
+			return image_views_;
+		}
+
+	private:
+		std::unique_ptr<vk::raii::SwapchainKHR> swap_chain_;
+		std::vector<VkImage> images_;
+		std::vector<vk::raii::ImageView> image_views_;
+		vk::Format image_format_;
+		vk::Extent2D extent_;
+
+		void createSwapChain(const PhysicalDevice& physical_device,
+			const LogicalDevice& device,
 			const Surface& surface,
 			const GLFWwindowWrapper& window)
 		{
@@ -64,48 +128,6 @@ namespace dmbrn
 
 			image_format_ = surfaceFormat.format;
 			extent_ = extent;
-
-			createImageViews(device);
-		}
-
-		vk::raii::SwapchainKHR* operator->()const
-		{
-			return swap_chain_.get();
-		}
-
-		const vk::Extent2D& getExtent()const
-		{
-			return extent_;
-		}
-
-		const vk::Format& getImageFormat()const
-		{
-			return image_format_;
-		}
-
-		const std::vector<vk::raii::ImageView>& getImageViews()const
-		{
-			return image_views_;
-		}
-
-	private:
-		std::unique_ptr<vk::raii::SwapchainKHR> swap_chain_;
-		std::vector<VkImage> images_;
-		std::vector<vk::raii::ImageView> image_views_;
-		vk::Format image_format_;
-		vk::Extent2D extent_;
-
-		vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
-		{
-			for (const auto& availableFormat : availableFormats)
-			{
-				if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
-				{
-					return availableFormat;
-				}
-			}
-
-			return availableFormats[0];
 		}
 
 		void createImageViews(const LogicalDevice& device)
@@ -115,7 +137,7 @@ namespace dmbrn
 				image_views_.push_back(createImageView(device, images_[i], image_format_));
 			}
 		}
-
+		
 		vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
 		{
 			vk::ImageViewCreateInfo viewInfo{};
@@ -129,6 +151,16 @@ namespace dmbrn
 			viewInfo.subresourceRange.layerCount = 1;
 
 			return device->createImageView(viewInfo);
+		}
+
+		vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
+			for (const auto& availableFormat : availableFormats) {
+				if (availableFormat.format == vk::Format::eB8G8R8A8Srgb&& availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+					return availableFormat;
+				}
+			}
+
+			return availableFormats[0];
 		}
 
 		vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)

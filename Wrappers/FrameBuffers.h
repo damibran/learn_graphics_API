@@ -25,7 +25,24 @@ namespace dmbrn
 	class FrameBuffers
 	{
 	public:
-		FrameBuffers(const LogicalDevice& device, const SwapChain& swap_chain,const RenderPass& render_pass)
+		FrameBuffers(const LogicalDevice& device, const SwapChain& swap_chain, const RenderPass& render_pass)
+		{
+			createFrameBuffers(device,swap_chain,render_pass);
+		}
+
+		void recreate(const LogicalDevice& device, const SwapChain& swap_chain, const RenderPass& render_pass)
+		{
+			framebuffers_.clear();
+			createFrameBuffers(device,swap_chain,render_pass);
+		}
+
+		const vk::raii::Framebuffer& operator[](int index)const
+		{
+			return framebuffers_[index];
+		}
+	private:
+		std::vector<vk::raii::Framebuffer> framebuffers_;
+		void createFrameBuffers(const LogicalDevice& device, const SwapChain& swap_chain, const RenderPass& render_pass)
 		{
 			for (size_t i = 0; i < swap_chain.getImageViews().size(); i++)
 			{
@@ -44,7 +61,5 @@ namespace dmbrn
 				framebuffers_.push_back(device->createFramebuffer(framebufferInfo));
 			}
 		}
-	private:
-		std::vector<vk::raii::Framebuffer> framebuffers_;
 	};
 }

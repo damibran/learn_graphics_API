@@ -40,6 +40,11 @@ namespace dmbrn
 			return res;
 		}
 
+		bool windowShouldClose()const
+		{
+			return glfwWindowShouldClose(window);
+		}
+
 	private:
 		GLFWwindow* window;
 	public:
