@@ -26,7 +26,6 @@ namespace dmbrn
 					physical_device_ = std::make_unique<vk::raii::PhysicalDevice>(device);
 					finded = true;
 					queue_family_indices_ = findQueueFamilies(*physical_device_, surface);
-					swap_chain_details_ = querySwapChainSupport(*physical_device_, surface);
 					break;
 				}
 			}
@@ -103,9 +102,8 @@ namespace dmbrn
 	private:
 		std::unique_ptr<vk::raii::PhysicalDevice> physical_device_;
 		QueueFamilyIndices queue_family_indices_;
-		SwapChainSupportDetails swap_chain_details_;
 
-		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface)
+		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface)const
 		{
 			QueueFamilyIndices indices = findQueueFamilies(device, surface);
 
