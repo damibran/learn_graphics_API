@@ -9,6 +9,8 @@
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
+#include "RenderPass.h"
+#include "../Utils/UtilsFunctions.h"
 
 namespace dmbrn
 {
@@ -17,16 +19,17 @@ namespace dmbrn
 	public:
 		SwapChain(const PhysicalDevice& physical_device,
 			const LogicalDevice& device,
-			const Surface& surface, const GLFWwindowWrapper& window)
+			const Surface& surface, const GLFWwindowWrapper& window, const RenderPass& render_pass)
 		{
 			createSwapChain(physical_device, device, surface, window);
 			createImageViews(device);
+			createFrameBuffers(device, render_pass);
 		}
 
 		void recreate(const PhysicalDevice& physical_device,
 			const LogicalDevice& device,
 			const Surface& surface,
-			const GLFWwindowWrapper& window)
+			const GLFWwindowWrapper& window, const RenderPass& render_pass)
 		{
 			int width = 0, height = 0;
 			auto rec_size = window.getFrameBufferSize();
@@ -41,10 +44,12 @@ namespace dmbrn
 
 			device->waitIdle();
 
+			framebuffers_.clear();
 			image_views_.clear();
 
 			createSwapChain(physical_device, device, surface, window);
 			createImageViews(device);
+			createFrameBuffers(device, render_pass);
 		}
 
 		const vk::raii::SwapchainKHR& operator*()const
@@ -62,31 +67,21 @@ namespace dmbrn
 			return extent_;
 		}
 
-		const vk::Format& getImageFormat()const
-		{
-			return image_format_;
-		}
-
 		const std::vector<vk::raii::ImageView>& getImageViews()const
 		{
 			return image_views_;
 		}
 
-		static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)
+		const std::vector<vk::raii::Framebuffer>& getFrameBuffers()const
 		{
-			for (const auto& availableFormat : availableFormats) {
-				if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-					return availableFormat;
-				}
-			}
-
-			return availableFormats[0];
+			return framebuffers_;
 		}
 
 	private:
 		std::unique_ptr<vk::raii::SwapchainKHR> swap_chain_;
 		std::vector<VkImage> images_;
 		std::vector<vk::raii::ImageView> image_views_;
+		std::vector<vk::raii::Framebuffer> framebuffers_;
 		vk::Format image_format_;
 		vk::Extent2D extent_;
 
@@ -96,10 +91,10 @@ namespace dmbrn
 			const GLFWwindowWrapper& window)
 		{
 
-			auto capabilities = physical_device.querySurfaceCapabilities(*physical_device,surface);
+			auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
 
-			vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(physical_device.querySurfaceFormats(*physical_device,surface));
-			vk::PresentModeKHR presentMode = chooseSwapPresentMode(physical_device.querySurfacePresentModes(*physical_device,surface));
+			vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface));
+			vk::PresentModeKHR presentMode = chooseSwapPresentMode(PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
 			vk::Extent2D extent = chooseSwapExtent(capabilities, window);
 
 			uint32_t imageCount = capabilities.minImageCount + 1;
@@ -165,6 +160,26 @@ namespace dmbrn
 			viewInfo.subresourceRange.layerCount = 1;
 
 			return device->createImageView(viewInfo);
+		}
+
+		void createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass)
+		{
+			for (size_t i = 0; i < image_views_.size(); i++)
+			{
+				vk::ImageView attachments[] = {
+					*image_views_[i]
+				};
+
+				vk::FramebufferCreateInfo framebufferInfo{};
+				framebufferInfo.renderPass = **render_pass;
+				framebufferInfo.attachmentCount = 1;
+				framebufferInfo.pAttachments = attachments;
+				framebufferInfo.width = extent_.width;
+				framebufferInfo.height = extent_.height;
+				framebufferInfo.layers = 1;
+
+				framebuffers_.push_back(device->createFramebuffer(framebufferInfo));
+			}
 		}
 
 		static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)

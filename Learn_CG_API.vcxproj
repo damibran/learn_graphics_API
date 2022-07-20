@@ -144,11 +144,11 @@
     <None Include="Shaders\shader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Utils\UtilsFunctions.h" />
     <ClInclude Include="Wrappers\CommandBuffers.h" />
     <ClInclude Include="Wrappers\CommandPool.h" />
     <ClInclude Include="Wrappers\DescriptorSetLayout.h" />
     <ClInclude Include="Wrappers\DescriptorSets.h" />
-    <ClInclude Include="Wrappers\FrameBuffers.h" />
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h" />
     <ClInclude Include="Wrappers\GraphicsPipeline.h" />
     <ClInclude Include="Wrappers\Instance.h" />

@@ -20,7 +20,6 @@
 #include "RenderPass.h"
 #include "DescriptorSetLayout.h"
 #include "GraphicsPipeline.h"
-#include "FrameBuffers.h"
 #include "CommandPool.h"
 #include "Texture.h"
 #include "VertexIndexBuffers.h"
@@ -43,7 +42,7 @@ namespace dmbrn
 		}
 
 		void recordCommandBuffer(const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
-			const SwapChain& swap_chain, const FrameBuffers& frame_buffers, const VertexIndexBuffers& vertex_index_buffers,
+			const SwapChain& swap_chain, const VertexIndexBuffers& vertex_index_buffers,
 			const DescriptorSets& descriptor_sets,
 			 int currentFrame, uint32_t imageIndex)
 		{
@@ -55,7 +54,7 @@ namespace dmbrn
 
 			vk::RenderPassBeginInfo renderPassInfo{};
 			renderPassInfo.renderPass = **render_pass;
-			renderPassInfo.framebuffer = *frame_buffers[imageIndex];
+			renderPassInfo.framebuffer = *swap_chain.getFrameBuffers()[imageIndex];
 			renderPassInfo.renderArea.offset = vk::Offset2D{ 0, 0 };
 			renderPassInfo.renderArea.extent = swap_chain.getExtent();
 
