@@ -27,9 +27,9 @@ namespace dmbrn
 	public:
 		CommandPool(const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
-			PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
+			const PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
 
-			vk::CommandPoolCreateInfo poolInfo
+			const vk::CommandPoolCreateInfo poolInfo
 			{
 				vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
 				queueFamilyIndices.graphicsFamily.value()
@@ -50,14 +50,14 @@ namespace dmbrn
 
 		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device)const
 		{
-			vk::CommandBufferAllocateInfo allocInfo
+			const vk::CommandBufferAllocateInfo allocInfo
 			{
 				**command_pool_, vk::CommandBufferLevel::ePrimary, 1
 			};
 
 			vk::raii::CommandBuffer commandBuffer = std::move(device->allocateCommandBuffers(allocInfo).front());
 
-			vk::CommandBufferBeginInfo beginInfo
+			const vk::CommandBufferBeginInfo beginInfo
 			{
 				vk::CommandBufferUsageFlagBits::eOneTimeSubmit
 			};
@@ -71,7 +71,7 @@ namespace dmbrn
 		{
 			commandBuffer.end();
 
-			vk::SubmitInfo submitInfo
+			const vk::SubmitInfo submitInfo
 			{
 				{},{},{},1,&*commandBuffer
 			};

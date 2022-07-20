@@ -14,7 +14,7 @@ namespace dmbrn
 	public:
 		RenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
-			vk::AttachmentDescription colorAttachment
+			const vk::AttachmentDescription colorAttachment
 			{
 				{},
 				utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface)).format,
@@ -27,12 +27,12 @@ namespace dmbrn
 				vk::ImageLayout::ePresentSrcKHR
 			};
 
-			vk::AttachmentReference colorAttachmentRef
+			const vk::AttachmentReference colorAttachmentRef
 			{
 				0,vk::ImageLayout::eAttachmentOptimal
 			};
 
-			vk::SubpassDescription subpass
+			const vk::SubpassDescription subpass
 			{
 				{},
 				vk::PipelineBindPoint::eGraphics,
@@ -40,7 +40,7 @@ namespace dmbrn
 				1, &colorAttachmentRef
 			};
 
-			vk::SubpassDependency dependency
+			const vk::SubpassDependency dependency
 			{
 				VK_SUBPASS_EXTERNAL, 0,
 				vk::PipelineStageFlagBits::eColorAttachmentOutput,
@@ -49,12 +49,12 @@ namespace dmbrn
 				vk::AccessFlagBits::eColorAttachmentWrite
 			};
 
-			vk::RenderPassCreateInfo renderPassInfo
+			const vk::RenderPassCreateInfo renderPassInfo
 			{
 				{},
-				1,	&colorAttachment,
-				1, &subpass,
-				1, &dependency
+				colorAttachment,
+				subpass,
+				dependency
 			};
 
 			render_pass_ = std::make_unique<vk::raii::RenderPass>(device->createRenderPass(renderPassInfo));

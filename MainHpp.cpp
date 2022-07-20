@@ -98,7 +98,8 @@ namespace dmbrn
 
 		uint32_t currentFrame = 0;
 
-		void drawFrame() {
+		void drawFrame()
+		{
 			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
 
 			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);

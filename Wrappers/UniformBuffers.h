@@ -22,7 +22,7 @@ namespace dmbrn
 
 		UniformBuffers(const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
-			vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
 			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++) {
 

@@ -11,13 +11,13 @@ namespace dmbrn
 	public:
 		DescriptorSetLayout(const LogicalDevice& device)
 		{
-			vk::DescriptorSetLayoutBinding uboLayoutBinding
+			const vk::DescriptorSetLayoutBinding uboLayoutBinding
 			{
 				0,vk::DescriptorType::eUniformBuffer,
 				1,vk::ShaderStageFlagBits::eVertex
 			};
 
-			vk::DescriptorSetLayoutBinding samplerLayoutBinding
+			const vk::DescriptorSetLayoutBinding samplerLayoutBinding
 			{
 				1, vk::DescriptorType::eCombinedImageSampler,
 				1,vk::ShaderStageFlagBits::eFragment
@@ -25,7 +25,7 @@ namespace dmbrn
 
 			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 
-			vk::DescriptorSetLayoutCreateInfo layoutInfo
+			const vk::DescriptorSetLayoutCreateInfo layoutInfo
 			{
 				{},
 				static_cast<uint32_t>(bindings.size()),

@@ -59,7 +59,7 @@ namespace dmbrn
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, **descriptor_set_layout);
 
-			vk::DescriptorSetAllocateInfo allocInfo
+			const vk::DescriptorSetAllocateInfo allocInfo
 			{
 				**descriptor_pool_,
 				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),

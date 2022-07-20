@@ -32,7 +32,7 @@ namespace dmbrn
 			const GLFWwindowWrapper& window, const RenderPass& render_pass)
 		{
 			int width = 0, height = 0;
-			auto rec_size = window.getFrameBufferSize();
+			const auto rec_size = window.getFrameBufferSize();
 			width = rec_size.first;
 			height = rec_size.second;
 			while (width == 0 || height == 0)
@@ -91,19 +91,18 @@ namespace dmbrn
 			const Surface& surface,
 			const GLFWwindowWrapper& window)
 		{
+			const auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
 
-			auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
-
-			vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface));
-			vk::PresentModeKHR presentMode = chooseSwapPresentMode(PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
-			vk::Extent2D extent = chooseSwapExtent(capabilities, window);
+			const vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface));
+			const vk::PresentModeKHR presentMode = chooseSwapPresentMode(PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
+			const vk::Extent2D extent = chooseSwapExtent(capabilities, window);
 
 			uint32_t imageCount = capabilities.minImageCount + 1;
 			if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
 				imageCount = capabilities.maxImageCount;
 			}
 
-			vk::SwapchainCreateInfoKHR createInfo{};
+			vk::SwapchainCreateInfoKHR createInfo{}; // very easy to miss something... may be redo
 			createInfo.surface = **surface;
 			createInfo.minImageCount = imageCount;
 			createInfo.imageFormat = surfaceFormat.format;
@@ -112,8 +111,8 @@ namespace dmbrn
 			createInfo.imageArrayLayers = 1;
 			createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
 
-			PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
-			uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+			const PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
+			const uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 			if (indices.graphicsFamily != indices.presentFamily) {
 				createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
@@ -149,7 +148,7 @@ namespace dmbrn
 
 		static vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
 		{
-			vk::ImageViewCreateInfo viewInfo
+			const vk::ImageViewCreateInfo viewInfo
 			{
 				{},image, vk::ImageViewType::e2D,
 				format,{},
@@ -163,11 +162,11 @@ namespace dmbrn
 		{
 			for (size_t i = 0; i < image_views_.size(); i++)
 			{
-				vk::ImageView attachments[] = {
+				const vk::ImageView attachments[] = {
 					*image_views_[i]
 				};
 
-				vk::FramebufferCreateInfo framebufferInfo
+				const vk::FramebufferCreateInfo framebufferInfo
 				{
 					{},**render_pass,1,
 					attachments,extent_.width,extent_.height,1
@@ -198,7 +197,7 @@ namespace dmbrn
 			}
 			else
 			{
-				auto rect = window.getFrameBufferSize();
+				const auto rect = window.getFrameBufferSize();
 
 				vk::Extent2D actualExtent = {
 					static_cast<uint32_t>(rect.first),

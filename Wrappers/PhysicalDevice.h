@@ -14,7 +14,7 @@ namespace dmbrn
 	public:
 		PhysicalDevice(const Instance& instance, const Surface& surface)
 		{
-			vk::raii::PhysicalDevices physical_devices(*instance);
+			const vk::raii::PhysicalDevices physical_devices(*instance);
 
 			bool finded = false;
 			for (const auto& device : physical_devices) {
@@ -33,7 +33,7 @@ namespace dmbrn
 
 		uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)const
 		{
-			vk::PhysicalDeviceMemoryProperties memProperties = physical_device_->getMemoryProperties();
+			const vk::PhysicalDeviceMemoryProperties memProperties = physical_device_->getMemoryProperties();
 
 			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
 				if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -96,9 +96,9 @@ namespace dmbrn
 
 		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface)const
 		{
-			QueueFamilyIndices indices = findQueueFamilies(device, surface);
+			const QueueFamilyIndices indices = findQueueFamilies(device, surface);
 
-			bool extensionsSupported = checkDeviceExtensionSupport(device);
+			const bool extensionsSupported = checkDeviceExtensionSupport(device);
 
 			bool swapChainAdequate = false;
 			if (extensionsSupported) {

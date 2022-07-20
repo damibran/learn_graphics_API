@@ -15,47 +15,47 @@ namespace dmbrn
 	public:
 		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass, const DescriptorSetLayout& descriptor_set_layout)
 		{
-			auto vertShaderCode = readFile("shaders/vert.spv");
-			auto fragShaderCode = readFile("shaders/frag.spv");
+			const auto vertShaderCode = readFile("shaders/vert.spv");
+			const auto fragShaderCode = readFile("shaders/frag.spv");
 
-			vk::raii::ShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
-			vk::raii::ShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+			const vk::raii::ShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
+			const vk::raii::ShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
 
-			vk::PipelineShaderStageCreateInfo vertShaderStageInfo
+			const vk::PipelineShaderStageCreateInfo vertShaderStageInfo
 			{
 				{}, vk::ShaderStageFlagBits::eVertex,
 				*vertShaderModule, "main"
 			};
 
-			vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+			const vk::PipelineShaderStageCreateInfo fragShaderStageInfo
 			{
 				{}, vk::ShaderStageFlagBits::eFragment,
 				*fragShaderModule, "main"
 			};
 
-			vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+			const vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 
-			auto bindingDescription = Vertex::getBindingDescription();
-			auto attributeDescriptions = Vertex::getAttributeDescriptions();
+			const auto bindingDescription = Vertex::getBindingDescription();
+			const auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
-			vk::PipelineVertexInputStateCreateInfo vertexInputInfo
+			const vk::PipelineVertexInputStateCreateInfo vertexInputInfo
 			{
 				{},
 				bindingDescription,  attributeDescriptions
 			};
 
-			vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+			const vk::PipelineInputAssemblyStateCreateInfo inputAssembly
 			{
 				{},vk::PrimitiveTopology::eTriangleList,VK_FALSE
 			};
 
-			vk::PipelineViewportStateCreateInfo viewportState
+			const vk::PipelineViewportStateCreateInfo viewportState
 			{
 				{}, 1,{},1,{}
 			};
 
-			vk::PipelineRasterizationStateCreateInfo rasterizer
+			const vk::PipelineRasterizationStateCreateInfo rasterizer
 			{
 				{}, VK_FALSE,
 				VK_FALSE, vk::PolygonMode::eFill,
@@ -63,12 +63,12 @@ namespace dmbrn
 				VK_FALSE, {}, {}, {}, 1.0f
 			};
 
-			vk::PipelineMultisampleStateCreateInfo multisampling
+			const vk::PipelineMultisampleStateCreateInfo multisampling
 			{
 				{},vk::SampleCountFlagBits::e1,VK_FALSE
 			};
 
-			vk::PipelineColorBlendAttachmentState colorBlendAttachment
+			const vk::PipelineColorBlendAttachmentState colorBlendAttachment
 			{
 				VK_FALSE,{},{},{},{},{},{}, // not like dis
 				vk::ColorComponentFlagBits::eR |
@@ -77,32 +77,32 @@ namespace dmbrn
 				vk::ColorComponentFlagBits::eA
 			};
 
-			vk::PipelineColorBlendStateCreateInfo colorBlending
+			const vk::PipelineColorBlendStateCreateInfo colorBlending
 			{
 				{},VK_FALSE,vk::LogicOp::eCopy,
 				1, &colorBlendAttachment, {0.0f,0.0f,0.0f,0.0f}
 			};
 
-			std::vector dynamicStates
+			const std::vector dynamicStates
 			{
 				vk::DynamicState::eViewport,
 				vk::DynamicState::eScissor
 			};
 
-			vk::PipelineDynamicStateCreateInfo dynamicState
+			const vk::PipelineDynamicStateCreateInfo dynamicState
 			{
 				{}, static_cast<uint32_t>(dynamicStates.size()),
 				dynamicStates.data()
 			};
 
-			vk::PipelineLayoutCreateInfo pipelineLayoutInfo
+			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 			{
 				{}, 1, &**descriptor_set_layout
 			};
 
 			pipeline_layout_ = std::make_unique<vk::raii::PipelineLayout>(device->createPipelineLayout(pipelineLayoutInfo));
 
-			vk::GraphicsPipelineCreateInfo pipelineInfo
+			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
 				{}, 2, shaderStages,
 				&vertexInputInfo,&inputAssembly,{},
@@ -136,7 +136,7 @@ namespace dmbrn
 				throw std::runtime_error("failed to open file!");
 			}
 
-			size_t fileSize = (size_t)file.tellg();
+			const size_t fileSize = (size_t)file.tellg();
 			std::vector<char> buffer(fileSize);
 
 			file.seekg(0);
@@ -149,7 +149,7 @@ namespace dmbrn
 
 		static vk::raii::ShaderModule createShaderModule(const LogicalDevice& device, const std::vector<char>& code)
 		{
-			vk::ShaderModuleCreateInfo createInfo
+			const vk::ShaderModuleCreateInfo createInfo
 			{
 				{},code.size(),
 				reinterpret_cast<const uint32_t*>(code.data())

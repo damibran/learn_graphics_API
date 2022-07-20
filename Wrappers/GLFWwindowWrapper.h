@@ -23,7 +23,7 @@ namespace dmbrn
 		}
 
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-			auto app = reinterpret_cast<GLFWwindowWrapper*>(glfwGetWindowUserPointer(window));
+			const auto app = reinterpret_cast<GLFWwindowWrapper*>(glfwGetWindowUserPointer(window));
 			app->framebufferResized = true;
 		}
 

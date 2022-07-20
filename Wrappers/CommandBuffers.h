@@ -17,7 +17,7 @@ namespace dmbrn
 	public:
 		CommandBuffers(const LogicalDevice& device, const CommandPool& command_pool)
 		{
-			vk::CommandBufferAllocateInfo allocInfo
+			const vk::CommandBufferAllocateInfo allocInfo
 			{
 				**command_pool, vk::CommandBufferLevel::ePrimary,
 				 static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
@@ -29,16 +29,16 @@ namespace dmbrn
 		void recordCommandBuffer(const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
 			const SwapChain& swap_chain, const VertexIndexBuffers& vertex_index_buffers,
 			const DescriptorSets& descriptor_sets,
-			 int currentFrame, uint32_t imageIndex)
+			int currentFrame, uint32_t imageIndex)const
 		{
-			vk::CommandBufferBeginInfo beginInfo{};
+			const vk::CommandBufferBeginInfo beginInfo{};
 
-			vk::raii::CommandBuffer& command_buffer = command_buffers_[currentFrame];
+			const vk::raii::CommandBuffer& command_buffer = command_buffers_[currentFrame];
 
 			command_buffer.begin(beginInfo);
 
-			vk::ClearValue clearColor = vk::ClearValue{vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} }};
-			vk::RenderPassBeginInfo renderPassInfo
+			vk::ClearValue clearColor = vk::ClearValue{ vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} } };
+			const vk::RenderPassBeginInfo renderPassInfo
 			{
 				**render_pass,
 				*swap_chain.getFrameBuffers()[imageIndex],
@@ -50,17 +50,16 @@ namespace dmbrn
 
 			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **graphics_pipeline);
 
-			vk::Viewport viewport
+			const vk::Viewport viewport
 			{
 				0.0f,0.0f,
 				static_cast<float>(swap_chain.getExtent().width),
 				static_cast<float>(swap_chain.getExtent().height),
 				0.0f, 1.0f
 			};
-
 			command_buffer.setViewport(0, viewport);
 
-			vk::Rect2D scissor
+			const vk::Rect2D scissor
 			{
 				vk::Offset2D{ 0, 0 },
 				swap_chain.getExtent()

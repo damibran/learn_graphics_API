@@ -12,7 +12,7 @@ namespace dmbrn
 	const bool enableValidationLayers = true;
 #endif
 
-	const std::vector<const char*> validationLayers = 
+	const std::vector<const char*> validationLayers =
 	{
 		"VK_LAYER_KHRONOS_validation"
 	};
@@ -22,12 +22,14 @@ namespace dmbrn
 	public:
 		Instance(const vk::raii::Context& context)
 		{
-			vk::ApplicationInfo application_info =
-				vk::ApplicationInfo("First Vulkan",
+			const vk::ApplicationInfo application_info
+			{
+				"First Vulkan",
 					1,
 					"Engine",
 					1,
-					VK_API_VERSION_1_3);
+					VK_API_VERSION_1_3
+			};
 
 			vk::InstanceCreateInfo create_info;
 			create_info.pApplicationInfo = &application_info;

@@ -47,13 +47,13 @@ namespace dmbrn
 		{
 			int texWidth, texHeight, texChannels;
 			stbi_uc* pixels = stbi_load("Textures/Tutorial/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-			vk::DeviceSize imageSize = texWidth * texHeight * 4;
+			const vk::DeviceSize imageSize = texWidth * texHeight * 4;
 
 			if (!pixels) {
 				throw std::runtime_error("failed to load texture image!");
 			}
 
-			vk::BufferCreateInfo bufferInfo
+			const vk::BufferCreateInfo bufferInfo
 			{
 				{},imageSize,vk::BufferUsageFlagBits::eTransferSrc,
 				vk::SharingMode::eExclusive
@@ -61,21 +61,20 @@ namespace dmbrn
 
 			vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
 
-			vk::MemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
+			const vk::MemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
 
-			vk::MemoryAllocateInfo allocInfo
+			const vk::MemoryAllocateInfo allocInfo
 			{
 				memRequirements.size,
 				physical_device.findMemoryType(memRequirements.memoryTypeBits,
 				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
 			};
 
-			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(allocInfo);
+			const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(allocInfo);
 
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
-			void* data;
-			data = stagingBufferMemory.mapMemory(0, imageSize);
+			void* data = stagingBufferMemory.mapMemory(0, imageSize);
 			memcpy(data, pixels, static_cast<size_t>(imageSize));
 			stagingBufferMemory.unmapMemory();
 
@@ -97,7 +96,7 @@ namespace dmbrn
 			vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, std::unique_ptr<vk::raii::Image>& image,
 			std::unique_ptr<vk::raii::DeviceMemory>& imageMemory) const
 		{
-			vk::ImageCreateInfo imageInfo
+			const vk::ImageCreateInfo imageInfo
 			{
 				{}, vk::ImageType::e2D,
 				format,
@@ -109,9 +108,9 @@ namespace dmbrn
 
 			image = std::make_unique<vk::raii::Image>(device->createImage(imageInfo));
 
-			vk::MemoryRequirements memRequirements = image->getMemoryRequirements();
+			const vk::MemoryRequirements memRequirements = image->getMemoryRequirements();
 
-			vk::MemoryAllocateInfo allocInfo
+			const vk::MemoryAllocateInfo allocInfo
 			{
 				memRequirements.size,
 				physical_device.findMemoryType(memRequirements.memoryTypeBits, properties)
@@ -182,7 +181,7 @@ namespace dmbrn
 
 		void createTextureImageView(const LogicalDevice& device)
 		{
-			vk::ImageViewCreateInfo viewInfo
+			const vk::ImageViewCreateInfo viewInfo
 			{
 				{}, **texture_image,
 				vk::ImageViewType::e2D,
@@ -196,9 +195,9 @@ namespace dmbrn
 
 		void createTextureSampler(const LogicalDevice& device, const PhysicalDevice& physical_device)
 		{
-			vk::PhysicalDeviceProperties properties = physical_device->getProperties();
+			const vk::PhysicalDeviceProperties properties = physical_device->getProperties();
 
-			vk::SamplerCreateInfo samplerInfo
+			const vk::SamplerCreateInfo samplerInfo
 			{
 				{}, vk::Filter::eLinear,vk::Filter::eLinear,
 				vk::SamplerMipmapMode::eLinear,vk::SamplerAddressMode::eRepeat,

@@ -55,9 +55,9 @@ namespace dmbrn
 		std::unique_ptr<vk::raii::DeviceMemory> index_buffer_memory_;
 
 
-		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
 		{
-			vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+			const vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 			vk::BufferCreateInfo bufferInfo
 			{
@@ -66,14 +66,14 @@ namespace dmbrn
 			};
 			vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
 
-			vk::MemoryAllocateInfo memory_allocate_info
+			const vk::MemoryAllocateInfo memory_allocate_info
 			{
 				stagingBuffer.getMemoryRequirements().size,
 				physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits,
 				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
 			};
 
-			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
+			const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
 
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
@@ -85,7 +85,7 @@ namespace dmbrn
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
 			vertex_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
 
-			vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo
+			const vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo
 			{
 				vertex_buffer_->getMemoryRequirements().size,
 				physical_device.findMemoryType(vertex_buffer_->getMemoryRequirements().memoryTypeBits,
@@ -101,19 +101,23 @@ namespace dmbrn
 
 		void createIndexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
-			vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+			const vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-			vk::BufferCreateInfo bufferInfo{};
-			bufferInfo.size = bufferSize;
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-			bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+			vk::BufferCreateInfo bufferInfo
+			{
+				{}, bufferSize,vk::BufferUsageFlagBits::eTransferSrc,
+				vk::SharingMode::eExclusive
+			};
 			vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
 
-			vk::MemoryAllocateInfo memory_allocate_info{ stagingBuffer.getMemoryRequirements().size,
-			physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits
-				,vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) };
+			const vk::MemoryAllocateInfo memory_allocate_info
+			{
+				stagingBuffer.getMemoryRequirements().size,
+				physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
+			};
 
-			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
+			const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
 
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
@@ -124,8 +128,8 @@ namespace dmbrn
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
 			index_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
 
-			vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo{
-
+			const vk::MemoryAllocateInfo allocate_info
+			{
 				index_buffer_->getMemoryRequirements().size,
 				physical_device.findMemoryType(index_buffer_->getMemoryRequirements().memoryTypeBits,
 					vk::MemoryPropertyFlagBits::eDeviceLocal)
@@ -142,7 +146,7 @@ namespace dmbrn
 		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
-			vk::BufferCopy copyRegion
+			const vk::BufferCopy copyRegion
 			{
 				0,0,size
 			};
