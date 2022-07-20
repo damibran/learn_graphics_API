@@ -20,10 +20,10 @@ namespace dmbrn
 	class RenderPass
 	{
 	public:
-		RenderPass(const LogicalDevice& device, const SwapChain& swap_chain)
+		RenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			vk::AttachmentDescription colorAttachment{};
-			colorAttachment.format = swap_chain.getImageFormat();
+			colorAttachment.format = SwapChain::chooseSwapSurfaceFormat(physical_device.querySurfaceFormats(*physical_device, surface)).format;
 			colorAttachment.samples = vk::SampleCountFlagBits::e1;
 			colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
 			colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
