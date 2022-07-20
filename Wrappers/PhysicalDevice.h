@@ -78,25 +78,19 @@ namespace dmbrn
 			return queue_family_indices_;
 		}
 
-		struct SwapChainSupportDetails
+		static vk::SurfaceCapabilitiesKHR querySurfaceCapabilities(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
-			vk::SurfaceCapabilitiesKHR capabilities;
-			std::vector<vk::SurfaceFormatKHR> formats;
-			std::vector<vk::PresentModeKHR> presentModes;
-		};
+			return device.getSurfaceCapabilitiesKHR(**surface);
+		}
 
-
-		static SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice& device, const Surface& surface)
+		static std::vector<vk::SurfaceFormatKHR> querySurfaceFormats(const vk::raii::PhysicalDevice& device, const Surface& surface)
 		{
-			SwapChainSupportDetails details;
+			return device.getSurfaceFormatsKHR(**surface);
+		}
 
-			details.capabilities = device.getSurfaceCapabilitiesKHR(**surface);
-
-			details.formats = device.getSurfaceFormatsKHR(**surface);
-
-			details.presentModes = device.getSurfacePresentModesKHR(**surface);
-
-			return details;
+		static std::vector<vk::PresentModeKHR> querySurfacePresentModes(const vk::raii::PhysicalDevice& device, const Surface& surface)
+		{
+			return device.getSurfacePresentModesKHR(**surface);
 		}
 
 	private:
@@ -111,8 +105,7 @@ namespace dmbrn
 
 			bool swapChainAdequate = false;
 			if (extensionsSupported) {
-				SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device, surface);
-				swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+				swapChainAdequate = !querySurfaceFormats(device, surface).empty() && !querySurfacePresentModes(device, surface).empty();
 			}
 
 			vk::PhysicalDeviceFeatures supportedFeatures = device.getFeatures();

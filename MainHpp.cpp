@@ -43,8 +43,8 @@ namespace dmbrn
 			device_(physical_device_, surface_),
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
+			render_pass_(surface_, physical_device_, device_),
 			swap_chain_(physical_device_, device_, surface_, window_),
-			render_pass_(device_, swap_chain_),
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			frame_buffers_(device_, swap_chain_, render_pass_),
@@ -84,8 +84,8 @@ namespace dmbrn
 		LogicalDevice device_;
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
-		SwapChain swap_chain_;
 		RenderPass render_pass_;
+		SwapChain swap_chain_;
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
 		FrameBuffers frame_buffers_;
