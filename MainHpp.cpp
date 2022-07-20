@@ -21,7 +21,6 @@
 #include "Wrappers/RenderPass.h"
 #include "Wrappers/DescriptorSetLayout.h"
 #include "Wrappers/GraphicsPipeline.h"
-#include "Wrappers/FrameBuffers.h"
 #include "Wrappers/CommandPool.h"
 #include "Wrappers/Texture.h"
 #include "Wrappers/VertexIndexBuffers.h"
@@ -44,10 +43,9 @@ namespace dmbrn
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			render_pass_(surface_, physical_device_, device_),
-			swap_chain_(physical_device_, device_, surface_, window_),
+			swap_chain_(physical_device_, device_, surface_, window_, render_pass_),
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
-			frame_buffers_(device_, swap_chain_, render_pass_),
 			command_pool_(physical_device_, device_),
 			texture_(physical_device_, device_, command_pool_, gragraphics_queue_),
 			vertex_index_buffers_(physical_device_, device_, command_pool_, gragraphics_queue_),
@@ -88,7 +86,6 @@ namespace dmbrn
 		SwapChain swap_chain_;
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
-		FrameBuffers frame_buffers_;
 		CommandPool command_pool_;
 		Texture texture_;
 		VertexIndexBuffers vertex_index_buffers_;
@@ -110,8 +107,7 @@ namespace dmbrn
 
 			if (result.first == vk::Result::eErrorOutOfDateKHR)
 			{
-				swap_chain_.recreate(physical_device_, device_, surface_, window_);
-				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
+				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
 				return;
 			}
 			else if (result.first != vk::Result::eSuccess && result.first != vk::Result::eSuboptimalKHR) {
@@ -125,7 +121,7 @@ namespace dmbrn
 			command_buffers_[currentFrame].reset();
 
 			command_buffers_.recordCommandBuffer(render_pass_, graphics_pipeline_,
-				swap_chain_, frame_buffers_, vertex_index_buffers_, descriptor_sets_,
+				swap_chain_, vertex_index_buffers_, descriptor_sets_,
 				currentFrame, imageIndex);
 
 			vk::SubmitInfo submitInfo{};
@@ -163,8 +159,7 @@ namespace dmbrn
 			catch (vk::OutOfDateKHRError e)
 			{
 				window_.framebufferResized = false;
-				swap_chain_.recreate(physical_device_, device_, surface_, window_);
-				frame_buffers_.recreate(device_, swap_chain_, render_pass_);
+				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
 				return;
 			}
 

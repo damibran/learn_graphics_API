@@ -13,7 +13,7 @@
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
+#include "../Utils//UtilsFunctions.h"
 
 namespace dmbrn
 {
@@ -23,7 +23,7 @@ namespace dmbrn
 		RenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			vk::AttachmentDescription colorAttachment{};
-			colorAttachment.format = SwapChain::chooseSwapSurfaceFormat(physical_device.querySurfaceFormats(*physical_device, surface)).format;
+			colorAttachment.format = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface)).format;
 			colorAttachment.samples = vk::SampleCountFlagBits::e1;
 			colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
 			colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
