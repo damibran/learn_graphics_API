@@ -1,7 +1,4 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #include <stb_image.h>
 
 #include <stdexcept>
@@ -9,15 +6,8 @@
 #include <cstdint>
 #include <limits>
 
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
-#include "RenderPass.h"
-#include "DescriptorSetLayout.h"
-#include "GraphicsPipeline.h"
 #include "CommandPool.h"
 
 namespace dmbrn
@@ -63,19 +53,22 @@ namespace dmbrn
 				throw std::runtime_error("failed to load texture image!");
 			}
 
-			vk::BufferCreateInfo bufferInfo{};
-			bufferInfo.size = imageSize;
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-			bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+			vk::BufferCreateInfo bufferInfo
+			{
+				{},imageSize,vk::BufferUsageFlagBits::eTransferSrc,
+				vk::SharingMode::eExclusive
+			};
 
 			vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
 
 			vk::MemoryRequirements memRequirements = stagingBuffer.getMemoryRequirements();
 
-			vk::MemoryAllocateInfo allocInfo{};
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = physical_device.findMemoryType(memRequirements.memoryTypeBits,
-				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+			vk::MemoryAllocateInfo allocInfo
+			{
+				memRequirements.size,
+				physical_device.findMemoryType(memRequirements.memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
+			};
 
 			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(allocInfo);
 
@@ -102,29 +95,27 @@ namespace dmbrn
 
 		void createImage(const LogicalDevice& device, const PhysicalDevice& physical_device, uint32_t width, uint32_t height,
 			vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, std::unique_ptr<vk::raii::Image>& image,
-			std::unique_ptr<vk::raii::DeviceMemory>& imageMemory)
+			std::unique_ptr<vk::raii::DeviceMemory>& imageMemory) const
 		{
-			vk::ImageCreateInfo imageInfo{};
-			imageInfo.imageType = vk::ImageType::e2D;
-			imageInfo.extent.width = width;
-			imageInfo.extent.height = height;
-			imageInfo.extent.depth = 1;
-			imageInfo.mipLevels = 1;
-			imageInfo.arrayLayers = 1;
-			imageInfo.format = format;
-			imageInfo.tiling = tiling;
-			imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-			imageInfo.usage = usage;
-			imageInfo.samples = vk::SampleCountFlagBits::e1;
-			imageInfo.sharingMode = vk::SharingMode::eExclusive;
+			vk::ImageCreateInfo imageInfo
+			{
+				{}, vk::ImageType::e2D,
+				format,
+				vk::Extent3D{width,height,1},
+				1, 1, vk::SampleCountFlagBits::e1,
+				tiling,usage,vk::SharingMode::eExclusive,{},
+				{},vk::ImageLayout::eUndefined
+			};
 
 			image = std::make_unique<vk::raii::Image>(device->createImage(imageInfo));
 
 			vk::MemoryRequirements memRequirements = image->getMemoryRequirements();
 
-			vk::MemoryAllocateInfo allocInfo{};
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = physical_device.findMemoryType(memRequirements.memoryTypeBits, properties);
+			vk::MemoryAllocateInfo allocInfo
+			{
+				memRequirements.size,
+				physical_device.findMemoryType(memRequirements.memoryTypeBits, properties)
+			};
 
 			imageMemory = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocInfo));
 
@@ -132,20 +123,16 @@ namespace dmbrn
 		}
 
 		void transitionImageLayout(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue,
-			vk::raii::Image& image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) {
+			vk::raii::Image& image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
-			vk::ImageMemoryBarrier barrier{};
-			barrier.oldLayout = oldLayout;
-			barrier.newLayout = newLayout;
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.image = *image;
-			barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-			barrier.subresourceRange.baseMipLevel = 0;
-			barrier.subresourceRange.levelCount = 1;
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount = 1;
+			vk::ImageMemoryBarrier barrier
+			{
+				{},{},oldLayout, newLayout,
+				VK_QUEUE_FAMILY_IGNORED,VK_QUEUE_FAMILY_IGNORED, *image,
+				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor,0,1,0,1}
+			};
 
 			vk::PipelineStageFlags sourceStage;
 			vk::PipelineStageFlags destinationStage;
@@ -176,22 +163,16 @@ namespace dmbrn
 
 
 		void copyBufferToImage(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue,
-			vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height) {
+			vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
+		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
-			vk::BufferImageCopy region{};
-			region.bufferOffset = 0;
-			region.bufferRowLength = 0;
-			region.bufferImageHeight = 0;
-			region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
-			region.imageSubresource.mipLevel = 0;
-			region.imageSubresource.baseArrayLayer = 0;
-			region.imageSubresource.layerCount = 1;
-			region.imageOffset = vk::Offset3D{ 0, 0, 0 };
-			region.imageExtent = vk::Extent3D{
-				width,
-				height,
-				1
+			vk::BufferImageCopy region
+			{
+				0,0,0,
+				vk::ImageSubresourceLayers{vk::ImageAspectFlagBits::eColor,0,0,1},
+				vk::Offset3D{ 0, 0, 0 },
+				vk::Extent3D{width, height,1}
 			};
 
 			commandBuffer.copyBufferToImage(*buffer, *image, vk::ImageLayout::eTransferDstOptimal, region);
@@ -201,15 +182,14 @@ namespace dmbrn
 
 		void createTextureImageView(const LogicalDevice& device)
 		{
-			vk::ImageViewCreateInfo viewInfo{};
-			viewInfo.image = **texture_image;
-			viewInfo.viewType = vk::ImageViewType::e2D;
-			viewInfo.format = vk::Format::eR8G8B8A8Srgb;
-			viewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-			viewInfo.subresourceRange.baseMipLevel = 0;
-			viewInfo.subresourceRange.levelCount = 1;
-			viewInfo.subresourceRange.baseArrayLayer = 0;
-			viewInfo.subresourceRange.layerCount = 1;
+			vk::ImageViewCreateInfo viewInfo
+			{
+				{}, **texture_image,
+				vk::ImageViewType::e2D,
+				vk::Format::eR8G8B8A8Srgb,
+				{},
+				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor,0,1,0,1}
+			};
 
 			image_view_ = std::make_unique<vk::raii::ImageView>(device->createImageView(viewInfo));
 		}
@@ -218,20 +198,15 @@ namespace dmbrn
 		{
 			vk::PhysicalDeviceProperties properties = physical_device->getProperties();
 
-			vk::SamplerCreateInfo samplerInfo{};
-			samplerInfo.magFilter = vk::Filter::eLinear;
-			samplerInfo.minFilter = vk::Filter::eLinear;
-			samplerInfo.addressModeU = vk::SamplerAddressMode::eRepeat;
-			samplerInfo.addressModeV = vk::SamplerAddressMode::eRepeat;
-			samplerInfo.addressModeW = vk::SamplerAddressMode::eRepeat;
-			samplerInfo.anisotropyEnable = VK_TRUE;
-			samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-			samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
-			samplerInfo.unnormalizedCoordinates = VK_FALSE;
-			samplerInfo.compareEnable = VK_FALSE;
-			samplerInfo.compareOp = vk::CompareOp::eAlways;
-			samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
-
+			vk::SamplerCreateInfo samplerInfo
+			{
+				{}, vk::Filter::eLinear,vk::Filter::eLinear,
+				vk::SamplerMipmapMode::eLinear,vk::SamplerAddressMode::eRepeat,
+				vk::SamplerAddressMode::eRepeat,vk::SamplerAddressMode::eRepeat,
+				{},VK_TRUE,properties.limits.maxSamplerAnisotropy,
+				VK_FALSE,vk::CompareOp::eAlways,{},{},vk::BorderColor::eIntOpaqueBlack,
+				VK_FALSE
+			};
 			sampler_ = std::make_unique<vk::raii::Sampler>(device->createSampler(samplerInfo));
 		}
 	};

@@ -1,16 +1,9 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
 #include <optional>
 #include <set>
 
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
 #include "PhysicalDevice.h"
 
 namespace dmbrn
@@ -20,7 +13,7 @@ namespace dmbrn
 	public:
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 
-		LogicalDevice(const PhysicalDevice& physical_device, const Surface& surface)
+		LogicalDevice(const PhysicalDevice& physical_device)
 		{
 			PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
 

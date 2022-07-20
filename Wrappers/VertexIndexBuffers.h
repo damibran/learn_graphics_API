@@ -1,27 +1,13 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
-#include <optional>
-#include <set>
 
 #include <glm/glm.hpp>
-#include <stb_image.h>
 
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
-#include "RenderPass.h"
-#include "DescriptorSetLayout.h"
 #include "GraphicsPipeline.h"
 #include "CommandPool.h"
-#include "Texture.h"
 
 namespace dmbrn
 {
@@ -36,10 +22,10 @@ namespace dmbrn
 		}
 
 		const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 		};
 
 		const std::vector<uint16_t> indices = {
@@ -73,19 +59,23 @@ namespace dmbrn
 		{
 			vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-			vk::BufferCreateInfo bufferInfo{};
-			bufferInfo.size = bufferSize;
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-			bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+			vk::BufferCreateInfo bufferInfo
+			{
+				{},bufferSize,vk::BufferUsageFlagBits::eTransferSrc,
+				vk::SharingMode::eExclusive
+			};
 			vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
 
-			vk::MemoryAllocateInfo memory_allocate_info{ stagingBuffer.getMemoryRequirements().size,
-			physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits
-				,vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) };
+			vk::MemoryAllocateInfo memory_allocate_info
+			{
+				stagingBuffer.getMemoryRequirements().size,
+				physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
+			};
 
 			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
 
-			stagingBuffer.bindMemory(*stagingBufferMemory,0);
+			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data;
 			data = stagingBufferMemory.mapMemory(0, bufferSize, {});
@@ -95,10 +85,14 @@ namespace dmbrn
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
 			vertex_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
 
-			vertex_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(vk::MemoryAllocateInfo(
+			vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo
+			{
 				vertex_buffer_->getMemoryRequirements().size,
 				physical_device.findMemoryType(vertex_buffer_->getMemoryRequirements().memoryTypeBits,
-					vk::MemoryPropertyFlagBits::eDeviceLocal))));
+				vk::MemoryPropertyFlagBits::eDeviceLocal)
+			};
+
+			vertex_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocate_info));
 
 			vertex_buffer_->bindMemory(**vertex_buffer_memory_, 0);
 
@@ -121,7 +115,7 @@ namespace dmbrn
 
 			vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
 
-			stagingBuffer.bindMemory(*stagingBufferMemory,0);
+			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data = stagingBufferMemory.mapMemory(0, bufferSize, {});
 			memcpy(data, indices.data(), (size_t)bufferSize);
@@ -130,21 +124,28 @@ namespace dmbrn
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
 			index_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
 
-			index_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(vk::MemoryAllocateInfo(
+			vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo{
+
 				index_buffer_->getMemoryRequirements().size,
 				physical_device.findMemoryType(index_buffer_->getMemoryRequirements().memoryTypeBits,
-					vk::MemoryPropertyFlagBits::eDeviceLocal))));
+					vk::MemoryPropertyFlagBits::eDeviceLocal)
+			};
+			index_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocate_info));
 
 			index_buffer_->bindMemory(**index_buffer_memory_, 0);
 
 			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, *index_buffer_, bufferSize);
 		}
 
-		void copyBuffer(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue, vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size) {
+		void copyBuffer(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue, 
+			vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size)
+		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
-			vk::BufferCopy copyRegion{};
-			copyRegion.size = size;
+			vk::BufferCopy copyRegion
+			{
+				0,0,size
+			};
 			commandBuffer.copyBuffer(*srcBuffer, *dstBuffer, copyRegion);
 
 			command_pool.endSingleTimeCommands(gragraphics_queue, commandBuffer);

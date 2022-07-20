@@ -12,7 +12,8 @@ namespace dmbrn
 	const bool enableValidationLayers = true;
 #endif
 
-	const std::vector<const char*> validationLayers = {
+	const std::vector<const char*> validationLayers = 
+	{
 		"VK_LAYER_KHRONOS_validation"
 	};
 
@@ -36,14 +37,16 @@ namespace dmbrn
 
 			vk::DebugUtilsMessengerCreateInfoEXT debug_create_info;
 
-			if (enableValidationLayers) {
+			if (enableValidationLayers)
+			{
 				create_info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 				create_info.ppEnabledLayerNames = validationLayers.data();
 
 				populateDebugMessengerCreateInfo(debug_create_info);
 				create_info.pNext = &debug_create_info;
 			}
-			else {
+			else
+			{
 				create_info.enabledLayerCount = 0;
 				create_info.pNext = nullptr;
 			}
@@ -51,7 +54,8 @@ namespace dmbrn
 			instance_ = std::make_unique<vk::raii::Instance>(context,
 				create_info);
 
-			if (!enableValidationLayers) return;
+			if constexpr (!enableValidationLayers)
+				return;
 
 			debug_messenger_ = std::make_unique<vk::raii::DebugUtilsMessengerEXT>
 				(instance_->createDebugUtilsMessengerEXT(debug_create_info));
@@ -71,21 +75,24 @@ namespace dmbrn
 		std::unique_ptr<vk::raii::Instance> instance_;
 		std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debug_messenger_;
 
-		std::vector<const char*> getRequiredExtensions() {
+		std::vector<const char*> getRequiredExtensions()
+		{
 			uint32_t glfwExtensionCount = 0;
 			const char** glfwExtensions;
 			glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 			std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-			if (enableValidationLayers) {
+			if (enableValidationLayers)
+			{
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 			}
 
 			return extensions;
 		}
 
-		void populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo) {
+		static void populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo)
+		{
 			createInfo.messageSeverity = //vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
 				vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
 				vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;

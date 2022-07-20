@@ -1,19 +1,8 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
-#include <optional>
-#include <set>
 
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
-#include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
-#include "RenderPass.h"
 
 namespace dmbrn
 {
@@ -22,24 +11,26 @@ namespace dmbrn
 	public:
 		DescriptorSetLayout(const LogicalDevice& device)
 		{
-			vk::DescriptorSetLayoutBinding uboLayoutBinding{};
-			uboLayoutBinding.binding = 0;
-			uboLayoutBinding.descriptorCount = 1;
-			uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
-			uboLayoutBinding.pImmutableSamplers = nullptr;
-			uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+			vk::DescriptorSetLayoutBinding uboLayoutBinding
+			{
+				0,vk::DescriptorType::eUniformBuffer,
+				1,vk::ShaderStageFlagBits::eVertex
+			};
 
-			vk::DescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = 1;
-			samplerLayoutBinding.descriptorCount = 1;
-			samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-			samplerLayoutBinding.pImmutableSamplers = nullptr;
-			samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+			vk::DescriptorSetLayoutBinding samplerLayoutBinding
+			{
+				1, vk::DescriptorType::eCombinedImageSampler,
+				1,vk::ShaderStageFlagBits::eFragment
+			};
 
 			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
-			vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-			layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-			layoutInfo.pBindings = bindings.data();
+
+			vk::DescriptorSetLayoutCreateInfo layoutInfo
+			{
+				{},
+				static_cast<uint32_t>(bindings.size()),
+				bindings.data()
+			};
 
 			descriptor_set_layout_ = std::make_unique<vk::raii::DescriptorSetLayout>(device->createDescriptorSetLayout(layoutInfo));
 		}

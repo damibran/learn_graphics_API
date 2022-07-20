@@ -35,7 +35,8 @@ namespace dmbrn
 			auto rec_size = window.getFrameBufferSize();
 			width = rec_size.first;
 			height = rec_size.second;
-			while (width == 0 || height == 0) {
+			while (width == 0 || height == 0)
+			{
 				auto rec_size = window.getFrameBufferSize();
 				width = rec_size.first;
 				height = rec_size.second;
@@ -104,7 +105,6 @@ namespace dmbrn
 
 			vk::SwapchainCreateInfoKHR createInfo{};
 			createInfo.surface = **surface;
-
 			createInfo.minImageCount = imageCount;
 			createInfo.imageFormat = surfaceFormat.format;
 			createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -147,17 +147,14 @@ namespace dmbrn
 			}
 		}
 
-		vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
+		static vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
 		{
-			vk::ImageViewCreateInfo viewInfo{};
-			viewInfo.image = image;
-			viewInfo.viewType = vk::ImageViewType::e2D;
-			viewInfo.format = format;
-			viewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-			viewInfo.subresourceRange.baseMipLevel = 0;
-			viewInfo.subresourceRange.levelCount = 1;
-			viewInfo.subresourceRange.baseArrayLayer = 0;
-			viewInfo.subresourceRange.layerCount = 1;
+			vk::ImageViewCreateInfo viewInfo
+			{
+				{},image, vk::ImageViewType::e2D,
+				format,{},
+				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor,0,1,0,1}
+			};
 
 			return device->createImageView(viewInfo);
 		}
@@ -170,13 +167,11 @@ namespace dmbrn
 					*image_views_[i]
 				};
 
-				vk::FramebufferCreateInfo framebufferInfo{};
-				framebufferInfo.renderPass = **render_pass;
-				framebufferInfo.attachmentCount = 1;
-				framebufferInfo.pAttachments = attachments;
-				framebufferInfo.width = extent_.width;
-				framebufferInfo.height = extent_.height;
-				framebufferInfo.layers = 1;
+				vk::FramebufferCreateInfo framebufferInfo
+				{
+					{},**render_pass,1,
+					attachments,extent_.width,extent_.height,1
+				};
 
 				framebuffers_.push_back(device->createFramebuffer(framebufferInfo));
 			}

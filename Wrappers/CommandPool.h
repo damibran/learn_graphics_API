@@ -29,10 +29,11 @@ namespace dmbrn
 		{
 			PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
 
-			VkCommandPoolCreateInfo poolInfo{};
-			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-			poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+			vk::CommandPoolCreateInfo poolInfo
+			{
+				vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+				queueFamilyIndices.graphicsFamily.value()
+			};
 
 			command_pool_ = std::make_unique<vk::raii::CommandPool>(device->createCommandPool(poolInfo));
 		}
@@ -49,28 +50,31 @@ namespace dmbrn
 
 		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device)const
 		{
-			vk::CommandBufferAllocateInfo allocInfo{};
-			allocInfo.level = vk::CommandBufferLevel::ePrimary;
-			allocInfo.commandPool = **command_pool_;
-			allocInfo.commandBufferCount = 1;
+			vk::CommandBufferAllocateInfo allocInfo
+			{
+				**command_pool_, vk::CommandBufferLevel::ePrimary, 1
+			};
 
 			vk::raii::CommandBuffer commandBuffer = std::move(device->allocateCommandBuffers(allocInfo).front());
 
-			vk::CommandBufferBeginInfo beginInfo{};
-			beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+			vk::CommandBufferBeginInfo beginInfo
+			{
+				vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+			};
 
 			commandBuffer.begin(beginInfo);
 
 			return commandBuffer;
 		}
 
-		void endSingleTimeCommands(vk::raii::Queue& gragraphics_queue, vk::raii::CommandBuffer& commandBuffer)const
+		void endSingleTimeCommands(vk::raii::Queue& gragraphics_queue, vk::raii::CommandBuffer& commandBuffer) const
 		{
 			commandBuffer.end();
 
-			vk::SubmitInfo submitInfo{};
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &*commandBuffer;
+			vk::SubmitInfo submitInfo
+			{
+				{},{},{},1,&*commandBuffer
+			};
 
 			gragraphics_queue.submit(submitInfo);
 			gragraphics_queue.waitIdle();

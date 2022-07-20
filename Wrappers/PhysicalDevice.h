@@ -1,10 +1,6 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
 #include <optional>
 #include <set>
 
@@ -68,7 +64,8 @@ namespace dmbrn
 			std::optional<uint32_t> graphicsFamily;
 			std::optional<uint32_t> presentFamily;
 
-			bool isComplete() {
+			bool isComplete() const
+			{
 				return graphicsFamily.has_value() && presentFamily.has_value();
 			}
 		};

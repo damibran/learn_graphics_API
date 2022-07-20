@@ -1,29 +1,13 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
-#include <optional>
-#include <set>
 
-#include <glm/glm.hpp>
-#include <stb_image.h>
-
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
-#include "PhysicalDevice.h"
 #include "LogicalDevice.h"
 #include "SwapChain.h"
 #include "RenderPass.h"
-#include "DescriptorSetLayout.h"
 #include "GraphicsPipeline.h"
 #include "CommandPool.h"
-#include "Texture.h"
 #include "VertexIndexBuffers.h"
-#include "UniformBuffers.h"
 #include "DescriptorSets.h"
 
 namespace dmbrn
@@ -33,10 +17,11 @@ namespace dmbrn
 	public:
 		CommandBuffers(const LogicalDevice& device, const CommandPool& command_pool)
 		{
-			vk::CommandBufferAllocateInfo allocInfo{};
-			allocInfo.commandPool = **command_pool;
-			allocInfo.level = vk::CommandBufferLevel::ePrimary;
-			allocInfo.commandBufferCount = (uint32_t)device.MAX_FRAMES_IN_FLIGHT;
+			vk::CommandBufferAllocateInfo allocInfo
+			{
+				**command_pool, vk::CommandBufferLevel::ePrimary,
+				 static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
+			};
 
 			command_buffers_ = device->allocateCommandBuffers(allocInfo);
 		}
@@ -52,32 +37,34 @@ namespace dmbrn
 
 			command_buffer.begin(beginInfo);
 
-			vk::RenderPassBeginInfo renderPassInfo{};
-			renderPassInfo.renderPass = **render_pass;
-			renderPassInfo.framebuffer = *swap_chain.getFrameBuffers()[imageIndex];
-			renderPassInfo.renderArea.offset = vk::Offset2D{ 0, 0 };
-			renderPassInfo.renderArea.extent = swap_chain.getExtent();
-
 			vk::ClearValue clearColor = vk::ClearValue{vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} }};
-			renderPassInfo.clearValueCount = 1;
-			renderPassInfo.pClearValues = &clearColor;
+			vk::RenderPassBeginInfo renderPassInfo
+			{
+				**render_pass,
+				*swap_chain.getFrameBuffers()[imageIndex],
+				vk::Rect2D{vk::Offset2D{ 0, 0 }, swap_chain.getExtent()},
+				clearColor
+			};
 
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
 			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **graphics_pipeline);
 
-			vk::Viewport viewport{};
-			viewport.x = 0.0f;
-			viewport.y = 0.0f;
-			viewport.width = (float)swap_chain.getExtent().width;
-			viewport.height = (float)swap_chain.getExtent().height;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
+			vk::Viewport viewport
+			{
+				0.0f,0.0f,
+				static_cast<float>(swap_chain.getExtent().width),
+				static_cast<float>(swap_chain.getExtent().height),
+				0.0f, 1.0f
+			};
+
 			command_buffer.setViewport(0, viewport);
 
-			vk::Rect2D scissor{};
-			scissor.offset = vk::Offset2D{ 0, 0 };
-			scissor.extent = swap_chain.getExtent();
+			vk::Rect2D scissor
+			{
+				vk::Offset2D{ 0, 0 },
+				swap_chain.getExtent()
+			};
 			command_buffer.setScissor(0, scissor);
 
 			vk::Buffer vertexBuffers[] = { *vertex_index_buffers.getVertex() };

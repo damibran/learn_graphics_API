@@ -4,9 +4,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 #include <iostream>
-#include <fstream>
 #include <optional>
-#include <set>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -17,9 +15,9 @@
 #include "Wrappers/Surface.h"
 #include "Wrappers/PhysicalDevice.h"
 #include "Wrappers/LogicalDevice.h"
-#include "Wrappers/SwapChain.h"
 #include "Wrappers/RenderPass.h"
-#include "Wrappers/DescriptorSetLayout.h"
+#include "Wrappers/SwapChain.h"
+#include "Wrappers/DescriptorSetLayout.h" // may be it should be a part of descriptor sets
 #include "Wrappers/GraphicsPipeline.h"
 #include "Wrappers/CommandPool.h"
 #include "Wrappers/Texture.h"
@@ -39,7 +37,7 @@ namespace dmbrn
 			instance_(context_),
 			surface_(instance_, window_),
 			physical_device_(instance_, surface_),
-			device_(physical_device_, surface_),
+			device_(physical_device_),
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			render_pass_(surface_, physical_device_, device_),
@@ -55,8 +53,10 @@ namespace dmbrn
 		{
 			vk::SemaphoreCreateInfo semaphoreInfo{};
 
-			vk::FenceCreateInfo fenceInfo{};
-			fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+			vk::FenceCreateInfo fenceInfo
+			{
+				vk::FenceCreateFlagBits::eSignaled
+			};
 
 			for (size_t i = 0; i < device_.MAX_FRAMES_IN_FLIGHT; i++) {
 				image_available_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));

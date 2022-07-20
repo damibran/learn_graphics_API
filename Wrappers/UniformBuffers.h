@@ -3,26 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
-#include <optional>
-#include <set>
 
 #include <glm/glm.hpp>
-#include <stb_image.h>
 
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
-#include "RenderPass.h"
-#include "DescriptorSetLayout.h"
-#include "GraphicsPipeline.h"
-#include "CommandPool.h"
-#include "Texture.h"
-#include "VertexIndexBuffers.h"
 
 namespace dmbrn
 {
@@ -37,7 +22,7 @@ namespace dmbrn
 
 		UniformBuffers(const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
-			VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+			vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
 			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++) {
 
