@@ -20,7 +20,9 @@ namespace dmbrn
 	class Instance
 	{
 	public:
-		Instance(const vk::raii::Context& context)
+		Instance(const vk::raii::Context& context):
+			instance_(nullptr),
+			debug_messenger_(nullptr)
 		{
 			const vk::ApplicationInfo application_info
 			{
@@ -53,29 +55,28 @@ namespace dmbrn
 				create_info.pNext = nullptr;
 			}
 
-			instance_ = std::make_unique<vk::raii::Instance>(context,
-				create_info);
+			instance_ = vk::raii::Instance{context,
+				create_info};
 
 			if constexpr (!enableValidationLayers)
 				return;
 
-			debug_messenger_ = std::make_unique<vk::raii::DebugUtilsMessengerEXT>
-				(instance_->createDebugUtilsMessengerEXT(debug_create_info));
+			debug_messenger_ = vk::raii::DebugUtilsMessengerEXT{instance_.createDebugUtilsMessengerEXT(debug_create_info)};
 		}
 
 		const vk::raii::Instance& operator*()const
 		{
-			return *instance_;
+			return instance_;
 		}
 
 		const vk::raii::Instance* operator->()const
 		{
-			return instance_.get();
+			return &instance_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::Instance> instance_;
-		std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debug_messenger_;
+		vk::raii::Instance instance_;
+		vk::raii::DebugUtilsMessengerEXT debug_messenger_;
 
 		std::vector<const char*> getRequiredExtensions()
 		{
