@@ -42,8 +42,7 @@ namespace dmbrn
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			render_pass_(surface_, physical_device_, device_),
-			depth_buffer_(surface_, window_, physical_device_, device_),
-			swap_chain_(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_),
+			swap_chain_(physical_device_, device_, surface_, window_, render_pass_),
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
@@ -85,7 +84,6 @@ namespace dmbrn
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
 		RenderPass render_pass_;
-		DepthBuffer depth_buffer_;
 		SwapChain swap_chain_;
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
@@ -146,8 +144,7 @@ namespace dmbrn
 			catch (vk::OutOfDateKHRError e)
 			{
 				window_.framebufferResized = false;
-				depth_buffer_.recreate(surface_, window_, physical_device_, device_);
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_);
+				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
 				return;
 			}
 

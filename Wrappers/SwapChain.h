@@ -20,23 +20,19 @@ namespace dmbrn
 	public:
 		SwapChain(const PhysicalDevice& physical_device,
 			const LogicalDevice& device, const Surface& surface,
-			const GLFWwindowWrapper& window, const RenderPass& render_pass,
-			const DepthBuffer& depth_buffer):
+			const GLFWwindowWrapper& window, const RenderPass& render_pass):
 			swap_chain_(createSwapChain(physical_device, device, surface, window)),
 			image_views_(createImageViews(device)),
-			framebuffers_(createFrameBuffers(device, render_pass, depth_buffer)),
+			depth_buffer_(surface,window,physical_device,device),
+			framebuffers_(createFrameBuffers(device, render_pass)),
 			image_format_(image_format_),
 			extent_(extent_)
 		{
 		}
 
-		/**
-		 * \param depth_buffer should be recreated before for now
-		 */
 		void recreate(const PhysicalDevice& physical_device,
 			const LogicalDevice& device, const Surface& surface,
-			const GLFWwindowWrapper& window, const RenderPass& render_pass,
-			const DepthBuffer& depth_buffer)
+			const GLFWwindowWrapper& window, const RenderPass& render_pass)
 		{
 			int width = 0, height = 0;
 			const auto rec_size = window.getFrameBufferSize();
@@ -57,7 +53,8 @@ namespace dmbrn
 
 			swap_chain_ = createSwapChain(physical_device, device, surface, window);
 			image_views_ = createImageViews(device);
-			framebuffers_ = createFrameBuffers(device, render_pass, depth_buffer);
+			depth_buffer_ = DepthBuffer(surface,window,physical_device,device);
+			framebuffers_ = createFrameBuffers(device, render_pass);
 		}
 
 		const vk::raii::SwapchainKHR& operator*()const
@@ -88,6 +85,7 @@ namespace dmbrn
 	private:
 		vk::raii::SwapchainKHR swap_chain_;
 		std::vector<vk::raii::ImageView> image_views_;
+		DepthBuffer depth_buffer_;
 		std::vector<vk::raii::Framebuffer> framebuffers_;
 		vk::Format image_format_;
 		vk::Extent2D extent_;
@@ -167,7 +165,7 @@ namespace dmbrn
 			return device->createImageView(viewInfo);
 		}
 
-		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass, const DepthBuffer& depth_buffer)
+		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass)
 		{
 			std::vector<vk::raii::Framebuffer> result;
 
@@ -175,7 +173,7 @@ namespace dmbrn
 			{
 				const vk::ImageView attachments[] = {
 					*image_views_[i],
-					**depth_buffer
+					**depth_buffer_
 				};
 
 				const vk::FramebufferCreateInfo framebufferInfo
