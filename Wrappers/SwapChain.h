@@ -21,11 +21,13 @@ namespace dmbrn
 		SwapChain(const PhysicalDevice& physical_device,
 			const LogicalDevice& device, const Surface& surface,
 			const GLFWwindowWrapper& window, const RenderPass& render_pass,
-			const DepthBuffer& depth_buffer)
+			const DepthBuffer& depth_buffer):
+			swap_chain_(createSwapChain(physical_device, device, surface, window)),
+			image_views_(createImageViews(device)),
+			framebuffers_(createFrameBuffers(device, render_pass, depth_buffer)),
+			image_format_(image_format_),
+			extent_(extent_)
 		{
-			createSwapChain(physical_device, device, surface, window);
-			createImageViews(device);
-			createFrameBuffers(device, render_pass,depth_buffer);
 		}
 
 		/**
@@ -53,19 +55,19 @@ namespace dmbrn
 			framebuffers_.clear();
 			image_views_.clear();
 
-			createSwapChain(physical_device, device, surface, window);
-			createImageViews(device);
-			createFrameBuffers(device, render_pass,depth_buffer);
+			swap_chain_ = createSwapChain(physical_device, device, surface, window);
+			image_views_ = createImageViews(device);
+			framebuffers_ = createFrameBuffers(device, render_pass, depth_buffer);
 		}
 
 		const vk::raii::SwapchainKHR& operator*()const
 		{
-			return *swap_chain_;
+			return swap_chain_;
 		}
 
 		const vk::raii::SwapchainKHR* operator->()const
 		{
-			return swap_chain_.get();
+			return &swap_chain_;
 		}
 
 		const vk::Extent2D& getExtent()const
@@ -84,14 +86,13 @@ namespace dmbrn
 		}
 
 	private:
-		std::unique_ptr<vk::raii::SwapchainKHR> swap_chain_;
-		std::vector<VkImage> images_;
+		vk::raii::SwapchainKHR swap_chain_;
 		std::vector<vk::raii::ImageView> image_views_;
 		std::vector<vk::raii::Framebuffer> framebuffers_;
 		vk::Format image_format_;
 		vk::Extent2D extent_;
 
-		void createSwapChain(const PhysicalDevice& physical_device,
+		[[nodiscard]] vk::raii::SwapchainKHR createSwapChain(const PhysicalDevice& physical_device,
 			const LogicalDevice& device,
 			const Surface& surface,
 			const GLFWwindowWrapper& window)
@@ -132,23 +133,26 @@ namespace dmbrn
 			createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 			createInfo.presentMode = presentMode;
 			createInfo.clipped = VK_TRUE;
-			if (swap_chain_.get())
-				createInfo.oldSwapchain = **swap_chain_;
+			createInfo.oldSwapchain = *swap_chain_;
 
-			swap_chain_ = std::make_unique<vk::raii::SwapchainKHR>(device->createSwapchainKHR(createInfo));
-
-			images_ = swap_chain_->getImages();
+			vk::raii::SwapchainKHR result = device->createSwapchainKHR(createInfo);
 
 			image_format_ = surfaceFormat.format;
 			extent_ = extent;
+
+			return result;
 		}
 
-		void createImageViews(const LogicalDevice& device)
+		[[nodiscard]] std::vector<vk::raii::ImageView> createImageViews(const LogicalDevice& device) const
 		{
-			for (size_t i = 0; i < images_.size(); i++)
+			std::vector<vk::raii::ImageView> result;
+			std::vector<VkImage> images = swap_chain_.getImages();
+			for (size_t i = 0; i < images.size(); i++)
 			{
-				image_views_.push_back(createImageView(device, images_[i], image_format_));
+				result.push_back(createImageView(device, images[i], image_format_));
 			}
+
+			return result;
 		}
 
 		static vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
@@ -163,8 +167,10 @@ namespace dmbrn
 			return device->createImageView(viewInfo);
 		}
 
-		void createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass,const DepthBuffer& depth_buffer)
+		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass, const DepthBuffer& depth_buffer)
 		{
+			std::vector<vk::raii::Framebuffer> result;
+
 			for (size_t i = 0; i < image_views_.size(); i++)
 			{
 				const vk::ImageView attachments[] = {
@@ -178,8 +184,10 @@ namespace dmbrn
 					attachments,extent_.width,extent_.height,1
 				};
 
-				framebuffers_.push_back(device->createFramebuffer(framebufferInfo));
+				result.push_back(device->createFramebuffer(framebufferInfo));
 			}
+
+			return result;
 		}
 
 		static vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
