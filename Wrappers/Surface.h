@@ -12,24 +12,29 @@ namespace dmbrn
 	class Surface
 	{
 	public:
-		Surface(const Instance& instance, const GLFWwindowWrapper& window)
+		Surface(const Instance& instance, const GLFWwindowWrapper& window) :
+			surface_(createSurface(instance, window))
 		{
-			VkSurfaceKHR raw_surface;
-			glfwCreateWindowSurface(**instance, window.data(), nullptr, &raw_surface);
-			surface_ = std::make_unique<vk::raii::SurfaceKHR>(*instance, raw_surface, nullptr);
 		}
 
 		const vk::raii::SurfaceKHR& operator*()const
 		{
-			return *surface_;
+			return surface_;
 		}
 
 		const vk::raii::SurfaceKHR* operator->()const
 		{
-			return surface_.get();
+			return &surface_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::SurfaceKHR> surface_;
+		vk::raii::SurfaceKHR surface_;
+
+		[[nodiscard]] static vk::raii::SurfaceKHR createSurface(const Instance& instance, const GLFWwindowWrapper& window)
+		{
+			VkSurfaceKHR raw_surface;
+			glfwCreateWindowSurface(**instance, window.data(), nullptr, &raw_surface);
+			return  {*instance, raw_surface, nullptr};
+		}
 	};
 }

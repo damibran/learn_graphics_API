@@ -25,7 +25,6 @@
 #include "Wrappers/UniformBuffers.h"
 #include "Wrappers/DescriptorSets.h"
 #include "Wrappers/CommandBuffers.h"
-#include "Wrappers/Depthbuffer.h"
 
 namespace dmbrn
 {
