@@ -37,13 +37,18 @@ namespace dmbrn
 
 			command_buffer.begin(beginInfo);
 
-			vk::ClearValue clearColor = vk::ClearValue{ vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} } };
+			const std::array<vk::ClearValue, 2> clear_values
+			{
+				vk::ClearValue{ vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} } },
+				vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}}
+			};
+
 			const vk::RenderPassBeginInfo renderPassInfo
 			{
 				**render_pass,
 				*swap_chain.getFrameBuffers()[imageIndex],
 				vk::Rect2D{vk::Offset2D{ 0, 0 }, swap_chain.getExtent()},
-				clearColor
+				clear_values
 			};
 
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);

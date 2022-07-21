@@ -2,24 +2,45 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "Surface.h"
+#include "GLFWwindowWrapper.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
 #include "Utils/UtilsFunctions.h"
-#include "SwapChain.h"
 
 namespace dmbrn
 {
 	class DepthBuffer
 	{
 	public:
-		DepthBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const SwapChain& swap_chain)
+		DepthBuffer(const Surface& surface, const GLFWwindowWrapper& window,
+			const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			vk::Format depth_format = utils::findDepthFormat(physical_device);
-			createImage(device, physical_device, swap_chain.getExtent().width, swap_chain.getExtent().height, depth_format,
+			vk::Extent2D extent = utils::chooseSwapExtent(PhysicalDevice::querySurfaceCapabilities(*physical_device, surface), window);
+			createImage(device, physical_device, extent.width, extent.height, depth_format,
 				vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
 				vk::MemoryPropertyFlagBits::eDeviceLocal, image_, image_memory_);
 			createImageView(device, depth_format);
 		}
+
+		void recreate(const Surface& surface, const GLFWwindowWrapper& window,
+			const PhysicalDevice& physical_device, const LogicalDevice& device)
+		{
+			device->waitIdle();
+			vk::Format depth_format = utils::findDepthFormat(physical_device);
+			vk::Extent2D extent = utils::chooseSwapExtent(PhysicalDevice::querySurfaceCapabilities(*physical_device, surface), window);
+			createImage(device, physical_device, extent.width, extent.height, depth_format,
+				vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
+				vk::MemoryPropertyFlagBits::eDeviceLocal, image_, image_memory_);
+			createImageView(device, depth_format);
+		}
+
+		const vk::raii::ImageView& operator*() const
+		{
+			return *image_view_;
+		}
+
 	private:
 		std::unique_ptr<vk::raii::Image> image_;
 		std::unique_ptr<vk::raii::DeviceMemory> image_memory_;

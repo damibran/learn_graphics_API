@@ -11,6 +11,7 @@
 #include "LogicalDevice.h"
 #include "RenderPass.h"
 #include "../Utils/UtilsFunctions.h"
+#include "Depthbuffer.h"
 
 namespace dmbrn
 {
@@ -18,18 +19,22 @@ namespace dmbrn
 	{
 	public:
 		SwapChain(const PhysicalDevice& physical_device,
-			const LogicalDevice& device,
-			const Surface& surface, const GLFWwindowWrapper& window, const RenderPass& render_pass)
+			const LogicalDevice& device, const Surface& surface,
+			const GLFWwindowWrapper& window, const RenderPass& render_pass,
+			const DepthBuffer& depth_buffer)
 		{
 			createSwapChain(physical_device, device, surface, window);
 			createImageViews(device);
-			createFrameBuffers(device, render_pass);
+			createFrameBuffers(device, render_pass,depth_buffer);
 		}
 
+		/**
+		 * \param depth_buffer should be recreated before for now
+		 */
 		void recreate(const PhysicalDevice& physical_device,
-			const LogicalDevice& device,
-			const Surface& surface,
-			const GLFWwindowWrapper& window, const RenderPass& render_pass)
+			const LogicalDevice& device, const Surface& surface,
+			const GLFWwindowWrapper& window, const RenderPass& render_pass,
+			const DepthBuffer& depth_buffer)
 		{
 			int width = 0, height = 0;
 			const auto rec_size = window.getFrameBufferSize();
@@ -50,7 +55,7 @@ namespace dmbrn
 
 			createSwapChain(physical_device, device, surface, window);
 			createImageViews(device);
-			createFrameBuffers(device, render_pass);
+			createFrameBuffers(device, render_pass,depth_buffer);
 		}
 
 		const vk::raii::SwapchainKHR& operator*()const
@@ -95,7 +100,7 @@ namespace dmbrn
 
 			const vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface));
 			const vk::PresentModeKHR presentMode = chooseSwapPresentMode(PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
-			const vk::Extent2D extent = chooseSwapExtent(capabilities, window);
+			const vk::Extent2D extent = utils::chooseSwapExtent(capabilities, window);
 
 			uint32_t imageCount = capabilities.minImageCount + 1;
 			if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
@@ -158,17 +163,18 @@ namespace dmbrn
 			return device->createImageView(viewInfo);
 		}
 
-		void createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass)
+		void createFrameBuffers(const LogicalDevice& device, const RenderPass& render_pass,const DepthBuffer& depth_buffer)
 		{
 			for (size_t i = 0; i < image_views_.size(); i++)
 			{
 				const vk::ImageView attachments[] = {
-					*image_views_[i]
+					*image_views_[i],
+					**depth_buffer
 				};
 
 				const vk::FramebufferCreateInfo framebufferInfo
 				{
-					{},**render_pass,1,
+					{},**render_pass,
 					attachments,extent_.width,extent_.height,1
 				};
 
@@ -187,28 +193,6 @@ namespace dmbrn
 			}
 
 			return vk::PresentModeKHR::eFifo;
-		}
-
-		static vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities, const GLFWwindowWrapper& window)
-		{
-			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-			{
-				return capabilities.currentExtent;
-			}
-			else
-			{
-				const auto rect = window.getFrameBufferSize();
-
-				vk::Extent2D actualExtent = {
-					static_cast<uint32_t>(rect.first),
-					static_cast<uint32_t>(rect.second)
-				};
-
-				actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-				actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-				return actualExtent;
-			}
 		}
 	};
 }

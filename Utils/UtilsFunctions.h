@@ -17,6 +17,28 @@ namespace dmbrn
 			return availableFormats[0];
 		}
 
+		vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities, const GLFWwindowWrapper& window)
+		{
+			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+			{
+				return capabilities.currentExtent;
+			}
+			else
+			{
+				const auto rect = window.getFrameBufferSize();
+
+				vk::Extent2D actualExtent = {
+					static_cast<uint32_t>(rect.first),
+					static_cast<uint32_t>(rect.second)
+				};
+
+				actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+				actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+				return actualExtent;
+			}
+		}
+
 		vk::Format findSupportedFormat(const PhysicalDevice& physical_device, const std::vector<vk::Format>& candidates,
 			vk::ImageTiling tiling, vk::FormatFeatureFlags features)
 		{

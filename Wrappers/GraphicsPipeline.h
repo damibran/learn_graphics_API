@@ -86,13 +86,19 @@ namespace dmbrn
 			const std::vector dynamicStates
 			{
 				vk::DynamicState::eViewport,
-				vk::DynamicState::eScissor
+				vk::DynamicState::eScissor,
 			};
 
 			const vk::PipelineDynamicStateCreateInfo dynamicState
 			{
 				{}, static_cast<uint32_t>(dynamicStates.size()),
 				dynamicStates.data()
+			};
+
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info
+			{
+				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
+				VK_FALSE, VK_FALSE
 			};
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
@@ -107,7 +113,7 @@ namespace dmbrn
 				{}, 2, shaderStages,
 				&vertexInputInfo,&inputAssembly,{},
 				&viewportState,&rasterizer,&multisampling,
-				{},&colorBlending,&dynamicState,
+				&depth_stencil_info,&colorBlending,&dynamicState,
 				**pipeline_layout_,**render_pass
 			};
 

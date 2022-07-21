@@ -42,11 +42,11 @@ namespace dmbrn
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
 			render_pass_(surface_, physical_device_, device_),
-			swap_chain_(physical_device_, device_, surface_, window_, render_pass_),
+			depth_buffer_(surface_, window_, physical_device_, device_),
+			swap_chain_(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_),
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
-			depth_buffer_(physical_device_, device_, swap_chain_),
 			texture_(physical_device_, device_, command_pool_, gragraphics_queue_),
 			vertex_index_buffers_(physical_device_, device_, command_pool_, gragraphics_queue_),
 			uniform_buffers_(physical_device_, device_),
@@ -85,11 +85,11 @@ namespace dmbrn
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
 		RenderPass render_pass_;
+		DepthBuffer depth_buffer_;
 		SwapChain swap_chain_;
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
 		CommandPool command_pool_;
-		DepthBuffer depth_buffer_;
 		Texture texture_;
 		VertexIndexBuffers vertex_index_buffers_;
 		UniformBuffers uniform_buffers_;
@@ -111,7 +111,8 @@ namespace dmbrn
 
 			if (result.first == vk::Result::eErrorOutOfDateKHR)
 			{
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
+				depth_buffer_.recreate(surface_, window_, physical_device_, device_);
+				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_);
 				return;
 			}
 			else if (result.first != vk::Result::eSuccess && result.first != vk::Result::eSuboptimalKHR) {
@@ -163,7 +164,8 @@ namespace dmbrn
 			catch (vk::OutOfDateKHRError e)
 			{
 				window_.framebufferResized = false;
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
+				depth_buffer_.recreate(surface_, window_, physical_device_, device_);
+				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_);
 				return;
 			}
 
