@@ -9,7 +9,8 @@ namespace dmbrn
 	class DescriptorSetLayout
 	{
 	public:
-		DescriptorSetLayout(const LogicalDevice& device)
+		DescriptorSetLayout(const LogicalDevice& device):
+			descriptor_set_layout_(nullptr)
 		{
 			const vk::DescriptorSetLayoutBinding uboLayoutBinding
 			{
@@ -32,19 +33,19 @@ namespace dmbrn
 				bindings.data()
 			};
 
-			descriptor_set_layout_ = std::make_unique<vk::raii::DescriptorSetLayout>(device->createDescriptorSetLayout(layoutInfo));
+			descriptor_set_layout_ = vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
 		}
 
 		const vk::raii::DescriptorSetLayout& operator*()const
 		{
-			return *descriptor_set_layout_;
+			return descriptor_set_layout_;
 		}
 
 		const vk::raii::DescriptorSetLayout* operator->()const
 		{
-			return descriptor_set_layout_.get();
+			return &descriptor_set_layout_;
 		}
 	private:
-		std::unique_ptr<vk::raii::DescriptorSetLayout> descriptor_set_layout_;
+		vk::raii::DescriptorSetLayout descriptor_set_layout_;
 	};
 }

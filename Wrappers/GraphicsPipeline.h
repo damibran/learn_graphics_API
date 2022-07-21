@@ -13,7 +13,9 @@ namespace dmbrn
 	class GraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass, const DescriptorSetLayout& descriptor_set_layout)
+		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass, const DescriptorSetLayout& descriptor_set_layout):
+			pipeline_layout_(nullptr),
+			graphics_pipeline_(nullptr)
 		{
 			const auto vertShaderCode = readFile("shaders/vert.spv");
 			const auto fragShaderCode = readFile("shaders/frag.spv");
@@ -106,7 +108,7 @@ namespace dmbrn
 				{}, 1, &**descriptor_set_layout
 			};
 
-			pipeline_layout_ = std::make_unique<vk::raii::PipelineLayout>(device->createPipelineLayout(pipelineLayoutInfo));
+			pipeline_layout_ = vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
@@ -114,25 +116,25 @@ namespace dmbrn
 				&vertexInputInfo,&inputAssembly,{},
 				&viewportState,&rasterizer,&multisampling,
 				&depth_stencil_info,&colorBlending,&dynamicState,
-				**pipeline_layout_,**render_pass
+				*pipeline_layout_,**render_pass
 			};
 
-			graphics_pipeline_ = std::make_unique<vk::raii::Pipeline>(device->createGraphicsPipeline(nullptr, pipelineInfo));
+			graphics_pipeline_ = vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
 		}
 
 		const vk::raii::Pipeline& operator*()const
 		{
-			return *graphics_pipeline_;
+			return graphics_pipeline_;
 		}
 
 		const vk::raii::PipelineLayout& getLayout()const
 		{
-			return *pipeline_layout_;
+			return pipeline_layout_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::PipelineLayout> pipeline_layout_;
-		std::unique_ptr<vk::raii::Pipeline> graphics_pipeline_;
+		vk::raii::PipelineLayout pipeline_layout_;
+		vk::raii::Pipeline graphics_pipeline_;
 
 		static std::vector<char> readFile(const std::string& filename)
 		{
