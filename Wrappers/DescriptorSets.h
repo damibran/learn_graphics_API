@@ -13,7 +13,8 @@ namespace dmbrn
 	{
 	public:
 		DescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
-			const UniformBuffers& uniform_buffers, const Texture& texture)
+			const UniformBuffers& uniform_buffers, const Texture& texture):
+			descriptor_pool_(nullptr)
 		{
 			createDescriptorPool(device);
 			createDescriptorSets(device, descriptor_set_layout, uniform_buffers, texture);
@@ -25,7 +26,7 @@ namespace dmbrn
 		}
 
 	private:
-		std::unique_ptr<vk::raii::DescriptorPool> descriptor_pool_;
+		vk::raii::DescriptorPool descriptor_pool_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorPool(const LogicalDevice& device)
@@ -51,7 +52,7 @@ namespace dmbrn
 				poolSizes.data()
 			};
 
-			descriptor_pool_ = std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo));
+			descriptor_pool_ = vk::raii::DescriptorPool{device->createDescriptorPool(poolInfo)};
 		}
 
 		void createDescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
@@ -61,7 +62,7 @@ namespace dmbrn
 
 			const vk::DescriptorSetAllocateInfo allocInfo
 			{
-				**descriptor_pool_,
+				*descriptor_pool_,
 				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
 				layouts.data()
 			};

@@ -15,7 +15,12 @@ namespace dmbrn
 	{
 	public:
 
-		VertexIndexBuffers(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		VertexIndexBuffers(const PhysicalDevice& physical_device, const LogicalDevice& device,
+			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue):
+			vertex_buffer_(nullptr),
+			vertex_buffer_memory_(nullptr),
+			index_buffer_(nullptr),
+			index_buffer_memory_(nullptr)
 		{
 			createVertexBuffer(physical_device, device, command_pool, gragraphics_queue);
 			createIndexBuffer(physical_device, device, command_pool, gragraphics_queue);
@@ -40,12 +45,12 @@ namespace dmbrn
 
 		const vk::raii::Buffer& getVertex()const
 		{
-			return *vertex_buffer_;
+			return vertex_buffer_;
 		}
 
 		const vk::raii::Buffer& getIndex()const
 		{
-			return *index_buffer_;
+			return index_buffer_;
 		}
 
 		int getIndeciesCount()const
@@ -54,11 +59,11 @@ namespace dmbrn
 		}
 
 	private:
-		std::unique_ptr<vk::raii::Buffer> vertex_buffer_;
-		std::unique_ptr<vk::raii::DeviceMemory> vertex_buffer_memory_;
+		vk::raii::Buffer vertex_buffer_;
+		vk::raii::DeviceMemory vertex_buffer_memory_;
 
-		std::unique_ptr<vk::raii::Buffer> index_buffer_;
-		std::unique_ptr<vk::raii::DeviceMemory> index_buffer_memory_;
+		vk::raii::Buffer index_buffer_;
+		vk::raii::DeviceMemory index_buffer_memory_;
 
 
 		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
@@ -89,20 +94,20 @@ namespace dmbrn
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
-			vertex_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
+			vertex_buffer_ = vk::raii::Buffer{device->createBuffer(bufferInfo)};
 
 			const vk::MemoryAllocateInfo allocate_info = vk::MemoryAllocateInfo
 			{
-				vertex_buffer_->getMemoryRequirements().size,
-				physical_device.findMemoryType(vertex_buffer_->getMemoryRequirements().memoryTypeBits,
+				vertex_buffer_.getMemoryRequirements().size,
+				physical_device.findMemoryType(vertex_buffer_.getMemoryRequirements().memoryTypeBits,
 				vk::MemoryPropertyFlagBits::eDeviceLocal)
 			};
 
-			vertex_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocate_info));
+			vertex_buffer_memory_ = vk::raii::DeviceMemory{device->allocateMemory(allocate_info)};
 
-			vertex_buffer_->bindMemory(**vertex_buffer_memory_, 0);
+			vertex_buffer_.bindMemory(*vertex_buffer_memory_, 0);
 
-			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, *vertex_buffer_, bufferSize);
+			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, vertex_buffer_, bufferSize);
 		}
 
 		void createIndexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
@@ -132,19 +137,19 @@ namespace dmbrn
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
-			index_buffer_ = std::make_unique<vk::raii::Buffer>(device->createBuffer(bufferInfo));
+			index_buffer_ = vk::raii::Buffer{device->createBuffer(bufferInfo)};
 
 			const vk::MemoryAllocateInfo allocate_info
 			{
-				index_buffer_->getMemoryRequirements().size,
-				physical_device.findMemoryType(index_buffer_->getMemoryRequirements().memoryTypeBits,
+				index_buffer_.getMemoryRequirements().size,
+				physical_device.findMemoryType(index_buffer_.getMemoryRequirements().memoryTypeBits,
 					vk::MemoryPropertyFlagBits::eDeviceLocal)
 			};
-			index_buffer_memory_ = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocate_info));
+			index_buffer_memory_ = vk::raii::DeviceMemory{device->allocateMemory(allocate_info)};
 
-			index_buffer_->bindMemory(**index_buffer_memory_, 0);
+			index_buffer_.bindMemory(*index_buffer_memory_, 0);
 
-			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, *index_buffer_, bufferSize);
+			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, index_buffer_, bufferSize);
 		}
 
 		void copyBuffer(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue,
