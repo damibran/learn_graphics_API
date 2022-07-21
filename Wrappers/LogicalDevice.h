@@ -13,7 +13,8 @@ namespace dmbrn
 	public:
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 
-		LogicalDevice(const PhysicalDevice& physical_device)
+		LogicalDevice(const PhysicalDevice& physical_device):
+			device_(nullptr)
 		{
 			const PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
 
@@ -50,20 +51,20 @@ namespace dmbrn
 				createInfo.enabledLayerCount = 0;
 			}
 
-			device_ = std::make_unique<vk::raii::Device>(physical_device->createDevice(createInfo));
+			device_ = vk::raii::Device{physical_device->createDevice(createInfo)};
 		}
 
 		const vk::raii::Device& operator*()const
 		{
-			return *device_;
+			return device_;
 		}
 
 		const vk::raii::Device* operator->()const
 		{
-			return device_.get();
+			return &device_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::Device> device_;
+		vk::raii::Device device_;
 	};
 }

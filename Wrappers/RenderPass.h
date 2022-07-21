@@ -12,7 +12,8 @@ namespace dmbrn
 	class RenderPass
 	{
 	public:
-		RenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device)
+		RenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device):
+			render_pass_(nullptr)
 		{
 			const vk::AttachmentDescription colorAttachment
 			{
@@ -79,21 +80,21 @@ namespace dmbrn
 				dependency
 			};
 
-			render_pass_ = std::make_unique<vk::raii::RenderPass>(device->createRenderPass(renderPassInfo));
+			render_pass_ = vk::raii::RenderPass{device->createRenderPass(renderPassInfo)};
 		}
 
 		const vk::raii::RenderPass& operator*()const
 		{
-			return *render_pass_;
+			return render_pass_;
 		}
 
-		vk::raii::RenderPass* operator->()const
+		const vk::raii::RenderPass* operator->()const
 		{
-			return render_pass_.get();
+			return &render_pass_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::RenderPass> render_pass_;
+		vk::raii::RenderPass render_pass_;
 
 	};
 }
