@@ -109,16 +109,6 @@ namespace dmbrn
 
 			uint32_t imageIndex = result.second;
 
-			if (result.first == vk::Result::eErrorOutOfDateKHR)
-			{
-				depth_buffer_.recreate(surface_, window_, physical_device_, device_);
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_, depth_buffer_);
-				return;
-			}
-			else if (result.first != vk::Result::eSuccess && result.first != vk::Result::eSuboptimalKHR) {
-				throw std::runtime_error("failed to acquire swap chain image!");
-			}
-
 			updateUniformBuffer(currentFrame);
 
 			device_->resetFences(*in_flight_fences_[currentFrame]);
@@ -129,36 +119,28 @@ namespace dmbrn
 				swap_chain_, vertex_index_buffers_, descriptor_sets_,
 				currentFrame, imageIndex);
 
-			vk::SubmitInfo submitInfo{};
+			const vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
+			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+			const vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
 
-			vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
-			vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = waitSemaphores;
-			submitInfo.pWaitDstStageMask = waitStages;
-
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &*command_buffers_[currentFrame];
-
-			vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
-			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = signalSemaphores;
+			const vk::SubmitInfo submitInfo
+			{
+				waitSemaphores,
+					waitStages,
+					*command_buffers_[currentFrame],
+					signalSemaphores
+			};
 
 			gragraphics_queue_.submit(submitInfo, *in_flight_fences_[currentFrame]);
 
-			vk::PresentInfoKHR presentInfo{};
-
-			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = signalSemaphores;
-
-			vk::SwapchainKHR swapChains[] = { **swap_chain_ };
-			presentInfo.swapchainCount = 1;
-			presentInfo.pSwapchains = swapChains;
-
-			presentInfo.pImageIndices = &imageIndex;
-
 			try
 			{
+				const vk::PresentInfoKHR presentInfo
+				{
+					signalSemaphores,
+					**swap_chain_,
+						imageIndex
+				};
 				present_queue_.presentKHR(presentInfo);
 			}
 			catch (vk::OutOfDateKHRError e)
