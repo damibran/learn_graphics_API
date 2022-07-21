@@ -13,15 +13,16 @@ namespace dmbrn
 	{
 	public:
 		PhysicalDevice(const Instance& instance, const Surface& surface)
+			: physical_device_(nullptr)
 		{
 			const vk::raii::PhysicalDevices physical_devices(*instance);
 
 			bool finded = false;
 			for (const auto& device : physical_devices) {
 				if (isDeviceSuitable(device, surface)) {
-					physical_device_ = std::make_unique<vk::raii::PhysicalDevice>(device);
+					physical_device_ = device;
 					finded = true;
-					queue_family_indices_ = findQueueFamilies(*physical_device_, surface);
+					queue_family_indices_ = findQueueFamilies(physical_device_, surface);
 					break;
 				}
 			}
@@ -33,7 +34,7 @@ namespace dmbrn
 
 		uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)const
 		{
-			const vk::PhysicalDeviceMemoryProperties memProperties = physical_device_->getMemoryProperties();
+			const vk::PhysicalDeviceMemoryProperties memProperties = physical_device_.getMemoryProperties();
 
 			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
 				if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -46,12 +47,12 @@ namespace dmbrn
 
 		const vk::raii::PhysicalDevice& operator*()const
 		{
-			return *physical_device_;
+			return physical_device_;
 		}
 
 		const vk::raii::PhysicalDevice* operator->()const
 		{
-			return physical_device_.get();
+			return &physical_device_;
 		}
 
 
@@ -91,7 +92,7 @@ namespace dmbrn
 		}
 
 	private:
-		std::unique_ptr<vk::raii::PhysicalDevice> physical_device_;
+		vk::raii::PhysicalDevice physical_device_;
 		QueueFamilyIndices queue_family_indices_;
 
 		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface)const
