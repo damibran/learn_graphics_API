@@ -1,31 +1,19 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <iostream>
-#include <fstream>
+
 #include <optional>
-#include <set>
 
-#include <glm/glm.hpp>
-
-#include "GLFWwindowWrapper.h"
-#include "Instance.h"
-#include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "SwapChain.h"
-#include "RenderPass.h"
-#include "DescriptorSetLayout.h"
-#include "GraphicsPipeline.h"
 
 namespace dmbrn
 {
 	class CommandPool
 	{
 	public:
-		CommandPool(const PhysicalDevice& physical_device, const LogicalDevice& device)
+		CommandPool(const PhysicalDevice& physical_device, const LogicalDevice& device):
+			command_pool_(nullptr)
 		{
 			const PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
 
@@ -35,24 +23,24 @@ namespace dmbrn
 				queueFamilyIndices.graphicsFamily.value()
 			};
 
-			command_pool_ = std::make_unique<vk::raii::CommandPool>(device->createCommandPool(poolInfo));
+			command_pool_ = vk::raii::CommandPool{device->createCommandPool(poolInfo)};
 		}
 
 		const vk::raii::CommandPool& operator*() const
 		{
-			return *command_pool_;
+			return command_pool_;
 		}
 
 		const vk::raii::CommandPool* operator->() const
 		{
-			return command_pool_.get();
+			return &command_pool_;
 		}
 
 		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device)const
 		{
 			const vk::CommandBufferAllocateInfo allocInfo
 			{
-				**command_pool_, vk::CommandBufferLevel::ePrimary, 1
+				*command_pool_, vk::CommandBufferLevel::ePrimary, 1
 			};
 
 			vk::raii::CommandBuffer commandBuffer = std::move(device->allocateCommandBuffers(allocInfo).front());
@@ -81,7 +69,7 @@ namespace dmbrn
 		}
 
 	private:
-		std::unique_ptr<vk::raii::CommandPool> command_pool_;
+		vk::raii::CommandPool command_pool_;
 
 	};
 }

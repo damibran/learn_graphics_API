@@ -15,7 +15,12 @@ namespace dmbrn
 	class Texture
 	{
 	public:
-		Texture(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		Texture(const PhysicalDevice& physical_device, const LogicalDevice& device,
+			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue) :
+			texture_image(nullptr),
+			texture_image_memory_(nullptr),
+			image_view_(nullptr),
+			sampler_(nullptr)
 		{
 			createTextureImage(physical_device, device, command_pool, gragraphics_queue);
 			createTextureImageView(device);
@@ -29,19 +34,19 @@ namespace dmbrn
 
 		const vk::raii::ImageView& getImageView()const
 		{
-			return *image_view_;
+			return image_view_;
 		}
 
 		const vk::raii::Sampler& getSampler()const
 		{
-			return *sampler_;
+			return sampler_;
 		}
 
 	private:
-		std::unique_ptr<vk::raii::Image> texture_image;
-		std::unique_ptr<vk::raii::DeviceMemory> texture_image_memory_;
-		std::unique_ptr<vk::raii::ImageView> image_view_;
-		std::unique_ptr<vk::raii::Sampler> sampler_;
+		vk::raii::Image texture_image;
+		vk::raii::DeviceMemory texture_image_memory_;
+		vk::raii::ImageView image_view_;
+		vk::raii::Sampler sampler_;
 
 		void createTextureImage(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
@@ -85,16 +90,16 @@ namespace dmbrn
 				vk::MemoryPropertyFlagBits::eDeviceLocal,
 				texture_image, texture_image_memory_);
 
-			transitionImageLayout(device, command_pool, gragraphics_queue, *texture_image, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined,
+			transitionImageLayout(device, command_pool, gragraphics_queue, texture_image, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eTransferDstOptimal);
-			copyBufferToImage(device, command_pool, gragraphics_queue, stagingBuffer, *texture_image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-			transitionImageLayout(device, command_pool, gragraphics_queue, *texture_image, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eTransferDstOptimal,
+			copyBufferToImage(device, command_pool, gragraphics_queue, stagingBuffer, texture_image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+			transitionImageLayout(device, command_pool, gragraphics_queue, texture_image, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eTransferDstOptimal,
 				vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 
 		void createImage(const LogicalDevice& device, const PhysicalDevice& physical_device, uint32_t width, uint32_t height,
-			vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, std::unique_ptr<vk::raii::Image>& image,
-			std::unique_ptr<vk::raii::DeviceMemory>& imageMemory) const
+			vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::raii::Image& image,
+			vk::raii::DeviceMemory& imageMemory) const
 		{
 			const vk::ImageCreateInfo imageInfo
 			{
@@ -106,9 +111,9 @@ namespace dmbrn
 				{},vk::ImageLayout::eUndefined
 			};
 
-			image = std::make_unique<vk::raii::Image>(device->createImage(imageInfo));
+			image = vk::raii::Image{ device->createImage(imageInfo) };
 
-			const vk::MemoryRequirements memRequirements = image->getMemoryRequirements();
+			const vk::MemoryRequirements memRequirements = image.getMemoryRequirements();
 
 			const vk::MemoryAllocateInfo allocInfo
 			{
@@ -116,9 +121,9 @@ namespace dmbrn
 				physical_device.findMemoryType(memRequirements.memoryTypeBits, properties)
 			};
 
-			imageMemory = std::make_unique<vk::raii::DeviceMemory>(device->allocateMemory(allocInfo));
+			imageMemory = vk::raii::DeviceMemory{ device->allocateMemory(allocInfo) };
 
-			image->bindMemory(**imageMemory, 0);
+			image.bindMemory(*imageMemory, 0);
 		}
 
 		void transitionImageLayout(const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue,
@@ -183,14 +188,14 @@ namespace dmbrn
 		{
 			const vk::ImageViewCreateInfo viewInfo
 			{
-				{}, **texture_image,
+				{}, *texture_image,
 				vk::ImageViewType::e2D,
 				vk::Format::eR8G8B8A8Srgb,
 				{},
 				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor,0,1,0,1}
 			};
 
-			image_view_ = std::make_unique<vk::raii::ImageView>(device->createImageView(viewInfo));
+			image_view_ = vk::raii::ImageView{ device->createImageView(viewInfo) };
 		}
 
 		void createTextureSampler(const LogicalDevice& device, const PhysicalDevice& physical_device)
@@ -206,7 +211,7 @@ namespace dmbrn
 				VK_FALSE,vk::CompareOp::eAlways,{},{},vk::BorderColor::eIntOpaqueBlack,
 				VK_FALSE
 			};
-			sampler_ = std::make_unique<vk::raii::Sampler>(device->createSampler(samplerInfo));
+			sampler_ = vk::raii::Sampler{ device->createSampler(samplerInfo) };
 		}
 	};
 }
