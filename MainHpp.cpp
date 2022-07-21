@@ -25,6 +25,7 @@
 #include "Wrappers/UniformBuffers.h"
 #include "Wrappers/DescriptorSets.h"
 #include "Wrappers/CommandBuffers.h"
+#include "Wrappers/Depthbuffer.h"
 
 namespace dmbrn
 {
@@ -45,6 +46,7 @@ namespace dmbrn
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
+			depth_buffer_(physical_device_, device_, swap_chain_),
 			texture_(physical_device_, device_, command_pool_, gragraphics_queue_),
 			vertex_index_buffers_(physical_device_, device_, command_pool_, gragraphics_queue_),
 			uniform_buffers_(physical_device_, device_),
@@ -87,6 +89,7 @@ namespace dmbrn
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
 		CommandPool command_pool_;
+		DepthBuffer depth_buffer_;
 		Texture texture_;
 		VertexIndexBuffers vertex_index_buffers_;
 		UniformBuffers uniform_buffers_;
