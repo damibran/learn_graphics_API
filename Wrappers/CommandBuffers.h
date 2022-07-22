@@ -29,7 +29,7 @@ namespace dmbrn
 		void recordCommandBuffer(const LogicalDevice& device, const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
 			const SwapChain& swap_chain, const Model& model,
 			const DescriptorSets& descriptor_sets,
-			int currentFrame, uint32_t imageIndex)const
+			uint32_t currentFrame, uint32_t imageIndex)const
 		{
 			const vk::CommandBufferBeginInfo beginInfo{};
 
@@ -79,7 +79,7 @@ namespace dmbrn
 			command_buffer.end();
 		}
 
-		const vk::raii::CommandBuffer& operator[](int index)const
+		const vk::raii::CommandBuffer& operator[](uint32_t index)const
 		{
 			return command_buffers_[index];
 		}

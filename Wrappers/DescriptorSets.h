@@ -20,7 +20,7 @@ namespace dmbrn
 			createDescriptorSets(device, descriptor_set_layout, uniform_buffers);
 		}
 
-		void updateFrameDescriptorSetTexture(int frame, const LogicalDevice& device, const Texture& texture) const
+		void updateFrameDescriptorSetTexture(uint32_t frame, const LogicalDevice& device, const Texture& texture) const
 		{
 			vk::DescriptorImageInfo imageInfo
 			{
@@ -36,7 +36,7 @@ namespace dmbrn
 			device->updateDescriptorSets(descriptor_write, nullptr);
 		}
 
-		const vk::raii::DescriptorSet& operator[](int index)const
+		const vk::raii::DescriptorSet& operator[](uint32_t index)const
 		{
 			return descriptor_sets_[index];
 		}

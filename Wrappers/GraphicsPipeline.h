@@ -105,7 +105,7 @@ namespace dmbrn
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 			{
-				{}, 1, &**descriptor_set_layout
+				{}, **descriptor_set_layout
 			};
 
 			pipeline_layout_ = vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};
