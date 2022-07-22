@@ -20,8 +20,7 @@
 #include "Wrappers/DescriptorSetLayout.h" // may be it should be a part of descriptor sets
 #include "Wrappers/GraphicsPipeline.h"
 #include "Wrappers/CommandPool.h"
-#include "Wrappers/Texture.h"
-#include "Wrappers/VertexIndexBuffers.h"
+#include "Wrappers/Model.h"
 #include "Wrappers/UniformBuffers.h"
 #include "Wrappers/DescriptorSets.h"
 #include "Wrappers/CommandBuffers.h"
@@ -45,10 +44,9 @@ namespace dmbrn
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
-			texture_(physical_device_, device_, command_pool_, gragraphics_queue_),
-			vertex_index_buffers_(physical_device_, device_, command_pool_, gragraphics_queue_),
+			model_("Models\\Barrel\\barell.obj",physical_device_,device_,command_pool_,gragraphics_queue_),
 			uniform_buffers_(physical_device_, device_),
-			descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_, texture_),
+			descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_),
 			command_buffers_(device_, command_pool_)
 		{
 			vk::SemaphoreCreateInfo semaphoreInfo{};
@@ -87,8 +85,7 @@ namespace dmbrn
 		DescriptorSetLayout descriptor_set_layout_;
 		GraphicsPipeline graphics_pipeline_;
 		CommandPool command_pool_;
-		Texture texture_;
-		VertexIndexBuffers vertex_index_buffers_;
+		Model model_;
 		UniformBuffers uniform_buffers_;
 		DescriptorSets descriptor_sets_;
 		CommandBuffers command_buffers_;
@@ -112,8 +109,8 @@ namespace dmbrn
 
 			command_buffers_[currentFrame].reset();
 
-			command_buffers_.recordCommandBuffer(render_pass_, graphics_pipeline_,
-				swap_chain_, vertex_index_buffers_, descriptor_sets_,
+			command_buffers_.recordCommandBuffer(device_,render_pass_, graphics_pipeline_,
+				swap_chain_, model_, descriptor_sets_,
 				currentFrame, imageIndex);
 
 			const vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };

@@ -7,7 +7,7 @@
 #include "RenderPass.h"
 #include "GraphicsPipeline.h"
 #include "CommandPool.h"
-#include "VertexIndexBuffers.h"
+#include "Model.h"
 #include "DescriptorSets.h"
 
 namespace dmbrn
@@ -26,8 +26,8 @@ namespace dmbrn
 			command_buffers_ = device->allocateCommandBuffers(allocInfo);
 		}
 
-		void recordCommandBuffer(const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
-			const SwapChain& swap_chain, const VertexIndexBuffers& vertex_index_buffers,
+		void recordCommandBuffer(const LogicalDevice& device, const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
+			const SwapChain& swap_chain, const Model& model,
 			const DescriptorSets& descriptor_sets,
 			int currentFrame, uint32_t imageIndex)const
 		{
@@ -71,23 +71,15 @@ namespace dmbrn
 			};
 			command_buffer.setScissor(0, scissor);
 
-			vk::Buffer vertexBuffers[] = { *vertex_index_buffers.getVertex() };
-			vk::DeviceSize offsets[] = { 0 };
-			command_buffer.bindVertexBuffers(0, vertexBuffers, offsets);
-
-			command_buffer.bindIndexBuffer(*vertex_index_buffers.getIndex(), 0, vk::IndexType::eUint16);
-
-			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *graphics_pipeline.getLayout(), 0,
-				*descriptor_sets[currentFrame], nullptr);
-
-			command_buffer.drawIndexed(vertex_index_buffers.getIndeciesCount(), 1, 0, 0, 0);
+			//model drawing
+			model.Draw(currentFrame, device, graphics_pipeline, command_buffer, descriptor_sets);
 
 			command_buffer.endRenderPass();
 
 			command_buffer.end();
 		}
 
-		const vk::raii::CommandBuffer& operator[](int index)
+		const vk::raii::CommandBuffer& operator[](int index)const
 		{
 			return command_buffers_[index];
 		}

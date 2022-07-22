@@ -15,14 +15,20 @@ namespace dmbrn
 	class Texture
 	{
 	public:
-		Texture(const PhysicalDevice& physical_device, const LogicalDevice& device,
+		Texture() :
+			texture_image(nullptr),
+			texture_image_memory_(nullptr),
+			image_view_(nullptr),
+			sampler_(nullptr) {}
+
+		Texture(const std::string& texPath, const PhysicalDevice& physical_device, const LogicalDevice& device,
 			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImage(physical_device, device, command_pool, gragraphics_queue);
+			createTextureImage(texPath, physical_device, device, command_pool, gragraphics_queue);
 			createTextureImageView(device);
 			createTextureSampler(device, physical_device);
 		}
@@ -48,10 +54,10 @@ namespace dmbrn
 		vk::raii::ImageView image_view_;
 		vk::raii::Sampler sampler_;
 
-		void createTextureImage(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		void createTextureImage(const std::string& texPath, const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = stbi_load("Textures/Tutorial/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+			stbi_uc* pixels = stbi_load(texPath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 			const vk::DeviceSize imageSize = texWidth * texHeight * 4;
 
 			if (!pixels) {
