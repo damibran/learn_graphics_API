@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <iostream>
 #include <optional>
+#include <thread>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -44,7 +45,7 @@ namespace dmbrn
 			descriptor_set_layout_(device_),
 			graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
-			model_("Models\\Barrel\\barell.obj",physical_device_,device_,command_pool_,gragraphics_queue_),
+			model_("Models\\Barrel\\barell.obj", physical_device_, device_, command_pool_, gragraphics_queue_),
 			uniform_buffers_(physical_device_, device_),
 			descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_),
 			command_buffers_(device_, command_pool_)
@@ -63,10 +64,21 @@ namespace dmbrn
 			}
 		}
 
-		void run() {
-			while (!window_.windowShouldClose()) {
+		void run()
+		{
+			while (!window_.windowShouldClose())
+			{
+				tp2_ = std::chrono::system_clock::now();
+				const std::chrono::duration<float> elapsed_time = tp2_ - tp1_;
+				tp1_ = tp2_;
+				const float delta_time = elapsed_time.count();
+
 				glfwPollEvents();
-				drawFrame();
+				drawFrame(delta_time);
+
+				window_.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(14));
 			}
 			device_->waitIdle();
 		}
@@ -93,9 +105,12 @@ namespace dmbrn
 		std::vector<vk::raii::Semaphore> render_finished_semaphores_;
 		std::vector<vk::raii::Fence> in_flight_fences_;
 
+		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
+		std::chrono::system_clock::time_point tp2_ = std::chrono::system_clock::now();
+
 		uint32_t currentFrame = 0;
 
-		void drawFrame()
+		void drawFrame(float delta_time)
 		{
 			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
 
@@ -103,13 +118,13 @@ namespace dmbrn
 
 			uint32_t imageIndex = result.second;
 
-			updateUniformBuffer(currentFrame);
+			updateUniformBuffer(currentFrame, delta_time);
 
 			device_->resetFences(*in_flight_fences_[currentFrame]);
 
 			command_buffers_[currentFrame].reset();
 
-			command_buffers_.recordCommandBuffer(device_,render_pass_, graphics_pipeline_,
+			command_buffers_.recordCommandBuffer(device_, render_pass_, graphics_pipeline_,
 				swap_chain_, model_, descriptor_sets_,
 				currentFrame, imageIndex);
 
@@ -148,15 +163,16 @@ namespace dmbrn
 		}
 
 
-		void updateUniformBuffer(uint32_t currentImage)
+		void updateUniformBuffer(uint32_t currentImage, float delta_t)
 		{
-			static auto startTime = std::chrono::high_resolution_clock::now();
+			const float speed = 90;
 
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+			static float objAngle = 0;
+
+			objAngle += delta_t * glm::radians(speed);
 
 			UniformBuffers::UniformBufferObject ubo{};
-			ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.model = glm::rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.proj = glm::perspective(glm::radians(45.0f), swap_chain_.getExtent().width / (float)swap_chain_.getExtent().height, 0.1f, 10.0f);
 			ubo.proj[1][1] *= -1;

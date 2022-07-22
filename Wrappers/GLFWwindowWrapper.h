@@ -12,14 +12,14 @@ namespace dmbrn
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-			window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
-			glfwSetWindowUserPointer(window, this);
-			glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+			window_ = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+			glfwSetWindowUserPointer(window_, this);
+			glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);
 		}
 
 		GLFWwindow* data() const
 		{
-			return window;
+			return window_;
 		}
 
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -29,24 +29,29 @@ namespace dmbrn
 
 		~GLFWwindowWrapper()
 		{
-			glfwDestroyWindow(window);
+			glfwDestroyWindow(window_);
 			glfwTerminate();
 		}
 
 		std::pair<int, int> getFrameBufferSize()const
 		{
 			std::pair<int, int> res;
-			glfwGetFramebufferSize(window, &res.first, &res.second);
+			glfwGetFramebufferSize(window_, &res.first, &res.second);
 			return res;
 		}
 
 		bool windowShouldClose()const
 		{
-			return glfwWindowShouldClose(window);
+			return glfwWindowShouldClose(window_);
+		}
+
+		void setWindowTitle(const std::string& s)
+		{
+			glfwSetWindowTitle(window_,s.c_str());
 		}
 
 	private:
-		GLFWwindow* window;
+		GLFWwindow* window_;
 	public:
 		bool framebufferResized = false;
 	};
