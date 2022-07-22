@@ -26,7 +26,7 @@ namespace dmbrn
 			createIndexBuffer(physical_device, device, command_pool, gragraphics_queue);
 		}
 
-		const std::vector<Vertex> vertices = {
+		const std::vector<Vertex> vertices_ = {
 			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
 			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -38,7 +38,7 @@ namespace dmbrn
 			{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 		};
 
-		const std::vector<uint16_t> indices = {
+		const std::vector<uint16_t> indices_ = {
 			0, 1, 2, 2, 3, 0,
 			4, 5, 6, 6, 7, 4
 		};
@@ -55,7 +55,7 @@ namespace dmbrn
 
 		int getIndeciesCount()const
 		{
-			return indices.size();
+			return indices_.size();
 		}
 
 	private:
@@ -68,7 +68,7 @@ namespace dmbrn
 
 		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
 		{
-			const vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+			const vk::DeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
 
 			vk::BufferCreateInfo bufferInfo
 			{
@@ -90,7 +90,7 @@ namespace dmbrn
 
 			void* data;
 			data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-			memcpy(data, vertices.data(), (size_t)bufferSize);
+			memcpy(data, vertices_.data(), (size_t)bufferSize);
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
@@ -112,7 +112,7 @@ namespace dmbrn
 
 		void createIndexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
-			const vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+			const vk::DeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
 
 			vk::BufferCreateInfo bufferInfo
 			{
@@ -133,7 +133,7 @@ namespace dmbrn
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-			memcpy(data, indices.data(), (size_t)bufferSize);
+			memcpy(data, indices_.data(), (size_t)bufferSize);
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
