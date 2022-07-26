@@ -162,7 +162,6 @@ namespace dmbrn
 			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
 		}
 
-
 		void updateUniformBuffer(uint32_t currentImage, float delta_t)
 		{
 			const float speed = 90;
