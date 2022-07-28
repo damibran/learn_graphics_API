@@ -168,6 +168,8 @@
     <ClInclude Include="Wrappers\DescriptorSets.h" />
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h" />
     <ClInclude Include="Wrappers\GraphicsPipeline.h" />
+    <ClInclude Include="Wrappers\ImGUIRenderPass.h" />
+    <ClInclude Include="Wrappers\ImGUISwapChain.h" />
     <ClInclude Include="Wrappers\Instance.h" />
     <ClInclude Include="Wrappers\LogicalDevice.h" />
     <ClInclude Include="Wrappers\Mesh.h" />
