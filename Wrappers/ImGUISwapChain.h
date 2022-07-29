@@ -11,47 +11,47 @@
 #include "LogicalDevice.h"
 #include "ImGUIRenderPass.h"
 #include "../Utils/UtilsFunctions.h"
+#include "EditorFrame.h"
 
 namespace dmbrn
 {
 	class ImGUISwapChain
 	{
 	public:
-		ImGUISwapChain(const PhysicalDevice& physical_device,
-		               const LogicalDevice& device, const Surface& surface,
-		               const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass):
-			swap_chain_(createSwapChain(physical_device, device, surface, window)),
-			image_views_(createImageViews(device)),
-			framebuffers_(createFrameBuffers(device, render_pass)),
+		ImGUISwapChain(const Singletons& singletons, const ImGUIRenderPass& render_pass):
+			swap_chain_(createSwapChain(singletons.physical_device, singletons.device, singletons.surface, singletons.window)),
 			image_format_(image_format_),
 			extent_(extent_)
 		{
+			for (auto image : swap_chain_.getImages())
+			{
+				editor_frames_.emplace_back(singletons,render_pass,image_format_,extent_,image);
+			}
 		}
 
-		void recreate(const PhysicalDevice& physical_device,
-		              const LogicalDevice& device, const Surface& surface,
-		              const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass)
+		void recreate(const Singletons& singletons, const ImGUIRenderPass& render_pass)
 		{
 			int width = 0, height = 0;
-			const auto rec_size = window.getFrameBufferSize();
+			const auto rec_size = singletons.window.getFrameBufferSize();
 			width = rec_size.first;
 			height = rec_size.second;
 			while (width == 0 || height == 0)
 			{
-				auto rec_size = window.getFrameBufferSize();
+				auto rec_size = singletons.window.getFrameBufferSize();
 				width = rec_size.first;
 				height = rec_size.second;
 				glfwWaitEvents();
 			}
 
-			device->waitIdle();
+			singletons.device->waitIdle();
 
-			framebuffers_.clear();
-			image_views_.clear();
-
-			swap_chain_ = createSwapChain(physical_device, device, surface, window);
-			image_views_ = createImageViews(device);
-			framebuffers_ = createFrameBuffers(device, render_pass);
+			swap_chain_ = createSwapChain(singletons.physical_device, singletons.device, singletons.surface, singletons.window);
+			auto frame = editor_frames_.begin();
+			for (auto image : swap_chain_.getImages())
+			{
+				*frame = EditorFrame{singletons,render_pass,image_format_,extent_,image};
+				++frame;
+			}
 		}
 
 		const vk::raii::SwapchainKHR& operator*() const
@@ -64,25 +64,24 @@ namespace dmbrn
 			return &swap_chain_;
 		}
 
+		const EditorFrame& getFrame(uint32_t i)
+		{
+			return  editor_frames_[i];
+		}
+
+		const vk::Format& getFormat()const
+		{
+			return image_format_;
+		}
+
 		const vk::Extent2D& getExtent() const
 		{
 			return extent_;
 		}
 
-		const std::vector<vk::raii::ImageView>& getImageViews() const
-		{
-			return image_views_;
-		}
-
-		const std::vector<vk::raii::Framebuffer>& getFrameBuffers() const
-		{
-			return framebuffers_;
-		}
-
 	private:
 		vk::raii::SwapchainKHR swap_chain_;
-		std::vector<vk::raii::ImageView> image_views_;
-		std::vector<vk::raii::Framebuffer> framebuffers_;
+		std::vector<EditorFrame> editor_frames_;
 		vk::Format image_format_;
 		vk::Extent2D extent_;
 
@@ -138,53 +137,6 @@ namespace dmbrn
 
 			image_format_ = surfaceFormat.format;
 			extent_ = extent;
-
-			return result;
-		}
-
-		[[nodiscard]] std::vector<vk::raii::ImageView> createImageViews(const LogicalDevice& device) const
-		{
-			std::vector<vk::raii::ImageView> result;
-			std::vector<VkImage> images = swap_chain_.getImages();
-			for (size_t i = 0; i < images.size(); i++)
-			{
-				result.push_back(createImageView(device, images[i], image_format_));
-			}
-
-			return result;
-		}
-
-		static vk::raii::ImageView createImageView(const LogicalDevice& device, VkImage image, vk::Format format)
-		{
-			const vk::ImageViewCreateInfo viewInfo
-			{
-				{}, image, vk::ImageViewType::e2D,
-				format, {},
-				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}
-			};
-
-			return device->createImageView(viewInfo);
-		}
-
-		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(
-			const LogicalDevice& device, const ImGUIRenderPass& render_pass)
-		{
-			std::vector<vk::raii::Framebuffer> result;
-
-			for (size_t i = 0; i < image_views_.size(); i++)
-			{
-				const vk::ImageView attachments[] = {
-					*image_views_[i],
-				};
-
-				const vk::FramebufferCreateInfo framebufferInfo
-				{
-					{}, **render_pass,
-					attachments, extent_.width, extent_.height, 1
-				};
-
-				result.push_back(device->createFramebuffer(framebufferInfo));
-			}
 
 			return result;
 		}

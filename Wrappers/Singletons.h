@@ -23,7 +23,7 @@ namespace dmbrn
 		{
 		}
 
-		const GLFWwindowWrapper window;
+		GLFWwindowWrapper window;
 		const vk::raii::Context context;
 		const Instance instance;
 		const Surface surface;

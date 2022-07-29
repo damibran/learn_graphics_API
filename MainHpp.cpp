@@ -33,27 +33,13 @@ namespace dmbrn
 	public:
 		HelloTriangleApplication(uint32_t width, uint32_t height) :
 			singletons_(width,height),
-			editor_ui_(singletons_),
-			command_buffers_(device_, command_pool_)
+			editor_ui_(singletons_)
 		{
-			vk::SemaphoreCreateInfo semaphoreInfo{};
-
-			vk::FenceCreateInfo fenceInfo
-			{
-				vk::FenceCreateFlagBits::eSignaled
-			};
-
-			for (size_t i = 0; i < device_.MAX_FRAMES_IN_FLIGHT; i++)
-			{
-				image_available_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
-				render_finished_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
-				in_flight_fences_.push_back(device_->createFence(fenceInfo));
-			}
 		}
 
 		void run()
 		{
-			while (!window_.windowShouldClose())
+			while (!singletons_.window.windowShouldClose())
 			{
 				tp2_ = std::chrono::system_clock::now();
 				const std::chrono::duration<float> elapsed_time = tp2_ - tp1_;
@@ -61,24 +47,16 @@ namespace dmbrn
 				const float delta_time = elapsed_time.count();
 
 				glfwPollEvents();
-				editor_ui_.drawFrame(delta_time);
+				editor_ui_.drawFrame(singletons_,delta_time);
 
-				window_.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
+				singletons_.window.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
 			}
-			device_->waitIdle();
+			singletons_.device->waitIdle();
 		}
 
 	private:
 		Singletons singletons_;
 		EditorUI editor_ui_;
-		//GraphicsPipeline graphics_pipeline_;
-		//UniformBuffers uniform_buffers_;
-		//DescriptorSets descriptor_sets_;
-		CommandBuffers command_buffers_;
-		std::vector<vk::raii::Semaphore> image_available_semaphores_;
-		std::vector<vk::raii::Semaphore> render_finished_semaphores_;
-		std::vector<vk::raii::Fence> in_flight_fences_;
-
 
 		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
 		std::chrono::system_clock::time_point tp2_ = std::chrono::system_clock::now();
