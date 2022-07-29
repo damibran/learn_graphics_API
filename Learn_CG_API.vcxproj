@@ -177,6 +177,7 @@
     <ClInclude Include="Wrappers\Model.h" />
     <ClInclude Include="Wrappers\PhysicalDevice.h" />
     <ClInclude Include="Wrappers\RenderPass.h" />
+    <ClInclude Include="Wrappers\Singletons.h" />
     <ClInclude Include="Wrappers\Surface.h" />
     <ClInclude Include="Wrappers\SwapChain.h" />
     <ClInclude Include="Wrappers\Texture.h" />

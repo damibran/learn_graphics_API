@@ -7,6 +7,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#include "Singletons.h"
 #include "CommandPool.h"
 #include "ImGUIRenderPass.h"
 #include "ImGUISwapChain.h"
@@ -16,11 +17,9 @@ namespace dmbrn
 	class EditorUI
 	{
 	public:
-		EditorUI(const GLFWwindowWrapper& window, const Instance& instance, const Surface& surface,
-		         const PhysicalDevice& physical_device, const LogicalDevice& device, const CommandPool& command_pool,
-		         const vk::raii::Queue& g_queue) :
-			render_pass_(surface, physical_device, device),
-			swap_chain_(physical_device, device, surface, window, render_pass_),
+		EditorUI(const Singletons& singletons) :
+			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
+			swap_chain_(singletons.physical_device, singletons.device, singletons.surface, singletons.window, render_pass_),
 			imguiPool(nullptr)
 		{
 			vk::DescriptorPoolSize pool_sizes[] =
@@ -44,7 +43,7 @@ namespace dmbrn
 				1000, pool_sizes
 			};
 
-			imguiPool = device->createDescriptorPool(pool_info);
+			imguiPool = singletons.device->createDescriptorPool(pool_info);
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
@@ -62,25 +61,25 @@ namespace dmbrn
 				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 			}
 
-			ImGui_ImplGlfw_InitForVulkan(window.data(), true);
+			ImGui_ImplGlfw_InitForVulkan(singletons.window.data(), true);
 
 			ImGui_ImplVulkan_InitInfo init_info = {};
-			init_info.Instance = **instance;
-			init_info.PhysicalDevice = **physical_device;
-			init_info.Device = **device;
-			init_info.QueueFamily = physical_device.getQueueFamilyIndices().graphicsFamily.value();
-			init_info.Queue = *g_queue;
+			init_info.Instance = **singletons.instance;
+			init_info.PhysicalDevice = **singletons.physical_device;
+			init_info.Device = **singletons.device;
+			init_info.QueueFamily = singletons.physical_device.getQueueFamilyIndices().graphicsFamily.value();
+			init_info.Queue = *singletons.gragraphics_queue;
 			init_info.DescriptorPool = *imguiPool;
 			init_info.Subpass = 0;
 			init_info.MinImageCount = 2;
-			init_info.ImageCount = device.MAX_FRAMES_IN_FLIGHT;
+			init_info.ImageCount = singletons.device.MAX_FRAMES_IN_FLIGHT;
 			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 			ImGui_ImplVulkan_Init(&init_info, **render_pass_);
 
-			vk::raii::CommandBuffer cb = command_pool.beginSingleTimeCommands(device);
+			vk::raii::CommandBuffer cb = singletons.command_pool.beginSingleTimeCommands(singletons.device);
 			ImGui_ImplVulkan_CreateFontsTexture(*cb);
 
-			command_pool.endSingleTimeCommands(g_queue, cb);
+			singletons.command_pool.endSingleTimeCommands(singletons.gragraphics_queue, cb);
 		}
 
 		~EditorUI()
