@@ -147,5 +147,8 @@
     <ClInclude Include="Wrappers\EditorUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Wrappers\Singletons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
