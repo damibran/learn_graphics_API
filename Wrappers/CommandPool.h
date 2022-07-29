@@ -36,7 +36,7 @@ namespace dmbrn
 			return &command_pool_;
 		}
 
-		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device)const
+		vk::raii::CommandBuffer beginSingleTimeCommands(const LogicalDevice& device) const
 		{
 			const vk::CommandBufferAllocateInfo allocInfo
 			{
@@ -61,7 +61,7 @@ namespace dmbrn
 
 			const vk::SubmitInfo submitInfo
 			{
-				{},{},{},1,&*commandBuffer
+				{}, {}, {}, 1, &*commandBuffer
 			};
 
 			gragraphics_queue.submit(submitInfo);
@@ -70,6 +70,5 @@ namespace dmbrn
 
 	private:
 		vk::raii::CommandPool command_pool_;
-
 	};
 }

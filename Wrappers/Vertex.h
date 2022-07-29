@@ -8,12 +8,14 @@
 
 namespace dmbrn
 {
-	struct Vertex {
+	struct Vertex
+	{
 		glm::vec3 pos;
 		glm::vec3 color;
 		glm::vec2 texCoord;
 
-		static vk::VertexInputBindingDescription getBindingDescription() {
+		static vk::VertexInputBindingDescription getBindingDescription()
+		{
 			vk::VertexInputBindingDescription bindingDescription{};
 			bindingDescription.binding = 0;
 			bindingDescription.stride = sizeof(Vertex);
@@ -22,7 +24,8 @@ namespace dmbrn
 			return bindingDescription;
 		}
 
-		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions() {
+		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
+		{
 			std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions{};
 
 			attributeDescriptions[0].binding = 0;

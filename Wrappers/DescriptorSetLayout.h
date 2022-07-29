@@ -14,17 +14,17 @@ namespace dmbrn
 		{
 			const vk::DescriptorSetLayoutBinding uboLayoutBinding
 			{
-				0,vk::DescriptorType::eUniformBuffer,
-				1,vk::ShaderStageFlagBits::eVertex
+				0, vk::DescriptorType::eUniformBuffer,
+				1, vk::ShaderStageFlagBits::eVertex
 			};
 
 			const vk::DescriptorSetLayoutBinding samplerLayoutBinding
 			{
 				1, vk::DescriptorType::eCombinedImageSampler,
-				1,vk::ShaderStageFlagBits::eFragment
+				1, vk::ShaderStageFlagBits::eFragment
 			};
 
-			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
 
 			const vk::DescriptorSetLayoutCreateInfo layoutInfo
 			{
@@ -36,15 +36,16 @@ namespace dmbrn
 			descriptor_set_layout_ = vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
 		}
 
-		const vk::raii::DescriptorSetLayout& operator*()const
+		const vk::raii::DescriptorSetLayout& operator*() const
 		{
 			return descriptor_set_layout_;
 		}
 
-		const vk::raii::DescriptorSetLayout* operator->()const
+		const vk::raii::DescriptorSetLayout* operator->() const
 		{
 			return &descriptor_set_layout_;
 		}
+
 	private:
 		vk::raii::DescriptorSetLayout descriptor_set_layout_;
 	};

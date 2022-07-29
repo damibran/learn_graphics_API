@@ -22,7 +22,8 @@ namespace dmbrn
 			return window_;
 		}
 
-		static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+		{
 			const auto app = reinterpret_cast<GLFWwindowWrapper*>(glfwGetWindowUserPointer(window));
 			app->framebufferResized = true;
 		}
@@ -33,21 +34,21 @@ namespace dmbrn
 			glfwTerminate();
 		}
 
-		std::pair<int, int> getFrameBufferSize()const
+		std::pair<int, int> getFrameBufferSize() const
 		{
 			std::pair<int, int> res;
 			glfwGetFramebufferSize(window_, &res.first, &res.second);
 			return res;
 		}
 
-		bool windowShouldClose()const
+		bool windowShouldClose() const
 		{
 			return glfwWindowShouldClose(window_);
 		}
 
 		void setWindowTitle(const std::string& s)
 		{
-			glfwSetWindowTitle(window_,s.c_str());
+			glfwSetWindowTitle(window_, s.c_str());
 		}
 
 	private:

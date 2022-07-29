@@ -18,8 +18,8 @@ namespace dmbrn
 	{
 	public:
 		ImGUISwapChain(const PhysicalDevice& physical_device,
-			const LogicalDevice& device, const Surface& surface,
-			const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass):
+		               const LogicalDevice& device, const Surface& surface,
+		               const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass):
 			swap_chain_(createSwapChain(physical_device, device, surface, window)),
 			image_views_(createImageViews(device)),
 			framebuffers_(createFrameBuffers(device, render_pass)),
@@ -29,8 +29,8 @@ namespace dmbrn
 		}
 
 		void recreate(const PhysicalDevice& physical_device,
-			const LogicalDevice& device, const Surface& surface,
-			const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass)
+		              const LogicalDevice& device, const Surface& surface,
+		              const GLFWwindowWrapper& window, const ImGUIRenderPass& render_pass)
 		{
 			int width = 0, height = 0;
 			const auto rec_size = window.getFrameBufferSize();
@@ -54,27 +54,27 @@ namespace dmbrn
 			framebuffers_ = createFrameBuffers(device, render_pass);
 		}
 
-		const vk::raii::SwapchainKHR& operator*()const
+		const vk::raii::SwapchainKHR& operator*() const
 		{
 			return swap_chain_;
 		}
 
-		const vk::raii::SwapchainKHR* operator->()const
+		const vk::raii::SwapchainKHR* operator->() const
 		{
 			return &swap_chain_;
 		}
 
-		const vk::Extent2D& getExtent()const
+		const vk::Extent2D& getExtent() const
 		{
 			return extent_;
 		}
 
-		const std::vector<vk::raii::ImageView>& getImageViews()const
+		const std::vector<vk::raii::ImageView>& getImageViews() const
 		{
 			return image_views_;
 		}
 
-		const std::vector<vk::raii::Framebuffer>& getFrameBuffers()const
+		const std::vector<vk::raii::Framebuffer>& getFrameBuffers() const
 		{
 			return framebuffers_;
 		}
@@ -87,18 +87,21 @@ namespace dmbrn
 		vk::Extent2D extent_;
 
 		[[nodiscard]] vk::raii::SwapchainKHR createSwapChain(const PhysicalDevice& physical_device,
-			const LogicalDevice& device,
-			const Surface& surface,
-			const GLFWwindowWrapper& window)
+		                                                     const LogicalDevice& device,
+		                                                     const Surface& surface,
+		                                                     const GLFWwindowWrapper& window)
 		{
 			const auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
 
-			const vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface));
-			const vk::PresentModeKHR presentMode = chooseSwapPresentMode(PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
+			const vk::SurfaceFormatKHR surfaceFormat = utils::chooseSwapSurfaceFormat(
+				PhysicalDevice::querySurfaceFormats(*physical_device, surface));
+			const vk::PresentModeKHR presentMode = chooseSwapPresentMode(
+				PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
 			const vk::Extent2D extent = utils::chooseSwapExtent(capabilities, window);
 
 			uint32_t imageCount = capabilities.minImageCount + 1;
-			if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
+			if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+			{
 				imageCount = capabilities.maxImageCount;
 			}
 
@@ -112,14 +115,16 @@ namespace dmbrn
 			createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
 
 			const PhysicalDevice::QueueFamilyIndices indices = physical_device.getQueueFamilyIndices();
-			const uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+			const uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
-			if (indices.graphicsFamily != indices.presentFamily) {
+			if (indices.graphicsFamily != indices.presentFamily)
+			{
 				createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
 				createInfo.queueFamilyIndexCount = 2;
 				createInfo.pQueueFamilyIndices = queueFamilyIndices;
 			}
-			else {
+			else
+			{
 				createInfo.imageSharingMode = vk::SharingMode::eExclusive;
 			}
 
@@ -153,15 +158,16 @@ namespace dmbrn
 		{
 			const vk::ImageViewCreateInfo viewInfo
 			{
-				{},image, vk::ImageViewType::e2D,
-				format,{},
-				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor,0,1,0,1}
+				{}, image, vk::ImageViewType::e2D,
+				format, {},
+				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}
 			};
 
 			return device->createImageView(viewInfo);
 		}
 
-		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(const LogicalDevice& device, const ImGUIRenderPass& render_pass)
+		[[nodiscard]] std::vector<vk::raii::Framebuffer> createFrameBuffers(
+			const LogicalDevice& device, const ImGUIRenderPass& render_pass)
 		{
 			std::vector<vk::raii::Framebuffer> result;
 
@@ -173,8 +179,8 @@ namespace dmbrn
 
 				const vk::FramebufferCreateInfo framebufferInfo
 				{
-					{},**render_pass,
-					attachments,extent_.width,extent_.height,1
+					{}, **render_pass,
+					attachments, extent_.width, extent_.height, 1
 				};
 
 				result.push_back(device->createFramebuffer(framebufferInfo));

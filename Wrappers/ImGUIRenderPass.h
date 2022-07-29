@@ -32,7 +32,7 @@ namespace dmbrn
 
 			const vk::AttachmentReference colorAttachmentRef
 			{
-				0,vk::ImageLayout::eAttachmentOptimal
+				0, vk::ImageLayout::eAttachmentOptimal
 			};
 
 			const vk::SubpassDescription subpass
@@ -52,7 +52,7 @@ namespace dmbrn
 				vk::AccessFlagBits::eColorAttachmentWrite
 			};
 
-			const std::array<vk::AttachmentDescription, 1> attachments{ colorAttachment };
+			const std::array<vk::AttachmentDescription, 1> attachments{colorAttachment};
 
 			const vk::RenderPassCreateInfo renderPassInfo
 			{
@@ -65,18 +65,17 @@ namespace dmbrn
 			render_pass_ = vk::raii::RenderPass{device->createRenderPass(renderPassInfo)};
 		}
 
-		const vk::raii::RenderPass& operator*()const
+		const vk::raii::RenderPass& operator*() const
 		{
 			return render_pass_;
 		}
 
-		const vk::raii::RenderPass* operator->()const
+		const vk::raii::RenderPass* operator->() const
 		{
 			return &render_pass_;
 		}
 
 	private:
 		vk::raii::RenderPass render_pass_;
-
 	};
 }

@@ -319,11 +319,12 @@ namespace dmbrn
 			objAngle += delta_t * glm::radians(speed);
 
 			UniformBuffers::UniformBufferObject ubo{};
-			ubo.model = glm::rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-			                       glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.model = rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+			                  glm::vec3(0.0f, 0.0f, 1.0f));
 			ubo.proj = glm::perspective(glm::radians(45.0f),
-			                            swap_chain_.getExtent().width / (float)swap_chain_.getExtent().height, 0.1f,
+			                            swap_chain_.getExtent().width / static_cast<float>(swap_chain_.getExtent().
+				                            height), 0.1f,
 			                            10.0f);
 			ubo.proj[1][1] *= -1;
 
@@ -338,7 +339,7 @@ int main()
 {
 	try
 	{
-		dmbrn::HelloTriangleApplication app(800, 600);
+		dmbrn::HelloTriangleApplication app(1200, 800);
 		app.run();
 	}
 	catch (const std::exception& e)

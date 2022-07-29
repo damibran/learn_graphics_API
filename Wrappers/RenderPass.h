@@ -30,7 +30,7 @@ namespace dmbrn
 
 			const vk::AttachmentReference colorAttachmentRef
 			{
-				0,vk::ImageLayout::eAttachmentOptimal
+				0, vk::ImageLayout::eAttachmentOptimal
 			};
 
 			const vk::AttachmentDescription depthAttachment
@@ -48,7 +48,7 @@ namespace dmbrn
 
 			const vk::AttachmentReference depthAttachmentRef
 			{
-				1,vk::ImageLayout::eDepthStencilAttachmentOptimal
+				1, vk::ImageLayout::eDepthStencilAttachmentOptimal
 			};
 
 			const vk::SubpassDescription subpass
@@ -70,7 +70,7 @@ namespace dmbrn
 				vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
 			};
 
-			const std::array<vk::AttachmentDescription, 2> attachments{ colorAttachment,depthAttachment };
+			const std::array<vk::AttachmentDescription, 2> attachments{colorAttachment, depthAttachment};
 
 			const vk::RenderPassCreateInfo renderPassInfo
 			{
@@ -83,18 +83,17 @@ namespace dmbrn
 			render_pass_ = vk::raii::RenderPass{device->createRenderPass(renderPassInfo)};
 		}
 
-		const vk::raii::RenderPass& operator*()const
+		const vk::raii::RenderPass& operator*() const
 		{
 			return render_pass_;
 		}
 
-		const vk::raii::RenderPass* operator->()const
+		const vk::raii::RenderPass* operator->() const
 		{
 			return &render_pass_;
 		}
 
 	private:
 		vk::raii::RenderPass render_pass_;
-
 	};
 }

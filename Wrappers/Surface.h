@@ -20,12 +20,12 @@ namespace dmbrn
 			surface_ = vk::raii::SurfaceKHR{*instance, raw_surface, nullptr};
 		}
 
-		const vk::raii::SurfaceKHR& operator*()const
+		const vk::raii::SurfaceKHR& operator*() const
 		{
 			return surface_;
 		}
 
-		const vk::raii::SurfaceKHR* operator->()const
+		const vk::raii::SurfaceKHR* operator->() const
 		{
 			return &surface_;
 		}
