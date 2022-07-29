@@ -55,7 +55,7 @@ namespace dmbrn
 			return commandBuffer;
 		}
 
-		void endSingleTimeCommands(vk::raii::Queue& gragraphics_queue, vk::raii::CommandBuffer& commandBuffer) const
+		void endSingleTimeCommands(const vk::raii::Queue& gragraphics_queue,const vk::raii::CommandBuffer& commandBuffer) const
 		{
 			commandBuffer.end();
 
