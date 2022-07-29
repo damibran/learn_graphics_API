@@ -141,8 +141,6 @@ namespace dmbrn
 				drawFrame(delta_time);
 
 				window_.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(14));
 			}
 			device_->waitIdle();
 			ImGui_ImplVulkan_Shutdown();
@@ -257,58 +255,6 @@ namespace dmbrn
 
 			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
 		}
-
-		/*void drawFrame(float delta_time)
-		{
-			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
-
-			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);
-
-			uint32_t imageIndex = result.second;
-
-			updateUniformBuffer(currentFrame, delta_time);
-
-			device_->resetFences(*in_flight_fences_[currentFrame]);
-
-			command_buffers_[currentFrame].reset();
-
-			command_buffers_.recordCommandBuffer(device_, render_pass_, graphics_pipeline_,
-				swap_chain_, model_, descriptor_sets_,
-				currentFrame, imageIndex);
-
-			const vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
-			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-			const vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
-
-			const vk::SubmitInfo submitInfo
-			{
-				waitSemaphores,
-					waitStages,
-					*command_buffers_[currentFrame],
-					signalSemaphores
-			};
-
-			gragraphics_queue_.submit(submitInfo, *in_flight_fences_[currentFrame]);
-
-			try
-			{
-				const vk::PresentInfoKHR presentInfo
-				{
-					signalSemaphores,
-					**swap_chain_,
-						imageIndex
-				};
-				present_queue_.presentKHR(presentInfo);
-			}
-			catch (vk::OutOfDateKHRError e)
-			{
-				window_.framebufferResized = false;
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
-				return;
-			}
-
-			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
-		}*/
 
 		void updateUniformBuffer(uint32_t currentImage, float delta_t)
 		{
