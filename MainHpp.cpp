@@ -35,7 +35,6 @@ namespace dmbrn
 	class HelloTriangleApplication
 	{
 	public:
-
 		HelloTriangleApplication(uint32_t width, uint32_t height) :
 			window_(width, height),
 			instance_(context_),
@@ -62,7 +61,8 @@ namespace dmbrn
 				vk::FenceCreateFlagBits::eSignaled
 			};
 
-			for (size_t i = 0; i < device_.MAX_FRAMES_IN_FLIGHT; i++) {
+			for (size_t i = 0; i < device_.MAX_FRAMES_IN_FLIGHT; i++)
+			{
 				image_available_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
 				render_finished_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
 				in_flight_fences_.push_back(device_->createFence(fenceInfo));
@@ -70,31 +70,32 @@ namespace dmbrn
 
 			vk::DescriptorPoolSize pool_sizes[] =
 			{
-				{  vk::DescriptorType::eSampler, 1000 },
-				{ vk::DescriptorType::eCombinedImageSampler, 1000 },
-				{ vk::DescriptorType::eSampledImage, 1000 },
-				{ vk::DescriptorType::eStorageImage, 1000 },
-				{ vk::DescriptorType::eUniformTexelBuffer, 1000 },
-				{ vk::DescriptorType::eStorageTexelBuffer, 1000 },
-				{ vk::DescriptorType::eUniformBuffer, 1000 },
-				{ vk::DescriptorType::eStorageBuffer, 1000 },
-				{ vk::DescriptorType::eUniformBufferDynamic, 1000 },
-				{ vk::DescriptorType::eStorageBufferDynamic, 1000 },
-				{ vk::DescriptorType::eInputAttachment, 1000 }
+				{vk::DescriptorType::eSampler, 1000},
+				{vk::DescriptorType::eCombinedImageSampler, 1000},
+				{vk::DescriptorType::eSampledImage, 1000},
+				{vk::DescriptorType::eStorageImage, 1000},
+				{vk::DescriptorType::eUniformTexelBuffer, 1000},
+				{vk::DescriptorType::eStorageTexelBuffer, 1000},
+				{vk::DescriptorType::eUniformBuffer, 1000},
+				{vk::DescriptorType::eStorageBuffer, 1000},
+				{vk::DescriptorType::eUniformBufferDynamic, 1000},
+				{vk::DescriptorType::eStorageBufferDynamic, 1000},
+				{vk::DescriptorType::eInputAttachment, 1000}
 			};
 
 			vk::DescriptorPoolCreateInfo pool_info
 			{
 				{vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet},
-				1000,pool_sizes
+				1000, pool_sizes
 			};
 
 			imguiPool = device_->createDescriptorPool(pool_info);
 
 			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+			ImGuiIO& io = ImGui::GetIO();
+			(void)io;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
 			ImGui::StyleColorsDark();
 
@@ -200,7 +201,8 @@ namespace dmbrn
 
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 			}
@@ -208,30 +210,30 @@ namespace dmbrn
 			const vk::raii::CommandBuffer& cb = command_buffers_[currentFrame];
 
 			vk::ClearValue clearValue;
-			clearValue.color = vk::ClearColorValue(std::array<float, 4>({ 0.0f, 0.0f, 0.0f, 1.0f }));
-			cb.begin({ vk::CommandBufferUsageFlags() });
+			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f}));
+			cb.begin({vk::CommandBufferUsageFlags()});
 			cb.beginRenderPass({
-				**render_pass_,
-				*swap_chain_.getFrameBuffers()[imageIndex],
-				{{0,0}, swap_chain_.getExtent()},
-				1, &clearValue
-				}, vk::SubpassContents::eInline);
+				                   **render_pass_,
+				                   *swap_chain_.getFrameBuffers()[imageIndex],
+				                   {{0, 0}, swap_chain_.getExtent()},
+				                   1, &clearValue
+			                   }, vk::SubpassContents::eInline);
 
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cb);
 
 			cb.endRenderPass();
 			cb.end();
 
-			const vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
-			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-			const vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
+			const vk::Semaphore waitSemaphores[] = {*image_available_semaphores_[currentFrame]};
+			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+			const vk::Semaphore signalSemaphores[] = {*render_finished_semaphores_[currentFrame]};
 
 			const vk::SubmitInfo submitInfo
 			{
 				waitSemaphores,
-					waitStages,
-					*command_buffers_[currentFrame],
-					signalSemaphores
+				waitStages,
+				*command_buffers_[currentFrame],
+				signalSemaphores
 			};
 
 			gragraphics_queue_.submit(submitInfo, *in_flight_fences_[currentFrame]);
@@ -242,7 +244,7 @@ namespace dmbrn
 				{
 					signalSemaphores,
 					**swap_chain_,
-						imageIndex
+					imageIndex
 				};
 				present_queue_.presentKHR(presentInfo);
 			}
@@ -318,8 +320,11 @@ namespace dmbrn
 
 			UniformBuffers::UniformBufferObject ubo{};
 			ubo.model = glm::rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.proj = glm::perspective(glm::radians(45.0f), swap_chain_.getExtent().width / (float)swap_chain_.getExtent().height, 0.1f, 10.0f);
+			ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+			                       glm::vec3(0.0f, 0.0f, 1.0f));
+			ubo.proj = glm::perspective(glm::radians(45.0f),
+			                            swap_chain_.getExtent().width / (float)swap_chain_.getExtent().height, 0.1f,
+			                            10.0f);
 			ubo.proj[1][1] *= -1;
 
 			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
@@ -331,11 +336,13 @@ namespace dmbrn
 
 int main()
 {
-	try {
+	try
+	{
 		dmbrn::HelloTriangleApplication app(800, 600);
 		app.run();
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}

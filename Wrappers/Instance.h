@@ -27,10 +27,10 @@ namespace dmbrn
 			const vk::ApplicationInfo application_info
 			{
 				"First Vulkan",
-					1,
-					"Engine",
-					1,
-					VK_API_VERSION_1_3
+				1,
+				"Engine",
+				1,
+				VK_API_VERSION_1_3
 			};
 
 			vk::InstanceCreateInfo create_info;
@@ -55,21 +55,25 @@ namespace dmbrn
 				create_info.pNext = nullptr;
 			}
 
-			instance_ = vk::raii::Instance{context,
-				create_info};
+			instance_ = vk::raii::Instance{
+				context,
+				create_info
+			};
 
 			if constexpr (!enableValidationLayers)
 				return;
 
-			debug_messenger_ = vk::raii::DebugUtilsMessengerEXT{instance_.createDebugUtilsMessengerEXT(debug_create_info)};
+			debug_messenger_ = vk::raii::DebugUtilsMessengerEXT{
+				instance_.createDebugUtilsMessengerEXT(debug_create_info)
+			};
 		}
 
-		const vk::raii::Instance& operator*()const
+		const vk::raii::Instance& operator*() const
 		{
 			return instance_;
 		}
 
-		const vk::raii::Instance* operator->()const
+		const vk::raii::Instance* operator->() const
 		{
 			return &instance_;
 		}
@@ -107,7 +111,11 @@ namespace dmbrn
 			createInfo.pfnUserCallback = debugCallback;
 		}
 
-		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		                                                    VkDebugUtilsMessageTypeFlagsEXT messageType,
+		                                                    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		                                                    void* pUserData)
+		{
 			std::cerr << "\nvalidation layer: " << pCallbackData->pMessage << std::endl;
 
 			return VK_FALSE;
