@@ -16,8 +16,7 @@
 #include "Wrappers/Surface.h"
 #include "Wrappers/PhysicalDevice.h"
 #include "Wrappers/LogicalDevice.h"
-#include "Wrappers/ImGUIRenderPass.h"
-#include "Wrappers/ImGUISwapChain.h"
+#include "Wrappers/EditorUI.h"
 #include "Wrappers/DescriptorSetLayout.h" // may be it should be a part of descriptor sets
 #include "Wrappers/GraphicsPipeline.h"
 #include "Wrappers/CommandPool.h"
@@ -43,16 +42,14 @@ namespace dmbrn
 			device_(physical_device_),
 			gragraphics_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue_(device_->getQueue(physical_device_.getQueueFamilyIndices().presentFamily.value(), 0)),
-			render_pass_(surface_, physical_device_, device_),
-			swap_chain_(physical_device_, device_, surface_, window_, render_pass_),
+			editor_ui_(window_,instance_,surface_,physical_device_,device_,command_pool_,gragraphics_queue_),
 			descriptor_set_layout_(device_),
 			//graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
 			model_("Models\\Barrel\\barell.obj", physical_device_, device_, command_pool_, gragraphics_queue_),
 			//uniform_buffers_(physical_device_, device_),
 			//descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_),
-			command_buffers_(device_, command_pool_),
-			imguiPool(nullptr)
+			command_buffers_(device_, command_pool_)
 		{
 			vk::SemaphoreCreateInfo semaphoreInfo{};
 
@@ -67,65 +64,6 @@ namespace dmbrn
 				render_finished_semaphores_.push_back(device_->createSemaphore(semaphoreInfo));
 				in_flight_fences_.push_back(device_->createFence(fenceInfo));
 			}
-
-			vk::DescriptorPoolSize pool_sizes[] =
-			{
-				{vk::DescriptorType::eSampler, 1000},
-				{vk::DescriptorType::eCombinedImageSampler, 1000},
-				{vk::DescriptorType::eSampledImage, 1000},
-				{vk::DescriptorType::eStorageImage, 1000},
-				{vk::DescriptorType::eUniformTexelBuffer, 1000},
-				{vk::DescriptorType::eStorageTexelBuffer, 1000},
-				{vk::DescriptorType::eUniformBuffer, 1000},
-				{vk::DescriptorType::eStorageBuffer, 1000},
-				{vk::DescriptorType::eUniformBufferDynamic, 1000},
-				{vk::DescriptorType::eStorageBufferDynamic, 1000},
-				{vk::DescriptorType::eInputAttachment, 1000}
-			};
-
-			vk::DescriptorPoolCreateInfo pool_info
-			{
-				{vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet},
-				1000, pool_sizes
-			};
-
-			imguiPool = device_->createDescriptorPool(pool_info);
-
-			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO();
-			(void)io;
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-
-			ImGui::StyleColorsDark();
-
-			// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-			ImGuiStyle& style = ImGui::GetStyle();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				style.WindowRounding = 0.0f;
-				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-			}
-
-			ImGui_ImplGlfw_InitForVulkan(window_.data(), true);
-
-			ImGui_ImplVulkan_InitInfo init_info = {};
-			init_info.Instance = **instance_;
-			init_info.PhysicalDevice = **physical_device_;
-			init_info.Device = **device_;
-			init_info.QueueFamily = physical_device_.getQueueFamilyIndices().graphicsFamily.value();
-			init_info.Queue = *gragraphics_queue_;
-			init_info.DescriptorPool = *imguiPool;
-			init_info.Subpass = 0;
-			init_info.MinImageCount = 2;
-			init_info.ImageCount = device_.MAX_FRAMES_IN_FLIGHT;
-			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-			ImGui_ImplVulkan_Init(&init_info, **render_pass_);
-
-			vk::raii::CommandBuffer cb = command_pool_.beginSingleTimeCommands(device_);
-			ImGui_ImplVulkan_CreateFontsTexture(*cb);
-
-			command_pool_.endSingleTimeCommands(gragraphics_queue_, cb);
 		}
 
 		void run()
@@ -143,9 +81,6 @@ namespace dmbrn
 				window_.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
 			}
 			device_->waitIdle();
-			ImGui_ImplVulkan_Shutdown();
-			ImGui_ImplGlfw_Shutdown();
-			ImGui::DestroyContext();
 		}
 
 	private:
@@ -157,8 +92,7 @@ namespace dmbrn
 		LogicalDevice device_;
 		vk::raii::Queue gragraphics_queue_;
 		vk::raii::Queue present_queue_;
-		ImGUIRenderPass render_pass_;
-		ImGUISwapChain swap_chain_;
+		EditorUI editor_ui_;
 		DescriptorSetLayout descriptor_set_layout_;
 		//GraphicsPipeline graphics_pipeline_;
 		CommandPool command_pool_;
@@ -170,7 +104,6 @@ namespace dmbrn
 		std::vector<vk::raii::Semaphore> render_finished_semaphores_;
 		std::vector<vk::raii::Fence> in_flight_fences_;
 
-		vk::raii::DescriptorPool imguiPool;
 
 		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
 		std::chrono::system_clock::time_point tp2_ = std::chrono::system_clock::now();
