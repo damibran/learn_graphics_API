@@ -20,16 +20,17 @@ namespace dmbrn
 			const vk::CommandBufferAllocateInfo allocInfo
 			{
 				**command_pool, vk::CommandBufferLevel::ePrimary,
-				 static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
+				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
 			};
 
 			command_buffers_ = device->allocateCommandBuffers(allocInfo);
 		}
 
-		void recordCommandBuffer(const LogicalDevice& device, const RenderPass& render_pass, const GraphicsPipeline& graphics_pipeline,
-			const SwapChain& swap_chain, const Model& model,
-			const DescriptorSets& descriptor_sets,
-			uint32_t currentFrame, uint32_t imageIndex)const
+		void recordCommandBuffer(const LogicalDevice& device, const RenderPass& render_pass,
+		                         const GraphicsPipeline& graphics_pipeline,
+		                         const SwapChain& swap_chain, const Model& model,
+		                         const DescriptorSets& descriptor_sets,
+		                         uint32_t currentFrame, uint32_t imageIndex) const
 		{
 			const vk::CommandBufferBeginInfo beginInfo{};
 
@@ -39,7 +40,7 @@ namespace dmbrn
 
 			const std::array<vk::ClearValue, 2> clear_values
 			{
-				vk::ClearValue{ vk::ClearColorValue{ std::array<float,4>{0.0f, 0.0f, 0.0f, 1.0f} } },
+				vk::ClearValue{vk::ClearColorValue{std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}}},
 				vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}}
 			};
 
@@ -47,7 +48,7 @@ namespace dmbrn
 			{
 				**render_pass,
 				*swap_chain.getFrameBuffers()[imageIndex],
-				vk::Rect2D{vk::Offset2D{ 0, 0 }, swap_chain.getExtent()},
+				vk::Rect2D{vk::Offset2D{0, 0}, swap_chain.getExtent()},
 				clear_values
 			};
 
@@ -57,7 +58,7 @@ namespace dmbrn
 
 			const vk::Viewport viewport
 			{
-				0.0f,0.0f,
+				0.0f, 0.0f,
 				static_cast<float>(swap_chain.getExtent().width),
 				static_cast<float>(swap_chain.getExtent().height),
 				0.0f, 1.0f
@@ -66,7 +67,7 @@ namespace dmbrn
 
 			const vk::Rect2D scissor
 			{
-				vk::Offset2D{ 0, 0 },
+				vk::Offset2D{0, 0},
 				swap_chain.getExtent()
 			};
 			command_buffer.setScissor(0, scissor);
@@ -79,7 +80,7 @@ namespace dmbrn
 			command_buffer.end();
 		}
 
-		const vk::raii::CommandBuffer& operator[](uint32_t index)const
+		const vk::raii::CommandBuffer& operator[](uint32_t index) const
 		{
 			return command_buffers_[index];
 		}

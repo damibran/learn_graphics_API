@@ -24,12 +24,13 @@ namespace dmbrn
 		std::string directory;
 
 		// constructor, expects a filepath to a 3D model.
-		Model(std::string const& path, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		Model(const std::string& path, const PhysicalDevice& physical_device, const LogicalDevice& device,
+		      const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			// read file via ASSIMP
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate );//| aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace
+			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
+			//| aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace
 			// check for errors
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 			{
@@ -44,7 +45,7 @@ namespace dmbrn
 
 		// draws the model, and thus all its meshes
 		void Draw(int frame, const LogicalDevice& device, const GraphicsPipeline& graphics_pipeline,
-			const vk::raii::CommandBuffer& command_buffers, const DescriptorSets& descriptor_sets)const
+		          const vk::raii::CommandBuffer& command_buffers, const DescriptorSets& descriptor_sets) const
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
 				meshes[i].Draw(frame, device, graphics_pipeline, command_buffers, descriptor_sets);
@@ -52,8 +53,9 @@ namespace dmbrn
 
 	private:
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-		void processNode(aiNode* node, const aiScene* scene, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		void processNode(aiNode* node, const aiScene* scene, const PhysicalDevice& physical_device,
+		                 const LogicalDevice& device,
+		                 const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			// process each mesh located at the current node
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -68,11 +70,11 @@ namespace dmbrn
 			{
 				processNode(node->mChildren[i], scene, physical_device, device, command_pool, gragraphics_queue);
 			}
-
 		}
 
-		Mesh processMesh(aiMesh* mesh, const aiScene* scene, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		Mesh processMesh(aiMesh* mesh, const aiScene* scene, const PhysicalDevice& physical_device,
+		                 const LogicalDevice& device,
+		                 const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			// data to fill
 			std::vector<Vertex> vertices;
@@ -83,7 +85,8 @@ namespace dmbrn
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
-				glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				glm::vec3 vector;
+				// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 				// positions
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;
@@ -140,8 +143,11 @@ namespace dmbrn
 			// normal: texture_normalN
 
 			// 1. diffuse maps
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", physical_device, device, command_pool, gragraphics_queue);
-			textures.insert(textures.end(), std::make_move_iterator(diffuseMaps.begin()), std::make_move_iterator(diffuseMaps.end()));
+			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse",
+			                                                        physical_device, device, command_pool,
+			                                                        gragraphics_queue);
+			textures.insert(textures.end(), std::make_move_iterator(diffuseMaps.begin()),
+			                std::make_move_iterator(diffuseMaps.end()));
 			// 2. specular maps
 			//std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -153,13 +159,15 @@ namespace dmbrn
 			//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 			// return a mesh object created from the extracted mesh data
-			return Mesh(std::move(vertices), std::move(indices), std::move(textures), physical_device, device, command_pool, gragraphics_queue);
+			return Mesh(std::move(vertices), std::move(indices), std::move(textures), physical_device, device,
+			            command_pool, gragraphics_queue);
 		}
 
 		// checks all material textures of a given type and loads the textures if they're not loaded yet.
 		// the required info is returned as a Texture struct.
-		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName,
+		                                          const PhysicalDevice& physical_device, const LogicalDevice& device,
+		                                          const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			std::vector<Texture> textures;
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -168,7 +176,7 @@ namespace dmbrn
 				mat->GetTexture(type, i, &str);
 				std::string filename = directory + '\\' + std::string(str.C_Str());
 
-				textures.emplace_back(Texture{ filename,physical_device, device, command_pool, gragraphics_queue });
+				textures.emplace_back(Texture{filename, physical_device, device, command_pool, gragraphics_queue});
 			}
 			return textures;
 		}

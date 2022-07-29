@@ -14,7 +14,8 @@ namespace dmbrn
 	class UniformBuffers
 	{
 	public:
-		struct UniformBufferObject {
+		struct UniformBufferObject
+		{
 			alignas(16) glm::mat4 model;
 			alignas(16) glm::mat4 view;
 			alignas(16) glm::mat4 proj;
@@ -24,32 +25,35 @@ namespace dmbrn
 		{
 			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
-			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++) {
-
+			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
+			{
 				uniform_buffers_.push_back(
 					device->createBuffer(
 						vk::BufferCreateInfo{
-							{},bufferSize,vk::BufferUsageFlagBits::eUniformBuffer
+							{}, bufferSize, vk::BufferUsageFlagBits::eUniformBuffer
 						}
-				));
+					));
 
 				uniform_buffers_memory.push_back(
 					device->allocateMemory(
-						vk::MemoryAllocateInfo{ uniform_buffers_[i].getMemoryRequirements().size,
-						physical_device.findMemoryType(uniform_buffers_[i].getMemoryRequirements().memoryTypeBits,
-							vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) }
-				));
+						vk::MemoryAllocateInfo{
+							uniform_buffers_[i].getMemoryRequirements().size,
+							physical_device.findMemoryType(uniform_buffers_[i].getMemoryRequirements().memoryTypeBits,
+							                               vk::MemoryPropertyFlagBits::eHostVisible |
+							                               vk::MemoryPropertyFlagBits::eHostCoherent)
+						}
+					));
 
 				uniform_buffers_[i].bindMemory(*uniform_buffers_memory[i], 0);
 			}
 		}
 
-		const vk::raii::Buffer& operator[](int index)const
+		const vk::raii::Buffer& operator[](int index) const
 		{
 			return uniform_buffers_[index];
 		}
 
-		const vk::raii::DeviceMemory& getUBMemory(int index)const
+		const vk::raii::DeviceMemory& getUBMemory(int index) const
 		{
 			return uniform_buffers_memory[index];
 		}

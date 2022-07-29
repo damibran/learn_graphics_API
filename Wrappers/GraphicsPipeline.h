@@ -13,7 +13,8 @@ namespace dmbrn
 	class GraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass, const DescriptorSetLayout& descriptor_set_layout):
+		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass,
+		                 const DescriptorSetLayout& descriptor_set_layout):
 			pipeline_layout_(nullptr),
 			graphics_pipeline_(nullptr)
 		{
@@ -35,7 +36,7 @@ namespace dmbrn
 				*fragShaderModule, "main"
 			};
 
-			const vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+			const vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
 
 			const auto bindingDescription = Vertex::getBindingDescription();
@@ -44,17 +45,17 @@ namespace dmbrn
 			const vk::PipelineVertexInputStateCreateInfo vertexInputInfo
 			{
 				{},
-				bindingDescription,  attributeDescriptions
+				bindingDescription, attributeDescriptions
 			};
 
 			const vk::PipelineInputAssemblyStateCreateInfo inputAssembly
 			{
-				{},vk::PrimitiveTopology::eTriangleList,VK_FALSE
+				{}, vk::PrimitiveTopology::eTriangleList,VK_FALSE
 			};
 
 			const vk::PipelineViewportStateCreateInfo viewportState
 			{
-				{}, 1,{},1,{}
+				{}, 1, {}, 1, {}
 			};
 
 			const vk::PipelineRasterizationStateCreateInfo rasterizer
@@ -67,12 +68,12 @@ namespace dmbrn
 
 			const vk::PipelineMultisampleStateCreateInfo multisampling
 			{
-				{},vk::SampleCountFlagBits::e1,VK_FALSE
+				{}, vk::SampleCountFlagBits::e1,VK_FALSE
 			};
 
 			const vk::PipelineColorBlendAttachmentState colorBlendAttachment
 			{
-				VK_FALSE,{},{},{},{},{},{}, // not like dis
+				VK_FALSE, {}, {}, {}, {}, {}, {}, // not like dis
 				vk::ColorComponentFlagBits::eR |
 				vk::ColorComponentFlagBits::eG |
 				vk::ColorComponentFlagBits::eB |
@@ -81,8 +82,8 @@ namespace dmbrn
 
 			const vk::PipelineColorBlendStateCreateInfo colorBlending
 			{
-				{},VK_FALSE,vk::LogicOp::eCopy,
-				1, &colorBlendAttachment, {0.0f,0.0f,0.0f,0.0f}
+				{},VK_FALSE, vk::LogicOp::eCopy,
+				1, &colorBlendAttachment, {0.0f, 0.0f, 0.0f, 0.0f}
 			};
 
 			const std::vector dynamicStates
@@ -113,21 +114,21 @@ namespace dmbrn
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
 				{}, 2, shaderStages,
-				&vertexInputInfo,&inputAssembly,{},
-				&viewportState,&rasterizer,&multisampling,
-				&depth_stencil_info,&colorBlending,&dynamicState,
-				*pipeline_layout_,**render_pass
+				&vertexInputInfo, &inputAssembly, {},
+				&viewportState, &rasterizer, &multisampling,
+				&depth_stencil_info, &colorBlending, &dynamicState,
+				*pipeline_layout_, **render_pass
 			};
 
 			graphics_pipeline_ = vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
 		}
 
-		const vk::raii::Pipeline& operator*()const
+		const vk::raii::Pipeline& operator*() const
 		{
 			return graphics_pipeline_;
 		}
 
-		const vk::raii::PipelineLayout& getLayout()const
+		const vk::raii::PipelineLayout& getLayout() const
 		{
 			return pipeline_layout_;
 		}
@@ -140,11 +141,12 @@ namespace dmbrn
 		{
 			std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-			if (!file.is_open()) {
+			if (!file.is_open())
+			{
 				throw std::runtime_error("failed to open file!");
 			}
 
-			const size_t fileSize = (size_t)file.tellg();
+			const size_t fileSize = file.tellg();
 			std::vector<char> buffer(fileSize);
 
 			file.seekg(0);
@@ -159,7 +161,7 @@ namespace dmbrn
 		{
 			const vk::ShaderModuleCreateInfo createInfo
 			{
-				{},code.size(),
+				{}, code.size(),
 				reinterpret_cast<const uint32_t*>(code.data())
 			};
 			return device->createShaderModule(createInfo);

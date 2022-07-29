@@ -13,7 +13,7 @@ namespace dmbrn
 	{
 	public:
 		DescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
-			const UniformBuffers& uniform_buffers) :
+		               const UniformBuffers& uniform_buffers) :
 			descriptor_pool_(nullptr)
 		{
 			createDescriptorPool(device);
@@ -24,19 +24,19 @@ namespace dmbrn
 		{
 			vk::DescriptorImageInfo imageInfo
 			{
-				*texture.getSampler(),*texture.getImageView(),texture.getLayout()
+				*texture.getSampler(), *texture.getImageView(), texture.getLayout()
 			};
 
 			vk::WriteDescriptorSet descriptor_write
 			{
-				*descriptor_sets_[frame], 1,0, vk::DescriptorType::eCombinedImageSampler,
-				 imageInfo
+				*descriptor_sets_[frame], 1, 0, vk::DescriptorType::eCombinedImageSampler,
+				imageInfo
 			};
 
 			device->updateDescriptorSets(descriptor_write, nullptr);
 		}
 
-		const vk::raii::DescriptorSet& operator[](uint32_t index)const
+		const vk::raii::DescriptorSet& operator[](uint32_t index) const
 		{
 			return descriptor_sets_[index];
 		}
@@ -68,11 +68,11 @@ namespace dmbrn
 				poolSizes.data()
 			};
 
-			descriptor_pool_ = vk::raii::DescriptorPool{ device->createDescriptorPool(poolInfo) };
+			descriptor_pool_ = vk::raii::DescriptorPool{device->createDescriptorPool(poolInfo)};
 		}
 
 		void createDescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
-			const UniformBuffers& uniform_buffers)
+		                          const UniformBuffers& uniform_buffers)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, **descriptor_set_layout);
 
@@ -89,7 +89,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers[i],0,sizeof(UniformBuffers::UniformBufferObject)
+					*uniform_buffers[i], 0, sizeof(UniformBuffers::UniformBufferObject)
 				};
 
 				//vk::DescriptorImageInfo imageInfo
@@ -101,8 +101,8 @@ namespace dmbrn
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{
-					*descriptor_sets_[i],0,0,vk::DescriptorType::eUniformBuffer,
-					{},bufferInfo
+					*descriptor_sets_[i], 0, 0, vk::DescriptorType::eUniformBuffer,
+					{}, bufferInfo
 				};
 
 				//descriptorWrites[1]=vk::WriteDescriptorSet
