@@ -49,8 +49,8 @@ namespace dmbrn
 			//graphics_pipeline_(device_, render_pass_, descriptor_set_layout_),
 			command_pool_(physical_device_, device_),
 			model_("Models\\Barrel\\barell.obj", physical_device_, device_, command_pool_, gragraphics_queue_),
-			uniform_buffers_(physical_device_, device_),
-			descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_),
+			//uniform_buffers_(physical_device_, device_),
+			//descriptor_sets_(device_, descriptor_set_layout_, uniform_buffers_),
 			command_buffers_(device_, command_pool_),
 			imguiPool(nullptr)
 		{
@@ -163,8 +163,8 @@ namespace dmbrn
 		//GraphicsPipeline graphics_pipeline_;
 		CommandPool command_pool_;
 		Model model_;
-		UniformBuffers uniform_buffers_;
-		DescriptorSets descriptor_sets_;
+		//UniformBuffers uniform_buffers_;
+		//DescriptorSets descriptor_sets_;
 		CommandBuffers command_buffers_;
 		std::vector<vk::raii::Semaphore> image_available_semaphores_;
 		std::vector<vk::raii::Semaphore> render_finished_semaphores_;
@@ -179,52 +179,22 @@ namespace dmbrn
 
 		void drawFrame(float delta_time)
 		{
-			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
-
-			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);
-
-			uint32_t imageIndex = result.second;
-
-			updateUniformBuffer(currentFrame, delta_time);
-
-			device_->resetFences(*in_flight_fences_[currentFrame]);
-
-			command_buffers_[currentFrame].reset();
-
-			ImGui_ImplVulkan_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+			uint32_t imageIndex = newFrame();
 
 			ImGui::ShowDemoWindow();
 
-			ImGuiIO& io = ImGui::GetIO();
-			ImGui::Render();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-			}
+			render(imageIndex);
 
-			const vk::raii::CommandBuffer& cb = command_buffers_[currentFrame];
+			submitAndPresent(imageIndex);
 
-			vk::ClearValue clearValue;
-			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f}));
-			cb.begin({vk::CommandBufferUsageFlags()});
-			cb.beginRenderPass({
-				                   **render_pass_,
-				                   *swap_chain_.getFrameBuffers()[imageIndex],
-				                   {{0, 0}, swap_chain_.getExtent()},
-				                   1, &clearValue
-			                   }, vk::SubpassContents::eInline);
+			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
+		}
 
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cb);
-
-			cb.endRenderPass();
-			cb.end();
-
-			const vk::Semaphore waitSemaphores[] = {*image_available_semaphores_[currentFrame]};
-			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-			const vk::Semaphore signalSemaphores[] = {*render_finished_semaphores_[currentFrame]};
+		void submitAndPresent(uint32_t imageIndex)
+		{
+			const vk::Semaphore waitSemaphores[] = { *image_available_semaphores_[currentFrame] };
+			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+			const vk::Semaphore signalSemaphores[] = { *render_finished_semaphores_[currentFrame] };
 
 			const vk::SubmitInfo submitInfo
 			{
@@ -252,32 +222,78 @@ namespace dmbrn
 				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
 				return;
 			}
-
-			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
 		}
 
-		void updateUniformBuffer(uint32_t currentImage, float delta_t)
+		uint32_t newFrame()
 		{
-			const float speed = 90;
+			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
 
-			static float objAngle = 0;
+			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);
 
-			objAngle += delta_t * glm::radians(speed);
+			device_->resetFences(*in_flight_fences_[currentFrame]);
 
-			UniformBuffers::UniformBufferObject ubo{};
-			ubo.model = rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-			                  glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.proj = glm::perspective(glm::radians(45.0f),
-			                            swap_chain_.getExtent().width / static_cast<float>(swap_chain_.getExtent().
-				                            height), 0.1f,
-			                            10.0f);
-			ubo.proj[1][1] *= -1;
+			command_buffers_[currentFrame].reset();
 
-			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
-			memcpy(data, &ubo, sizeof(ubo));
-			uniform_buffers_.getUBMemory(currentImage).unmapMemory();
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			return result.second;
 		}
+
+		/**
+		 * \brief record command buffer with ImGUIRenderPass
+		 */
+		void render(uint32_t imageIndex)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			ImGui::Render();
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+
+			const vk::raii::CommandBuffer& command_buffer = command_buffers_[currentFrame];
+
+			vk::ClearValue clearValue;
+			clearValue.color = vk::ClearColorValue(std::array<float, 4>({ 0.5f, 0.5f, 0.5f, 1.0f }));
+			command_buffer.begin({ vk::CommandBufferUsageFlags() });
+			command_buffer.beginRenderPass({
+								   **render_pass_,
+								   *swap_chain_.getFrameBuffers()[imageIndex],
+								   {{0, 0}, swap_chain_.getExtent()},
+								   1, &clearValue
+				}, vk::SubpassContents::eInline);
+
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *command_buffer);
+
+			command_buffer.endRenderPass();
+			command_buffer.end();
+		}
+
+		//void updateUniformBuffer(uint32_t currentImage, float delta_t)
+		//{
+		//	const float speed = 90;
+		//
+		//	static float objAngle = 0;
+		//
+		//	objAngle += delta_t * glm::radians(speed);
+		//
+		//	UniformBuffers::UniformBufferObject ubo{};
+		//	ubo.model = rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+		//	ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+		//		glm::vec3(0.0f, 0.0f, 1.0f));
+		//	ubo.proj = glm::perspective(glm::radians(45.0f),
+		//		swap_chain_.getExtent().width / static_cast<float>(swap_chain_.getExtent().
+		//			height), 0.1f,
+		//		10.0f);
+		//	ubo.proj[1][1] *= -1;
+		//
+		//	void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
+		//	memcpy(data, &ubo, sizeof(ubo));
+		//	uniform_buffers_.getUBMemory(currentImage).unmapMemory();
+		//}
 	};
 }
 
