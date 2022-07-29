@@ -19,7 +19,7 @@ namespace dmbrn
 	public:
 		EditorUI(const Singletons& singletons) :
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
-			swap_chain_(singletons.physical_device, singletons.device, singletons.surface, singletons.window, render_pass_),
+			swap_chain_(singletons, render_pass_),
 			imguiPool(nullptr)
 		{
 			vk::DescriptorPoolSize pool_sizes[] =
@@ -71,8 +71,8 @@ namespace dmbrn
 			init_info.Queue = *singletons.gragraphics_queue;
 			init_info.DescriptorPool = *imguiPool;
 			init_info.Subpass = 0;
-			init_info.MinImageCount = 2;
-			init_info.ImageCount = singletons.device.MAX_FRAMES_IN_FLIGHT;
+			init_info.MinImageCount = 2; // idk what values to put here
+			init_info.ImageCount = singletons.device.MAX_FRAMES_IN_FLIGHT; // idk what values to put here
 			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 			ImGui_ImplVulkan_Init(&init_info, **render_pass_);
 
@@ -89,17 +89,19 @@ namespace dmbrn
 			ImGui::DestroyContext();
 		}
 
-		void drawFrame(float delta_time)
+		void drawFrame(Singletons& singletons,float delta_time)
 		{
-			uint32_t imageIndex = newFrame();
+			const EditorFrame& frame = swap_chain_.getFrame(currentFrame);
+
+			uint32_t imageIndex = newFrame(singletons.device,frame);
 
 			ImGui::ShowDemoWindow();
 
-			render(imageIndex);
+			render(frame,imageIndex);
 
-			submitAndPresent(imageIndex);
+			submitAndPresent(singletons,frame,imageIndex);
 
-			currentFrame = (currentFrame + 1) % device_.MAX_FRAMES_IN_FLIGHT;
+			currentFrame = (currentFrame + 1) % singletons.device.MAX_FRAMES_IN_FLIGHT;
 		}
 
 	private:
@@ -109,48 +111,15 @@ namespace dmbrn
 
 		uint32_t currentFrame = 0;
 
-		void submitAndPresent(uint32_t imageIndex)
+		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)
 		{
-			const vk::Semaphore waitSemaphores[] = {*image_available_semaphores_[currentFrame]};
-			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-			const vk::Semaphore signalSemaphores[] = {*render_finished_semaphores_[currentFrame]};
+			device->waitForFences(*frame.in_flight_fence, true, UINT64_MAX);
 
-			const vk::SubmitInfo submitInfo
-			{
-				waitSemaphores,
-				waitStages,
-				*command_buffers_[currentFrame],
-				signalSemaphores
-			};
+			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *frame.image_available_semaphore);
 
-			gragraphics_queue_.submit(submitInfo, *in_flight_fences_[currentFrame]);
+			device->resetFences(*frame.in_flight_fence);
 
-			try
-			{
-				const vk::PresentInfoKHR presentInfo
-				{
-					signalSemaphores,
-					**swap_chain_,
-					imageIndex
-				};
-				present_queue_.presentKHR(presentInfo);
-			}
-			catch (vk::OutOfDateKHRError e)
-			{
-				window_.framebufferResized = false;
-				swap_chain_.recreate(physical_device_, device_, surface_, window_, render_pass_);
-			}
-		}
-
-		uint32_t newFrame()
-		{
-			device_->waitForFences(*in_flight_fences_[currentFrame], true, UINT64_MAX);
-
-			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *image_available_semaphores_[currentFrame]);
-
-			device_->resetFences(*in_flight_fences_[currentFrame]);
-
-			command_buffers_[currentFrame].reset();
+			frame.command_buffer.reset();
 
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
@@ -160,9 +129,9 @@ namespace dmbrn
 		}
 
 		/**
-		 * \brief record command buffer with ImGUIRenderPass
-		 */
-		void render(uint32_t imageIndex)
+		* \brief record command buffer with ImGUIRenderPass
+		*/
+		void render(const EditorFrame& frame,uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -172,14 +141,14 @@ namespace dmbrn
 				ImGui::RenderPlatformWindowsDefault();
 			}
 
-			const vk::raii::CommandBuffer& command_buffer = command_buffers_[currentFrame];
+			const vk::raii::CommandBuffer& command_buffer = frame.command_buffer;
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 			command_buffer.beginRenderPass({
 				                               **render_pass_,
-				                               *swap_chain_.getFrameBuffers()[imageIndex],
+				                               *swap_chain_.getFrame(imageIndex).frame_buffer,
 				                               {{0, 0}, swap_chain_.getExtent()},
 				                               1, &clearValue
 			                               }, vk::SubpassContents::eInline);
@@ -188,6 +157,39 @@ namespace dmbrn
 
 			command_buffer.endRenderPass();
 			command_buffer.end();
+		}
+
+		void submitAndPresent(Singletons& singletons,const EditorFrame& frame,uint32_t imageIndex)
+		{
+			const vk::Semaphore waitSemaphores[] = {*frame.image_available_semaphore};
+			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+			const vk::Semaphore signalSemaphores[] = {*frame.render_finished_semaphore};
+
+			const vk::SubmitInfo submitInfo
+			{
+				waitSemaphores,
+				waitStages,
+				*frame.command_buffer,
+				signalSemaphores
+			};
+
+			singletons.gragraphics_queue.submit(submitInfo, *frame.in_flight_fence);
+
+			try
+			{
+				const vk::PresentInfoKHR presentInfo
+				{
+					signalSemaphores,
+					**swap_chain_,
+					imageIndex
+				};
+				singletons.present_queue.presentKHR(presentInfo);
+			}
+			catch (vk::OutOfDateKHRError e)
+			{
+				singletons.window.framebufferResized = false;
+				swap_chain_.recreate(singletons, render_pass_);
+			}
 		}
 	};
 }
