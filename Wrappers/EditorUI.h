@@ -77,6 +77,7 @@ namespace dmbrn
 			ImGui_ImplVulkan_Init(&init_info, **render_pass_);
 
 			vk::raii::CommandBuffer cb = singletons.command_pool.beginSingleTimeCommands(singletons.device);
+
 			ImGui_ImplVulkan_CreateFontsTexture(*cb);
 
 			singletons.command_pool.endSingleTimeCommands(singletons.gragraphics_queue, cb);
@@ -89,17 +90,27 @@ namespace dmbrn
 			ImGui::DestroyContext();
 		}
 
-		void drawFrame(Singletons& singletons,float delta_time)
+		void drawFrame(Singletons& singletons, float delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(currentFrame);
 
-			uint32_t imageIndex = newFrame(singletons.device,frame);
+			uint32_t imageIndex = newFrame(singletons.device, frame);
 
-			ImGui::ShowDemoWindow();
+			ImGui::DockSpaceOverViewport();
+			//showAppMainMenuBar();
+			//ImGui::ShowDemoWindow();
 
-			render(frame,imageIndex);
+			ImGui::Begin("Viewport");
 
-			submitAndPresent(singletons,frame,imageIndex);
+			ImGui::Image()
+
+			ImGui_ImplVulkan_AddTexture();
+
+			ImGui::End();
+
+			render(frame, imageIndex);
+
+			submitAndPresent(singletons, frame, imageIndex);
 
 			currentFrame = (currentFrame + 1) % singletons.device.MAX_FRAMES_IN_FLIGHT;
 		}
@@ -110,6 +121,24 @@ namespace dmbrn
 		vk::raii::DescriptorPool imguiPool;
 
 		uint32_t currentFrame = 0;
+
+		static void showAppMainMenuBar()
+		{
+			if (ImGui::BeginMainMenuBar())
+			{
+				if (ImGui::BeginMenu("File"))
+				{
+					if (ImGui::MenuItem("New")) {}
+					if (ImGui::MenuItem("Open")) {}
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Edit"))
+				{
+					ImGui::EndMenu();
+				}
+				ImGui::EndMainMenuBar();
+			}
+		}
 
 		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)
 		{
@@ -131,7 +160,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const EditorFrame& frame,uint32_t imageIndex)
+		void render(const EditorFrame& frame, uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -144,14 +173,14 @@ namespace dmbrn
 			const vk::raii::CommandBuffer& command_buffer = frame.command_buffer;
 
 			vk::ClearValue clearValue;
-			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
-			command_buffer.begin({vk::CommandBufferUsageFlags()});
+			clearValue.color = vk::ClearColorValue(std::array<float, 4>({ 0.5f, 0.5f, 0.5f, 1.0f }));
+			command_buffer.begin({ vk::CommandBufferUsageFlags() });
 			command_buffer.beginRenderPass({
-				                               **render_pass_,
-				                               *swap_chain_.getFrame(imageIndex).frame_buffer,
-				                               {{0, 0}, swap_chain_.getExtent()},
-				                               1, &clearValue
-			                               }, vk::SubpassContents::eInline);
+											   **render_pass_,
+											   *swap_chain_.getFrame(imageIndex).frame_buffer,
+											   {{0, 0}, swap_chain_.getExtent()},
+											   1, &clearValue
+				}, vk::SubpassContents::eInline);
 
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *command_buffer);
 
@@ -159,11 +188,11 @@ namespace dmbrn
 			command_buffer.end();
 		}
 
-		void submitAndPresent(Singletons& singletons,const EditorFrame& frame,uint32_t imageIndex)
+		void submitAndPresent(Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
 		{
-			const vk::Semaphore waitSemaphores[] = {*frame.image_available_semaphore};
-			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-			const vk::Semaphore signalSemaphores[] = {*frame.render_finished_semaphore};
+			const vk::Semaphore waitSemaphores[] = { *frame.image_available_semaphore };
+			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+			const vk::Semaphore signalSemaphores[] = { *frame.render_finished_semaphore };
 
 			const vk::SubmitInfo submitInfo
 			{

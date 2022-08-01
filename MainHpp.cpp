@@ -7,24 +7,11 @@
 #include <optional>
 #include <thread>
 
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-
 #include "Wrappers/Singletons.h"
 #include "Wrappers/EditorUI.h"
-#include "Wrappers/DescriptorSetLayout.h" // may be it should be a part of descriptor sets
-#include "Wrappers/GraphicsPipeline.h"
-#include "Wrappers/CommandPool.h"
 #include "Wrappers/Model.h"
-#include "Wrappers/UniformBuffers.h"
-#include "Wrappers/DescriptorSets.h"
-#include "Wrappers/CommandBuffers.h"
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
 
 namespace dmbrn
 {
