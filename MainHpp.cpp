@@ -47,29 +47,6 @@ namespace dmbrn
 
 		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
 		std::chrono::system_clock::time_point tp2_ = std::chrono::system_clock::now();
-
-		//void updateUniformBuffer(uint32_t currentImage, float delta_t)
-		//{
-		//	const float speed = 90;
-		//
-		//	static float objAngle = 0;
-		//
-		//	objAngle += delta_t * glm::radians(speed);
-		//
-		//	UniformBuffers::UniformBufferObject ubo{};
-		//	ubo.model = rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-		//	ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-		//		glm::vec3(0.0f, 0.0f, 1.0f));
-		//	ubo.proj = glm::perspective(glm::radians(45.0f),
-		//		swap_chain_.getExtent().width / static_cast<float>(swap_chain_.getExtent().
-		//			height), 0.1f,
-		//		10.0f);
-		//	ubo.proj[1][1] *= -1;
-		//
-		//	void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
-		//	memcpy(data, &ubo, sizeof(ubo));
-		//	uniform_buffers_.getUBMemory(currentImage).unmapMemory();
-		//}
 	};
 }
 

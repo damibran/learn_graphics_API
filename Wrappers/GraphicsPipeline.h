@@ -4,16 +4,16 @@
 #include <fstream>
 
 #include "LogicalDevice.h"
-#include "RenderPass.h"
 #include "DescriptorSetLayout.h"
 #include "Vertex.h"
+#include "ViewportRenderPass.h"
 
 namespace dmbrn
 {
 	class GraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const LogicalDevice& device, const RenderPass& render_pass,
+		GraphicsPipeline(const LogicalDevice& device, const ViewportRenderPass& render_pass,
 		                 const DescriptorSetLayout& descriptor_set_layout):
 			pipeline_layout_(nullptr),
 			graphics_pipeline_(nullptr)

@@ -9,8 +9,10 @@
 
 #include "Singletons.h"
 #include "CommandPool.h"
+#include "ImGuiRaii.h"
 #include "ImGUIRenderPass.h"
 #include "ImGUISwapChain.h"
+#include "Viewport.h"
 
 namespace dmbrn
 {
@@ -20,75 +22,11 @@ namespace dmbrn
 		EditorUI(const Singletons& singletons) :
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_(singletons, render_pass_),
-			imguiPool(nullptr)
+			im_gui_(singletons, render_pass_),
+			viewport_({200, 200},swap_chain_->getImages().size(), singletons)
 		{
-			vk::DescriptorPoolSize pool_sizes[] =
-			{
-				{vk::DescriptorType::eSampler, 1000},
-				{vk::DescriptorType::eCombinedImageSampler, 1000},
-				{vk::DescriptorType::eSampledImage, 1000},
-				{vk::DescriptorType::eStorageImage, 1000},
-				{vk::DescriptorType::eUniformTexelBuffer, 1000},
-				{vk::DescriptorType::eStorageTexelBuffer, 1000},
-				{vk::DescriptorType::eUniformBuffer, 1000},
-				{vk::DescriptorType::eStorageBuffer, 1000},
-				{vk::DescriptorType::eUniformBufferDynamic, 1000},
-				{vk::DescriptorType::eStorageBufferDynamic, 1000},
-				{vk::DescriptorType::eInputAttachment, 1000}
-			};
-
-			vk::DescriptorPoolCreateInfo pool_info
-			{
-				{vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet},
-				1000, pool_sizes
-			};
-
-			imguiPool = singletons.device->createDescriptorPool(pool_info);
-
-			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO();
-			(void)io;
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-
-			ImGui::StyleColorsDark();
-
-			// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-			ImGuiStyle& style = ImGui::GetStyle();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				style.WindowRounding = 0.0f;
-				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-			}
-
-			ImGui_ImplGlfw_InitForVulkan(singletons.window.data(), true);
-
-			ImGui_ImplVulkan_InitInfo init_info = {};
-			init_info.Instance = **singletons.instance;
-			init_info.PhysicalDevice = **singletons.physical_device;
-			init_info.Device = **singletons.device;
-			init_info.QueueFamily = singletons.physical_device.getQueueFamilyIndices().graphicsFamily.value();
-			init_info.Queue = *singletons.gragraphics_queue;
-			init_info.DescriptorPool = *imguiPool;
-			init_info.Subpass = 0;
-			init_info.MinImageCount = 2; // idk what values to put here
-			init_info.ImageCount = singletons.device.MAX_FRAMES_IN_FLIGHT; // idk what values to put here
-			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-			ImGui_ImplVulkan_Init(&init_info, **render_pass_);
-
-			vk::raii::CommandBuffer cb = singletons.command_pool.beginSingleTimeCommands(singletons.device);
-
-			ImGui_ImplVulkan_CreateFontsTexture(*cb);
-
-			singletons.command_pool.endSingleTimeCommands(singletons.gragraphics_queue, cb);
 		}
 
-		~EditorUI()
-		{
-			ImGui_ImplVulkan_Shutdown();
-			ImGui_ImplGlfw_Shutdown();
-			ImGui::DestroyContext();
-		}
 
 		void drawFrame(Singletons& singletons, float delta_time)
 		{
@@ -100,15 +38,9 @@ namespace dmbrn
 			//showAppMainMenuBar();
 			//ImGui::ShowDemoWindow();
 
-			ImGui::Begin("Viewport");
+			viewport_.newImGuiFrame(singletons, imageIndex);
 
-			ImGui::Image()
-
-			ImGui_ImplVulkan_AddTexture();
-
-			ImGui::End();
-
-			render(frame, imageIndex);
+			render(singletons, frame, imageIndex);
 
 			submitAndPresent(singletons, frame, imageIndex);
 
@@ -118,7 +50,8 @@ namespace dmbrn
 	private:
 		ImGUIRenderPass render_pass_;
 		ImGUISwapChain swap_chain_;
-		vk::raii::DescriptorPool imguiPool;
+		ImGuiRaii im_gui_;
+		Viewport viewport_;
 
 		uint32_t currentFrame = 0;
 
@@ -128,8 +61,12 @@ namespace dmbrn
 			{
 				if (ImGui::BeginMenu("File"))
 				{
-					if (ImGui::MenuItem("New")) {}
-					if (ImGui::MenuItem("Open")) {}
+					if (ImGui::MenuItem("New"))
+					{
+					}
+					if (ImGui::MenuItem("Open"))
+					{
+					}
 					ImGui::EndMenu();
 				}
 				if (ImGui::BeginMenu("Edit"))
@@ -160,7 +97,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const EditorFrame& frame, uint32_t imageIndex)
+		void render(const Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -172,15 +109,18 @@ namespace dmbrn
 
 			const vk::raii::CommandBuffer& command_buffer = frame.command_buffer;
 
+			command_buffer.begin({vk::CommandBufferUsageFlags()});
+
+			viewport_.render(singletons.device, command_buffer,currentFrame, imageIndex);
+
 			vk::ClearValue clearValue;
-			clearValue.color = vk::ClearColorValue(std::array<float, 4>({ 0.5f, 0.5f, 0.5f, 1.0f }));
-			command_buffer.begin({ vk::CommandBufferUsageFlags() });
+			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
 			command_buffer.beginRenderPass({
-											   **render_pass_,
-											   *swap_chain_.getFrame(imageIndex).frame_buffer,
-											   {{0, 0}, swap_chain_.getExtent()},
-											   1, &clearValue
-				}, vk::SubpassContents::eInline);
+				                               **render_pass_,
+				                               *swap_chain_.getFrame(imageIndex).frame_buffer,
+				                               {{0, 0}, swap_chain_.getExtent()},
+				                               1, &clearValue
+			                               }, vk::SubpassContents::eInline);
 
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *command_buffer);
 
@@ -190,9 +130,9 @@ namespace dmbrn
 
 		void submitAndPresent(Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
 		{
-			const vk::Semaphore waitSemaphores[] = { *frame.image_available_semaphore };
-			const vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-			const vk::Semaphore signalSemaphores[] = { *frame.render_finished_semaphore };
+			const vk::Semaphore waitSemaphores[] = {*frame.image_available_semaphore};
+			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+			const vk::Semaphore signalSemaphores[] = {*frame.render_finished_semaphore};
 
 			const vk::SubmitInfo submitInfo
 			{

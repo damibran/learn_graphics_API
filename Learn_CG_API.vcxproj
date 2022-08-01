@@ -170,6 +170,7 @@
     <ClInclude Include="Wrappers\EditorUI.h" />
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h" />
     <ClInclude Include="Wrappers\GraphicsPipeline.h" />
+    <ClInclude Include="Wrappers\ImGuiRaii.h" />
     <ClInclude Include="Wrappers\ImGUIRenderPass.h" />
     <ClInclude Include="Wrappers\ImGUISwapChain.h" />
     <ClInclude Include="Wrappers\Instance.h" />
@@ -185,6 +186,9 @@
     <ClInclude Include="Wrappers\UniformBuffers.h" />
     <ClInclude Include="Wrappers\Vertex.h" />
     <ClInclude Include="Wrappers\VertexIndexBuffers.h" />
+    <ClInclude Include="Wrappers\Viewport.h" />
+    <ClInclude Include="Wrappers\ViewportRenderPass.h" />
+    <ClInclude Include="Wrappers\ViewportSwapChain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

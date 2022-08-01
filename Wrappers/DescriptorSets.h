@@ -24,7 +24,7 @@ namespace dmbrn
 		{
 			vk::DescriptorImageInfo imageInfo
 			{
-				*texture.getSampler(), *texture.getImageView(), texture.getLayout()
+				*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
 			};
 
 			vk::WriteDescriptorSet descriptor_write

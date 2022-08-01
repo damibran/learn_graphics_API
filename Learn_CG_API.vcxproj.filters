@@ -153,5 +153,17 @@
     <ClInclude Include="Wrappers\EditorFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Wrappers\Viewport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\ViewportSwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\ViewportRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\ImGuiRaii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
