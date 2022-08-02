@@ -98,11 +98,7 @@ namespace dmbrn
 				PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
 			const vk::Extent2D extent = utils::chooseSwapExtent(capabilities, window);
 
-			uint32_t imageCount = capabilities.minImageCount + 1;
-			if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
-			{
-				imageCount = capabilities.maxImageCount;
-			}
+			uint32_t imageCount = utils::capabilitiesGetImageCount(physical_device,surface);
 
 			vk::SwapchainCreateInfoKHR createInfo{}; // very easy to miss something... may be redo
 			createInfo.surface = **surface;

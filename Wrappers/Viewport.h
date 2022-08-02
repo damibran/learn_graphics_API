@@ -10,10 +10,10 @@ namespace dmbrn
 	class Viewport
 	{
 	public:
-		Viewport(uint32_t imageCount, const Singletons& singletons) :
-			size_(getWindowSize()), image_count_(imageCount),
+		Viewport(const Singletons& singletons) :
+			size_(getWindowSize()),
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
-			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, image_count_, singletons,
+			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, singletons,
 			            render_pass_),
 			uniform_buffers_(singletons.physical_device, singletons.device),
 			descriptor_set_layout_(singletons.device),
@@ -98,7 +98,6 @@ namespace dmbrn
 
 	private:
 		ImVec2 size_;
-		uint32_t image_count_;
 		ViewportRenderPass render_pass_;
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
@@ -135,7 +134,7 @@ namespace dmbrn
 
 		void resize(const Singletons& singletons)
 		{
-			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, image_count_,
+			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			                     singletons,
 			                     render_pass_);
 

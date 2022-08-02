@@ -20,22 +20,22 @@ namespace dmbrn
 	class ViewportSwapChain
 	{
 	public:
-		ViewportSwapChain(vk::Extent2D extent, uint32_t imageCount,const Singletons& singletons, const ViewportRenderPass& render_pass):
+		ViewportSwapChain(vk::Extent2D extent,const Singletons& singletons, const ViewportRenderPass& render_pass):
 			extent_(extent),
-			color_buffers_(createColorBuffers(extent, imageCount,singletons.physical_device, singletons.device,
+			color_buffers_(createColorBuffers(extent,singletons.physical_device, singletons.surface,singletons.device,
 			                                  singletons.command_pool, singletons.gragraphics_queue)),
 			depth_buffer_(singletons.surface, singletons.window, singletons.physical_device, singletons.device),
 			framebuffers_(createFrameBuffers(singletons.device, render_pass))
 		{
 		}
 
-		void recreate(const vk::Extent2D extent,uint32_t imageCount, const Singletons& singletons, const ViewportRenderPass& render_pass)
+		void recreate(const vk::Extent2D extent, const Singletons& singletons, const ViewportRenderPass& render_pass)
 		{
 			extent_ = extent;
 
 			singletons.device->waitIdle(); // may be not
 
-			color_buffers_ = createColorBuffers(extent_,imageCount, singletons.physical_device, singletons.device,
+			color_buffers_ = createColorBuffers(extent_, singletons.physical_device,singletons.surface, singletons.device,
 			                                    singletons.command_pool, singletons.gragraphics_queue);
 			depth_buffer_ = DepthBuffer(singletons.surface, singletons.window, singletons.physical_device,
 			                            singletons.device);
@@ -63,14 +63,15 @@ namespace dmbrn
 		DepthBuffer depth_buffer_;
 		std::vector<vk::raii::Framebuffer> framebuffers_;
 
-		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent, uint32_t imageCount,
+		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent,
 		                                                      const PhysicalDevice& physical_device,
+				const Surface& surface,
 		                                                      const LogicalDevice& device,
 		                                                      const CommandPool& command_pool,
 		                                                      const vk::raii::Queue& gragraphics_queue)
 		{
 			std::vector<Texture> res;
-			for (int i = 0; i < imageCount; ++i)
+			for (int i = 0; i < utils::capabilitiesGetImageCount(physical_device,surface); ++i)
 			{
 				res.emplace_back(extent, physical_device, device, command_pool, gragraphics_queue);
 			}

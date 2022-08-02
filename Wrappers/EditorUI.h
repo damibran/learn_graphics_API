@@ -23,7 +23,7 @@ namespace dmbrn
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_(singletons, render_pass_),
 			im_gui_(singletons, render_pass_),
-			viewport_(swap_chain_->getImages().size(), singletons)
+			viewport_(singletons)
 		{
 			
 		}

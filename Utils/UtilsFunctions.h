@@ -68,4 +68,16 @@ namespace dmbrn::utils
 		                           vk::FormatFeatureFlagBits::eDepthStencilAttachment
 		);
 	}
+
+	uint32_t capabilitiesGetImageCount(const PhysicalDevice& physical_device,const Surface& surface)
+	{
+		const auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
+
+		uint32_t imageCount = capabilities.minImageCount + 1;
+		if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+		{
+			imageCount = capabilities.maxImageCount;
+		}
+		return imageCount;
+	}
 }
