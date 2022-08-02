@@ -8,10 +8,10 @@
 #include "imgui_impl_vulkan.h"
 
 #include "Singletons.h"
-#include "CommandPool.h"
 #include "ImGuiRaii.h"
 #include "ImGUIRenderPass.h"
 #include "ImGUISwapChain.h"
+#include "imgui_internal.h"
 #include "Viewport.h"
 
 namespace dmbrn
@@ -23,8 +23,9 @@ namespace dmbrn
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_(singletons, render_pass_),
 			im_gui_(singletons, render_pass_),
-			viewport_({200, 200},swap_chain_->getImages().size(), singletons)
+			viewport_(swap_chain_->getImages().size(), singletons)
 		{
+			
 		}
 
 

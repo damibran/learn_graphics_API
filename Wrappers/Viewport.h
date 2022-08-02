@@ -10,10 +10,11 @@ namespace dmbrn
 	class Viewport
 	{
 	public:
-		Viewport(ImVec2 size,uint32_t imageCount, const Singletons& singletons) :
-			size_(size),image_count_(imageCount),
+		Viewport(uint32_t imageCount, const Singletons& singletons) :
+			size_(getWindowSize()), image_count_(imageCount),
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
-			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},image_count_ ,singletons, render_pass_),
+			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, image_count_, singletons,
+			            render_pass_),
 			uniform_buffers_(singletons.physical_device, singletons.device),
 			descriptor_set_layout_(singletons.device),
 			descriptor_sets_(singletons.device, descriptor_set_layout_, uniform_buffers_),
@@ -45,7 +46,8 @@ namespace dmbrn
 			ImGui::End();
 		}
 
-		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, uint32_t current_frame,uint32_t imageIndex)
+		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, uint32_t current_frame,
+		            uint32_t imageIndex)
 		{
 			const Texture& color_buffer = swap_chain_.getColorBuffers()[imageIndex];
 
@@ -133,7 +135,8 @@ namespace dmbrn
 
 		void resize(const Singletons& singletons)
 		{
-			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},image_count_, singletons,
+			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, image_count_,
+			                     singletons,
 			                     render_pass_);
 
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
@@ -165,6 +168,24 @@ namespace dmbrn
 			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
 			memcpy(data, &ubo, sizeof(ubo));
 			uniform_buffers_.getUBMemory(currentImage).unmapMemory();
+		}
+
+		ImVec2 getWindowSize()
+		{
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			ImGui::Begin("Viewport");
+
+			ImVec2 res = ImGui::GetWindowSize();
+
+			ImGui::End();
+			ImGui::EndFrame();
+
+			ImGui::UpdatePlatformWindows();
+
+			return res;
 		}
 	};
 }
