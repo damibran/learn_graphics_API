@@ -46,12 +46,12 @@ namespace dmbrn
 			ImGui::End();
 		}
 
-		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, uint32_t current_frame,
+		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, float delta_time,uint32_t current_frame,
 		            uint32_t imageIndex)
 		{
 			const Texture& color_buffer = swap_chain_.getColorBuffers()[imageIndex];
 
-			updateUniformBuffer(current_frame, 0.16f);
+			updateUniformBuffer(current_frame, delta_time);
 
 			color_buffer.transitionImageLayoutWithCommandBuffer(command_buffer, vk::ImageLayout::eShaderReadOnlyOptimal,
 			                                                    vk::ImageLayout::eColorAttachmentOptimal);

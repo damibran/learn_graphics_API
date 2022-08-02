@@ -25,13 +25,12 @@ namespace dmbrn
 			im_gui_(singletons, render_pass_),
 			viewport_(singletons)
 		{
-			
 		}
 
 
 		void drawFrame(Singletons& singletons, float delta_time)
 		{
-			const EditorFrame& frame = swap_chain_.getFrame(currentFrame);
+			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
 			uint32_t imageIndex = newFrame(singletons.device, frame);
 
@@ -41,11 +40,11 @@ namespace dmbrn
 
 			viewport_.newImGuiFrame(singletons, imageIndex);
 
-			render(singletons, frame, imageIndex);
+			render(singletons, delta_time, frame, imageIndex);
 
 			submitAndPresent(singletons, frame, imageIndex);
 
-			currentFrame = (currentFrame + 1) % singletons.device.MAX_FRAMES_IN_FLIGHT;
+			current_frame_ = (current_frame_ + 1) % singletons.device.MAX_FRAMES_IN_FLIGHT;
 		}
 
 	private:
@@ -54,7 +53,7 @@ namespace dmbrn
 		ImGuiRaii im_gui_;
 		Viewport viewport_;
 
-		uint32_t currentFrame = 0;
+		uint32_t current_frame_ = 0;
 
 		static void showAppMainMenuBar()
 		{
@@ -98,7 +97,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
+		void render(const Singletons& singletons, float delta_time, const EditorFrame& frame, uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -112,7 +111,7 @@ namespace dmbrn
 
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
-			viewport_.render(singletons.device, command_buffer,currentFrame, imageIndex);
+			viewport_.render(singletons.device, command_buffer, delta_time, current_frame_, imageIndex);
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
