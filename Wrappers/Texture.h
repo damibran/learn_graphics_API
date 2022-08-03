@@ -24,25 +24,25 @@ namespace dmbrn
 		}
 
 		Texture(vk::Extent2D extent, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue) :
+			const CommandPool& command_pool, const vk::raii::Queue& graphics_queue) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageWithSize(extent, physical_device, device, command_pool, gragraphics_queue);
+			createTextureImageWithSize(extent, physical_device, device, command_pool, graphics_queue);
 			createTextureImageView(device);
 			createTextureSampler(device, physical_device);
 		}
 
 		Texture(const std::string& texPath, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue gragraphics_queue) :
+			const CommandPool& command_pool, vk::raii::Queue graphics_queue) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageFromFile(texPath, physical_device, device, command_pool, gragraphics_queue);
+			createTextureImageFromFile(texPath, physical_device, device, command_pool, graphics_queue);
 			createTextureImageView(device);
 			createTextureSampler(device, physical_device);
 		}
@@ -85,7 +85,7 @@ namespace dmbrn
 
 		void createTextureImageWithSize(vk::Extent2D extent, const PhysicalDevice& physical_device,
 			const LogicalDevice& device, const CommandPool& command_pool,
-			const vk::raii::Queue& gragraphics_queue)
+			const vk::raii::Queue& graphics_queue)
 		{
 			createImage(device, physical_device, extent, vk::Format::eR8G8B8A8Srgb,
 				vk::ImageTiling::eOptimal,
@@ -93,14 +93,14 @@ namespace dmbrn
 				vk::MemoryPropertyFlagBits::eDeviceLocal,
 				texture_image, texture_image_memory_);
 
-			singleTimeTransitionImageLayout(device, command_pool, gragraphics_queue, texture_image,
+			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 
 		void createTextureImageFromFile(const std::string& texPath, const PhysicalDevice& physical_device,
 			const LogicalDevice& device, const CommandPool& command_pool,
-			vk::raii::Queue gragraphics_queue)
+			vk::raii::Queue graphics_queue)
 		{
 			int texWidth, texHeight, texChannels;
 			stbi_uc* pixels = stbi_load(texPath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -146,12 +146,12 @@ namespace dmbrn
 				vk::MemoryPropertyFlagBits::eDeviceLocal,
 				texture_image, texture_image_memory_);
 
-			singleTimeTransitionImageLayout(device, command_pool, gragraphics_queue, texture_image,
+			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eTransferDstOptimal);
-			copyBufferToImage(device, command_pool, gragraphics_queue, stagingBuffer, texture_image,
+			copyBufferToImage(device, command_pool, graphics_queue, stagingBuffer, texture_image,
 				static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-			singleTimeTransitionImageLayout(device, command_pool, gragraphics_queue, texture_image,
+			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
 				vk::ImageLayout::eTransferDstOptimal,
 				vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
@@ -265,7 +265,7 @@ namespace dmbrn
 		}
 
 		void copyBufferToImage(const LogicalDevice& device, const CommandPool& command_pool,
-			vk::raii::Queue gragraphics_queue,
+			vk::raii::Queue graphics_queue,
 			vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
 		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
@@ -280,7 +280,7 @@ namespace dmbrn
 
 			commandBuffer.copyBufferToImage(*buffer, *image, vk::ImageLayout::eTransferDstOptimal, region);
 
-			command_pool.endSingleTimeCommands(gragraphics_queue, commandBuffer);
+			command_pool.endSingleTimeCommands(graphics_queue, commandBuffer);
 		}
 
 		void createTextureImageView(const LogicalDevice& device)
