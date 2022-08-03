@@ -43,7 +43,6 @@ namespace dmbrn
 			if (HandleWindowResize(singletons) == false)
 			{
 				ImGui::End();
-				ImGui::PopStyleVar();
 				return;
 			}
 
@@ -119,7 +118,7 @@ namespace dmbrn
 
 			if (view.x != size_.x || view.y != size_.y)
 			{
-				if (view.x == 0 || view.y == 0)
+				if (view.x == 0 || view.y == 0 || ImGui::IsWindowCollapsed())
 				{
 					// The window is too small or collapsed.
 					return false;
