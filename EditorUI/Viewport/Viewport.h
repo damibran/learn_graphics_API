@@ -183,7 +183,7 @@ namespace dmbrn
 
 			ImGui::Begin("Viewport");
 
-			ImVec2 res = ImGui::GetWindowSize();
+			ImVec2 res = ImGui::GetContentRegionAvail();
 
 			ImGui::End();
 			ImGui::EndFrame();
