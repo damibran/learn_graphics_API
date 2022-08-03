@@ -2,10 +2,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <vulkan/vulkan.hpp>
 
-#include <glm/glm.hpp>
-#include "Instance.h"
-
-
 namespace dmbrn
 {
 	struct Vertex

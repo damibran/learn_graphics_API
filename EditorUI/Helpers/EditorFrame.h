@@ -3,9 +3,8 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "CommandBuffers.h"
 #include "ImGUIRenderPass.h"
-#include "Singletons.h"
+#include "Wrappers/Singletons/Singletons.h"
 
 
 namespace dmbrn

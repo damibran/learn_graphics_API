@@ -6,8 +6,8 @@
 
 #include <glm/glm.hpp>
 
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
+#include "Wrappers/Singletons/PhysicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
 
 namespace dmbrn
 {

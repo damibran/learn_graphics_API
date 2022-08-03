@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "LogicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
 
 namespace dmbrn
 {

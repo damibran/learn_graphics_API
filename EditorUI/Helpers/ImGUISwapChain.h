@@ -5,12 +5,12 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <optional>
 
-#include "GLFWwindowWrapper.h"
-#include "Surface.h"
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
+#include "Wrappers/Singletons/GLFWwindowWrapper.h"
+#include "Wrappers/Singletons/Surface.h"
+#include "Wrappers/Singletons/PhysicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
 #include "ImGUIRenderPass.h"
-#include "../Utils/UtilsFunctions.h"
+#include "Utils/UtilsFunctions.h"
 #include "EditorFrame.h"
 
 namespace dmbrn

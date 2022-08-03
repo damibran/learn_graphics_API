@@ -6,9 +6,9 @@
 #include <cstdint>
 #include <limits>
 
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
-#include "CommandPool.h"
+#include "Wrappers/Singletons/PhysicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
+#include "Wrappers/Singletons/CommandPool.h"
 
 namespace dmbrn
 {

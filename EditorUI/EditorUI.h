@@ -7,12 +7,12 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
-#include "Singletons.h"
-#include "ImGuiRaii.h"
-#include "ImGUIRenderPass.h"
-#include "ImGUISwapChain.h"
+#include "Wrappers/Singletons/Singletons.h"
+#include "Helpers/ImGuiRaii.h"
+#include "Helpers/ImGUIRenderPass.h"
+#include "Helpers/ImGUISwapChain.h"
 #include "imgui_internal.h"
-#include "Viewport.h"
+#include "Viewport/Viewport.h"
 
 namespace dmbrn
 {

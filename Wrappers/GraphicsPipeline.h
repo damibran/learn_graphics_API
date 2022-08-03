@@ -3,10 +3,10 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <fstream>
 
-#include "LogicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
 #include "DescriptorSetLayout.h"
 #include "Vertex.h"
-#include "ViewportRenderPass.h"
+#include "EditorUI/Viewport/ViewportRenderPass.h"
 
 namespace dmbrn
 {

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\imgui\backends;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\glfw\include;C:\VulkanSDK\1.3.216.0\Include;$(SolutionDir)Dependencies\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\imgui\backends;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\glfw\include;C:\VulkanSDK\1.3.216.0\Include;$(SolutionDir)Dependencies\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -160,8 +160,15 @@
     <ClInclude Include="Dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imstb_truetype.h" />
+    <ClInclude Include="EditorUI\EditorUI.h" />
+    <ClInclude Include="EditorUI\Helpers\EditorFrame.h" />
+    <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h" />
+    <ClInclude Include="EditorUI\Helpers\ImGUIRenderPass.h" />
+    <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h" />
+    <ClInclude Include="EditorUI\Viewport\Viewport.h" />
+    <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
+    <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
     <ClInclude Include="Utils\UtilsFunctions.h" />
-    <ClInclude Include="Wrappers\CommandBuffers.h" />
     <ClInclude Include="Wrappers\CommandPool.h" />
     <ClInclude Include="Wrappers\Depthbuffer.h" />
     <ClInclude Include="Wrappers\DescriptorSetLayout.h" />
@@ -180,6 +187,13 @@
     <ClInclude Include="Wrappers\PhysicalDevice.h" />
     <ClInclude Include="Wrappers\RenderPass.h" />
     <ClInclude Include="Wrappers\Singletons.h" />
+    <ClInclude Include="Wrappers\Singletons\CommandPool.h" />
+    <ClInclude Include="Wrappers\Singletons\GLFWwindowWrapper.h" />
+    <ClInclude Include="Wrappers\Singletons\Instance.h" />
+    <ClInclude Include="Wrappers\Singletons\LogicalDevice.h" />
+    <ClInclude Include="Wrappers\Singletons\PhysicalDevice.h" />
+    <ClInclude Include="Wrappers\Singletons\Singletons.h" />
+    <ClInclude Include="Wrappers\Singletons\Surface.h" />
     <ClInclude Include="Wrappers\Surface.h" />
     <ClInclude Include="Wrappers\SwapChain.h" />
     <ClInclude Include="Wrappers\Texture.h" />

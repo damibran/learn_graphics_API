@@ -4,12 +4,10 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 #include <iostream>
-#include <optional>
 #include <thread>
 
-#include "Wrappers/Singletons.h"
-#include "Wrappers/EditorUI.h"
-#include "Wrappers/Model.h"
+#include "Wrappers/Singletons/Singletons.h"
+#include "EditorUI/EditorUI.h"
 
 #include "imgui.h"
 

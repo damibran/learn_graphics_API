@@ -1,19 +1,14 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
-#include <optional>
 
-#include "GLFWwindowWrapper.h"
-#include "Surface.h"
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
-#include "RenderPass.h"
-#include "../Utils/UtilsFunctions.h"
-#include "Depthbuffer.h"
-#include "Singletons.h"
-#include "Texture.h"
+#include "Wrappers/Singletons/Surface.h"
+#include "Wrappers/Singletons/PhysicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
+#include "Utils/UtilsFunctions.h"
+#include "Wrappers/Depthbuffer.h"
+#include "Wrappers/Singletons/Singletons.h"
+#include "Wrappers/Texture.h"
 
 namespace dmbrn
 {

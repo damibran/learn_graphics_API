@@ -4,10 +4,10 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Surface.h"
-#include "PhysicalDevice.h"
-#include "LogicalDevice.h"
-#include "../Utils//UtilsFunctions.h"
+#include "Wrappers/Singletons/Surface.h"
+#include "Wrappers/Singletons/PhysicalDevice.h"
+#include "Wrappers/Singletons/LogicalDevice.h"
+#include "Utils/UtilsFunctions.h"
 
 namespace dmbrn
 {

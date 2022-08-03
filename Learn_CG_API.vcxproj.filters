@@ -99,9 +99,6 @@
     <ClInclude Include="Wrappers\DescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\CommandBuffers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\UtilsFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -163,6 +160,51 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\ImGuiRaii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\CommandPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\GLFWwindowWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\Instance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\LogicalDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\PhysicalDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\Singletons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\Surface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\EditorUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Helpers\EditorFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Helpers\ImGUIRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Viewport\Viewport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
