@@ -17,7 +17,7 @@ namespace dmbrn
 			surface(instance, window),
 			physical_device(instance, surface),
 			device(physical_device),
-			gragraphics_queue(device->getQueue(physical_device.getQueueFamilyIndices().graphicsFamily.value(), 0)),
+			graphics_queue(device->getQueue(physical_device.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue(device->getQueue(physical_device.getQueueFamilyIndices().presentFamily.value(), 0)),
 			command_pool(physical_device, device)
 		{
@@ -29,7 +29,7 @@ namespace dmbrn
 		const Surface surface;
 		const PhysicalDevice physical_device;
 		const LogicalDevice device;
-		const vk::raii::Queue gragraphics_queue;
+		const vk::raii::Queue graphics_queue;
 		const vk::raii::Queue present_queue;
 		const CommandPool command_pool;
 	};

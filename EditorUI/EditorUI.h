@@ -142,7 +142,7 @@ namespace dmbrn
 				signalSemaphores
 			};
 
-			singletons.gragraphics_queue.submit(submitInfo, *frame.in_flight_fence);
+			singletons.graphics_queue.submit(submitInfo, *frame.in_flight_fence);
 
 			try
 			{

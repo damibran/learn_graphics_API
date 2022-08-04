@@ -23,28 +23,26 @@ namespace dmbrn
 		{
 		}
 
-		Texture(vk::Extent2D extent, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, const vk::raii::Queue& graphics_queue) :
+		Texture(vk::Extent2D extent, const Singletons& singletons) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageWithSize(extent, physical_device, device, command_pool, graphics_queue);
-			createTextureImageView(device);
-			createTextureSampler(device, physical_device);
+			createTextureImageWithSize(extent, singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
+			createTextureImageView(singletons.device);
+			createTextureSampler(singletons.device, singletons.physical_device);
 		}
 
-		Texture(const std::string& texPath, const PhysicalDevice& physical_device, const LogicalDevice& device,
-			const CommandPool& command_pool, vk::raii::Queue graphics_queue) :
+		Texture(const std::string& texPath, const Singletons& singletons) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageFromFile(texPath, physical_device, device, command_pool, graphics_queue);
-			createTextureImageView(device);
-			createTextureSampler(device, physical_device);
+			createTextureImageFromFile(texPath, singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
+			createTextureImageView(singletons.device);
+			createTextureSampler(singletons.device, singletons.physical_device);
 		}
 
 		void transitionImageLayoutWithCommandBuffer(const vk::raii::CommandBuffer& command_buffer,

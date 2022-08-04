@@ -55,7 +55,7 @@ namespace dmbrn
 			init_info.PhysicalDevice = **singletons.physical_device;
 			init_info.Device = **singletons.device;
 			init_info.QueueFamily = singletons.physical_device.getQueueFamilyIndices().graphicsFamily.value();
-			init_info.Queue = *singletons.gragraphics_queue;
+			init_info.Queue = *singletons.graphics_queue;
 			init_info.DescriptorPool = *imguiPool;
 			init_info.Subpass = 0;
 			init_info.MinImageCount = 2; // idk what values to put here
@@ -67,7 +67,7 @@ namespace dmbrn
 
 			ImGui_ImplVulkan_CreateFontsTexture(*cb);
 
-			singletons.command_pool.endSingleTimeCommands(singletons.gragraphics_queue, cb);
+			singletons.command_pool.endSingleTimeCommands(singletons.graphics_queue, cb);
 		}
 				
 		~ImGuiRaii()

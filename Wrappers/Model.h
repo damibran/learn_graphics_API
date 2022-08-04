@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "GraphicsPipeline.h"
 #include "Mesh.h"
 #include "Texture.h"
 
@@ -24,8 +25,7 @@ namespace dmbrn
 		std::string directory;
 
 		// constructor, expects a filepath to a 3D model.
-		Model(const std::string& path, const PhysicalDevice& physical_device, const LogicalDevice& device,
-		      const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		Model(const std::string& path, const Singletons& singletons)
 		{
 			// read file via ASSIMP
 			Assimp::Importer importer;
@@ -40,7 +40,7 @@ namespace dmbrn
 			directory = path.substr(0, path.find_last_of('\\'));
 
 			// process ASSIMP's root node recursively
-			processNode(scene->mRootNode, scene, physical_device, device, command_pool, gragraphics_queue);
+			processNode(scene->mRootNode, scene, singletons);
 		}
 
 		// draws the model, and thus all its meshes
@@ -53,9 +53,7 @@ namespace dmbrn
 
 	private:
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-		void processNode(aiNode* node, const aiScene* scene, const PhysicalDevice& physical_device,
-		                 const LogicalDevice& device,
-		                 const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		void processNode(aiNode* node, const aiScene* scene,const Singletons& singletons)
 		{
 			// process each mesh located at the current node
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -63,18 +61,16 @@ namespace dmbrn
 				// the node object only contains indices to index the actual objects in the scene. 
 				// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.push_back(processMesh(mesh, scene, physical_device, device, command_pool, gragraphics_queue));
+				meshes.push_back(processMesh(mesh, scene, singletons));
 			}
 			// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 			for (unsigned int i = 0; i < node->mNumChildren; i++)
 			{
-				processNode(node->mChildren[i], scene, physical_device, device, command_pool, gragraphics_queue);
+				processNode(node->mChildren[i], scene, singletons);
 			}
 		}
 
-		Mesh processMesh(aiMesh* mesh, const aiScene* scene, const PhysicalDevice& physical_device,
-		                 const LogicalDevice& device,
-		                 const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		Mesh processMesh(aiMesh* mesh, const aiScene* scene, const Singletons& singletons)
 		{
 			// data to fill
 			std::vector<Vertex> vertices;
@@ -144,8 +140,7 @@ namespace dmbrn
 
 			// 1. diffuse maps
 			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse",
-			                                                        physical_device, device, command_pool,
-			                                                        gragraphics_queue);
+			                                                        singletons);
 			textures.insert(textures.end(), std::make_move_iterator(diffuseMaps.begin()),
 			                std::make_move_iterator(diffuseMaps.end()));
 			// 2. specular maps
@@ -159,15 +154,13 @@ namespace dmbrn
 			//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 			// return a mesh object created from the extracted mesh data
-			return Mesh(std::move(vertices), std::move(indices), std::move(textures), physical_device, device,
-			            command_pool, gragraphics_queue);
+			return Mesh(std::move(vertices), std::move(indices), std::move(textures),singletons);
 		}
 
 		// checks all material textures of a given type and loads the textures if they're not loaded yet.
 		// the required info is returned as a Texture struct.
 		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName,
-		                                          const PhysicalDevice& physical_device, const LogicalDevice& device,
-		                                          const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
+		                                          const Singletons& singletons)
 		{
 			std::vector<Texture> textures;
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -176,7 +169,7 @@ namespace dmbrn
 				mat->GetTexture(type, i, &str);
 				std::string filename = directory + '\\' + std::string(str.C_Str());
 
-				textures.emplace_back(Texture{filename, physical_device, device, command_pool, gragraphics_queue});
+				textures.emplace_back(Texture{filename, singletons});
 			}
 			return textures;
 		}

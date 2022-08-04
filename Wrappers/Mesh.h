@@ -19,8 +19,7 @@ namespace dmbrn
 
 		// constructor
 		Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<Texture>&& textures,
-		     const PhysicalDevice& physical_device, const LogicalDevice& device,
-		     const CommandPool& command_pool, vk::raii::Queue gragraphics_queue) :
+		     const Singletons& singletons) :
 			vertices_(std::move(vertices)),
 			indices_(std::move(indices)),
 			textures_(std::move(textures)),
@@ -30,8 +29,8 @@ namespace dmbrn
 			index_buffer_memory_(nullptr)
 		{
 			// now that we have all the required data, set the vertex buffers and its attribute pointers.
-			createVertexBuffer(physical_device, device, command_pool, gragraphics_queue);
-			createIndexBuffer(physical_device, device, command_pool, gragraphics_queue);
+			createVertexBuffer(singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
+			createIndexBuffer(singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
 		}
 
 		// render the mesh

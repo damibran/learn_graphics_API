@@ -25,8 +25,7 @@ namespace dmbrn
 			descriptor_set_layout_(singletons.device),
 			descriptor_sets_(singletons.device, descriptor_set_layout_, uniform_buffers_),
 			graphics_pipeline_(singletons.device, render_pass_, descriptor_set_layout_),
-			model_("Models\\Barrel\\barell.obj", singletons.physical_device, singletons.device, singletons.command_pool,
-			       singletons.gragraphics_queue)
+			model_("Models\\Barrel\\barell.obj",singletons)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{

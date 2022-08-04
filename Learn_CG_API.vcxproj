@@ -166,6 +166,10 @@
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
+    <ClInclude Include="Main\SceneTree.h" />
+    <ClInclude Include="Main\Script.h" />
+    <ClInclude Include="Main\Shape.h" />
+    <ClInclude Include="Utils\Transform.h" />
     <ClInclude Include="Utils\UtilsFunctions.h" />
     <ClInclude Include="Wrappers\CommandPool.h" />
     <ClInclude Include="Wrappers\Depthbuffer.h" />
