@@ -201,7 +201,7 @@
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\SceneTree.h">
+    <ClInclude Include="Main\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Main\Shape.h">

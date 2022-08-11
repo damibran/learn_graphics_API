@@ -7,7 +7,7 @@
 #include <thread>
 
 #include "Wrappers/Singletons/Singletons.h"
-#include "Main/SceneTree.h"
+#include "Main/Scene.h"
 #include "EditorUI/EditorUI.h"
 
 #include "imgui.h"
