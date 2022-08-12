@@ -166,6 +166,8 @@
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
+    <ClInclude Include="Main\Componenets\Components.h" />
+    <ClInclude Include="Main\Enttity.h" />
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="Main\Script.h" />
     <ClInclude Include="Main\Shape.h" />

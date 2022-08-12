@@ -2,13 +2,15 @@
 
 #include <entt/entt.hpp>
 #include "Shape.h"
+#include "Enttity.h"
 
 namespace dmbrn
 {
 	class Scene
 	{
 	public:
-		Scene(const Singletons& singletons)
+		Scene(const Singletons& singletons):
+			first(registry_,"First Barrel")
 		{
 
 		}
@@ -19,6 +21,7 @@ namespace dmbrn
 		}
 
 	private:
+		Enttity first;
 		entt::registry registry_;
 	};
 }

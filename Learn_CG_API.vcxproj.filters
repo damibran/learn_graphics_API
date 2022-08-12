@@ -213,5 +213,11 @@
     <ClInclude Include="Main\Script.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Main\Enttity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
