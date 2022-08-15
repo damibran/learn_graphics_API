@@ -68,7 +68,7 @@ namespace dmbrn
 
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **graphics_pipeline_);
+			//command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **graphics_pipeline_);
 
 			const vk::Viewport viewport
 			{
@@ -87,7 +87,8 @@ namespace dmbrn
 			command_buffer.setScissor(0, scissor);
 
 			//model drawing
-			model_.Draw(current_frame, device, graphics_pipeline_, command_buffer, descriptor_sets_);
+			scene_.draw(current_frame, device,command_buffer);
+			//model_.Draw(current_frame, device, graphics_pipeline_, command_buffer, descriptor_sets_);
 
 			command_buffer.endRenderPass();
 		}

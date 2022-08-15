@@ -9,18 +9,18 @@ namespace dmbrn
 	{
 	public:
 		Scene(const Singletons& singletons, const ViewportRenderPass& render_pass):
-			first(registry_,"First Barrel")
+			first(registry_, "First Barrel")
 		{
-			first.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj",singletons,render_pass);
+			first.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj", singletons, render_pass);
 		}
 
-		void draw()
+		void draw(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer)
 		{
-			
+			first.getComponent<MeshRendererComponent>().draw(curentFrame, device, command_buffer,first.getComponent<TransformComponent>());
 		}
 
 	private:
-		Enttity first;
 		entt::registry registry_;
+		Enttity first;
 	};
 }

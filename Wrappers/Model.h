@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "GraphicsPipeline.h"
+#include "Materials/UnLitTextured/UnlitTextureMaterial.h"
 #include "Mesh.h"
 #include "Texture.h"
 
@@ -44,11 +44,10 @@ namespace dmbrn
 		}
 
 		// draws the model, and thus all its meshes
-		void Draw(int frame, const LogicalDevice& device, const GraphicsPipeline& graphics_pipeline,
-		          const vk::raii::CommandBuffer& command_buffers, const DescriptorSets& descriptor_sets) const
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTextureMaterial& material) const
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
-				meshes[i].Draw(frame, device, graphics_pipeline, command_buffers, descriptor_sets);
+				meshes[i].draw(frame, device, command_buffers, material);
 		}
 
 	private:

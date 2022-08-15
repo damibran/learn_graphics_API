@@ -5,7 +5,6 @@
 
 #include "Texture.h"
 #include "Vertex.h"
-#include "DescriptorSets.h"
 
 namespace dmbrn
 {
@@ -34,17 +33,18 @@ namespace dmbrn
 		}
 
 		// render the mesh
-		void Draw(int frame, const LogicalDevice& device, const GraphicsPipeline& graphics_pipeline,
-		          const vk::raii::CommandBuffer& command_buffer, const DescriptorSets& descriptor_sets) const
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, const UnlitTextureMaterial& material) const
 		{
-			descriptor_sets.updateFrameDescriptorSetTexture(frame, device, textures_[0]);
+			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **material.graphics_pipeline_);
+
+			material.descriptor_sets_.updateFrameDescriptorSetTexture(frame, device, textures_[0]);
 
 			command_buffer.bindVertexBuffers(0, {*vertex_buffer_}, {0});
 
 			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 
-			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *graphics_pipeline.getLayout(), 0,
-			                                  *descriptor_sets[frame], nullptr);
+			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *material.graphics_pipeline_.getLayout(), 0,
+			                                  *material.descriptor_sets_[frame], nullptr);
 
 			command_buffer.drawIndexed(indices_.size(), 1, 0, 0, 0);
 		}

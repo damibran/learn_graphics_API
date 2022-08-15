@@ -56,7 +56,7 @@ namespace dmbrn
 
 			descriptor_sets_ = device->allocateDescriptorSets(allocInfo);
 
-			/*for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
+			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
@@ -83,7 +83,7 @@ namespace dmbrn
 				//};
 
 				device->updateDescriptorSets(descriptorWrites, nullptr);
-			}*/
+			}
 		}
 	};
 }

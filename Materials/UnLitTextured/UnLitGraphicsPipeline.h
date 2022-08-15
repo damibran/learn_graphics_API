@@ -4,7 +4,6 @@
 #include <fstream>
 
 #include "Wrappers/Singletons/LogicalDevice.h"
-#include "UnLitDescriptorsStatics.h"
 #include "Wrappers/Vertex.h"
 #include "EditorUI/Viewport/ViewportRenderPass.h"
 

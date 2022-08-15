@@ -30,7 +30,7 @@ namespace dmbrn
 		template <typename Type, typename... Args>
 		void addComponent(Args&&...args)
 		{
-			registry_.emplace<Type>(entityID_,std::forward<Args>(args));
+			registry_.emplace<Type>(entityID_,std::forward<Args>(args)...);
 		}
 
 	private:
