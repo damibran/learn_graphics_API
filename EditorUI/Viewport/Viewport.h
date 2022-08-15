@@ -17,7 +17,7 @@ namespace dmbrn
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, singletons,
 			            render_pass_),
-		scene_(singletons,render_pass_)
+			scene_(singletons, render_pass_,focused,size_)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
@@ -27,7 +27,7 @@ namespace dmbrn
 			}
 		}
 
-		void newImGuiFrame(const Singletons& singletons, uint32_t imageIndex)
+		void newImGuiFrame(const Singletons& singletons, float delta_t,uint32_t imageIndex)
 		{
 			ImGui::Begin("Viewport");
 
@@ -37,17 +37,20 @@ namespace dmbrn
 				return;
 			}
 
+			focused = ImGui::IsWindowFocused();
+
+			scene_.update(delta_t	);
+
 			ImGui::Image(images_[imageIndex], size_);
 
 			ImGui::End();
 		}
 
-		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, float delta_time,uint32_t current_frame,
+		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
+		            uint32_t current_frame,
 		            uint32_t imageIndex)
 		{
 			const Texture& color_buffer = swap_chain_.getColorBuffers()[imageIndex];
-
-			//updateUniformBuffer(current_frame, delta_time);
 
 			color_buffer.transitionImageLayoutWithCommandBuffer(command_buffer, vk::ImageLayout::eShaderReadOnlyOptimal,
 			                                                    vk::ImageLayout::eColorAttachmentOptimal);
@@ -68,8 +71,6 @@ namespace dmbrn
 
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-			//command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **graphics_pipeline_);
-
 			const vk::Viewport viewport
 			{
 				0.0f, 0.0f,
@@ -87,8 +88,7 @@ namespace dmbrn
 			command_buffer.setScissor(0, scissor);
 
 			//model drawing
-			scene_.draw(current_frame, device,command_buffer);
-			//model_.Draw(current_frame, device, graphics_pipeline_, command_buffer, descriptor_sets_);
+			scene_.draw(current_frame, device, command_buffer);
 
 			command_buffer.endRenderPass();
 		}
@@ -99,6 +99,7 @@ namespace dmbrn
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
 		Scene scene_;
+		bool focused=false;
 
 		bool HandleWindowResize(const Singletons& singletons)
 		{
@@ -116,6 +117,7 @@ namespace dmbrn
 				size_.y = view.y;
 
 				resize(singletons);
+				scene_.changeCameraAspect(size_	);
 
 				// The window state has been successfully changed.
 				return true;
@@ -138,29 +140,6 @@ namespace dmbrn
 				                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 			}
 		}
-
-		/*void updateUniformBuffer(uint32_t currentImage, float delta_t)
-		{
-			const float speed = 90;
-
-			static float objAngle = 0;
-
-			objAngle += delta_t * glm::radians(speed);
-
-			UniformBuffers::UniformBufferObject ubo{};
-			ubo.model = rotate(glm::mat4(1.0f), objAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-			                  glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.proj = glm::perspective(glm::radians(45.0f),
-			                            swap_chain_.getExtent().width / static_cast<float>(swap_chain_.getExtent().
-				                            height), 0.1f,
-			                            10.0f);
-			ubo.proj[1][1] *= -1;
-
-			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
-			memcpy(data, &ubo, sizeof(ubo));
-			uniform_buffers_.getUBMemory(currentImage).unmapMemory();
-		}*/
 
 		ImVec2 getWindowSize()
 		{

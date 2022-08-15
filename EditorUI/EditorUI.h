@@ -27,7 +27,6 @@ namespace dmbrn
 		{
 		}
 
-
 		void drawFrame(Singletons& singletons, float delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
@@ -38,9 +37,9 @@ namespace dmbrn
 			//showAppMainMenuBar();
 			//ImGui::ShowDemoWindow();
 
-			viewport_.newImGuiFrame(singletons, imageIndex);
+			viewport_.newImGuiFrame(singletons,delta_time, imageIndex);
 
-			render(singletons, delta_time, frame, imageIndex);
+			render(singletons, frame, imageIndex);
 
 			submitAndPresent(singletons, frame, imageIndex);
 
@@ -97,7 +96,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const Singletons& singletons, float delta_time, const EditorFrame& frame, uint32_t imageIndex)
+		void render(const Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -111,7 +110,7 @@ namespace dmbrn
 
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
-			viewport_.render(singletons.device, command_buffer, delta_time, current_frame_, imageIndex);
+			viewport_.render(singletons.device, command_buffer, current_frame_, imageIndex);
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));

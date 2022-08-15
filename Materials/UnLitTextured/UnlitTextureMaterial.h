@@ -15,17 +15,15 @@ namespace dmbrn
 		{
 		}
 
-		void updateUBO(int curentFrame, glm::mat4 modelMat)
+		void updateUBO(int curentFrame, glm::mat4 modelMat,const glm::mat4& view,const glm::mat4& proj)
 		{
 			const float speed = 90;
 
 			UniformBuffers::UniformBufferObject ubo{};
 			ubo.model = modelMat;
-			ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-			                  glm::vec3(0.0f, 0.0f, 1.0f));
-			ubo.proj = glm::perspective(glm::radians(45.0f),
-			                            1.0f, 0.1f,
-			                            10.0f);
+			ubo.view = view;
+			ubo.proj = proj;
+
 			ubo.proj[1][1] *= -1;
 
 			void* data = uniform_buffers_.getUBMemory(curentFrame).mapMemory(0, sizeof(ubo));
