@@ -124,14 +124,22 @@ namespace dmbrn
 
 				moveCamera(cam_move_dir, delta_t);
 
-				ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
-				ImVec2 mouse_rot = new_mouse_delt - mouse_last_delt;
+				if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+				{
+					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
+					ImVec2 mouse_rot = new_mouse_delt - mouse_last_delt;
 
-				mouse_last_delt = new_mouse_delt;
+					mouse_last_delt = new_mouse_delt;
 
-				std::cout << mouse_rot.x << " : " << mouse_rot.y << std::endl;
+					std::cout << mouse_rot.x << " : " << mouse_rot.y << std::endl;
 
-				rotateCamera({mouse_rot.x, -mouse_rot.y});
+					rotateCamera({mouse_rot.x, -mouse_rot.y});
+				}
+
+				if(ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				{
+					mouse_last_delt={0,0};
+				}
 			}
 		}
 
@@ -148,7 +156,7 @@ namespace dmbrn
 		glm::vec3 right_;
 		glm::vec3 world_up_ = glm::vec3(0, 1, 0);
 		float mouse_sensitivity_ = 0.15f;
-		float speed_ = 15;
+		float speed_ = 7;
 		ImVec2 mouse_last_delt;
 
 		void moveCamera(const glm::vec3 dir, const float dt)
