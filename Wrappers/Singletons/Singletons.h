@@ -6,6 +6,7 @@
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
+#include "UnLitDescriptorsStatics.h"
 
 namespace dmbrn
 {
@@ -19,7 +20,8 @@ namespace dmbrn
 			device(physical_device),
 			graphics_queue(device->getQueue(physical_device.getQueueFamilyIndices().graphicsFamily.value(), 0)),
 			present_queue(device->getQueue(physical_device.getQueueFamilyIndices().presentFamily.value(), 0)),
-			command_pool(physical_device, device)
+			command_pool(physical_device, device),
+			un_lit_descriptor_statics(device)
 		{
 		}
 
@@ -32,5 +34,6 @@ namespace dmbrn
 		const vk::raii::Queue graphics_queue;
 		const vk::raii::Queue present_queue;
 		const CommandPool command_pool;
+		const UnLitDescriptorsStatics un_lit_descriptor_statics;
 	};
 }

@@ -2,6 +2,9 @@
 #include <string>
 #include <glm/glm.hpp>
 
+#include "Wrappers/Model.h"
+#include "Materials/UnLitTextured/UnlitTextureMaterial.h"
+
 namespace dmbrn
 {
 	struct TagComponent
@@ -26,8 +29,22 @@ namespace dmbrn
 		{}
 	};
 
-	struct MeshRenderrer
+	class MeshRendererComponent
 	{
-	
+	public:
+		MeshRendererComponent(const std::string& modelPath,const Singletons& singletons,const ViewportRenderPass& render_pass):
+					material_(singletons,render_pass),
+			model_(modelPath,singletons)
+		{
+		}
+
+		void draw(int curentFrame, const LogicalDevice& device,const vk::raii::CommandBuffer& command_buffer )
+		{
+			model_.Draw(curentFrame,device,material_.descriptor_sets_,command_buffer,material_.descriptor_sets_);
+		}
+
+	private:
+		UnlitTextureMaterial material_;
+		Model model_;
 	};
 }

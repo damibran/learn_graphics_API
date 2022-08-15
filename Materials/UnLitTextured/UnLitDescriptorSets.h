@@ -3,21 +3,19 @@
 #include <vulkan/vulkan_raii.hpp>
 
 #include "Wrappers/Singletons/LogicalDevice.h"
-#include "DescriptorSetLayout.h"
-#include "Texture.h"
-#include "UniformBuffers.h"
+#include "Wrappers/Singletons/UnLitDescriptorsStatics.h"
+#include "Wrappers/Texture.h"
+#include "Wrappers/UniformBuffers.h"
 
 namespace dmbrn
 {
-	class DescriptorSets
+	class UnLitDescriptorSets
 	{
 	public:
-		DescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
-		               const UniformBuffers& uniform_buffers) :
-			descriptor_pool_(nullptr)
+		UnLitDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics, 
+		               const UniformBuffers& uniform_buffers)
 		{
-			createDescriptorPool(device);
-			createDescriptorSets(device, descriptor_set_layout, uniform_buffers);
+			createDescriptorSets(device, statics, uniform_buffers);
 		}
 
 		void updateFrameDescriptorSetTexture(uint32_t frame, const LogicalDevice& device, const Texture& texture) const
@@ -42,50 +40,23 @@ namespace dmbrn
 		}
 
 	private:
-		vk::raii::DescriptorPool descriptor_pool_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
-
-		void createDescriptorPool(const LogicalDevice& device)
-		{
-			std::array<vk::DescriptorPoolSize, 2> poolSizes{};
-
-			poolSizes[0] = vk::DescriptorPoolSize
-			{
-				vk::DescriptorType::eUniformBuffer,
-				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
-			};
-			poolSizes[1] = vk::DescriptorPoolSize
-			{
-				vk::DescriptorType::eCombinedImageSampler,
-				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
-			};
-
-			vk::DescriptorPoolCreateInfo poolInfo
-			{
-				vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
-				static_cast<uint32_t>(poolSizes.size()),
-				poolSizes.data()
-			};
-
-			descriptor_pool_ = vk::raii::DescriptorPool{device->createDescriptorPool(poolInfo)};
-		}
-
-		void createDescriptorSets(const LogicalDevice& device, const DescriptorSetLayout& descriptor_set_layout,
+		
+		void createDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics,
 		                          const UniformBuffers& uniform_buffers)
 		{
-			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, **descriptor_set_layout);
+			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.layout_);
 
 			const vk::DescriptorSetAllocateInfo allocInfo
 			{
-				*descriptor_pool_,
+				*statics.pool_,
 				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
 				layouts.data()
 			};
 
 			descriptor_sets_ = device->allocateDescriptorSets(allocInfo);
 
-			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
+			/*for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
@@ -112,7 +83,7 @@ namespace dmbrn
 				//};
 
 				device->updateDescriptorSets(descriptorWrites, nullptr);
-			}
+			}*/
 		}
 	};
 }

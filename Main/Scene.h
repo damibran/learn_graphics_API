@@ -1,7 +1,6 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include "Shape.h"
 #include "Enttity.h"
 
 namespace dmbrn
@@ -9,12 +8,12 @@ namespace dmbrn
 	class Scene
 	{
 	public:
-		Scene(const Singletons& singletons):
+		Scene(const Singletons& singletons, const ViewportRenderPass& render_pass):
 			first(registry_,"First Barrel")
 		{
-
+			first.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj",singletons,render_pass);
 		}
-		
+
 		void draw()
 		{
 			

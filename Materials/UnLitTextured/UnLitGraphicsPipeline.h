@@ -4,17 +4,17 @@
 #include <fstream>
 
 #include "Wrappers/Singletons/LogicalDevice.h"
-#include "DescriptorSetLayout.h"
-#include "Vertex.h"
+#include "UnLitDescriptorsStatics.h"
+#include "Wrappers/Vertex.h"
 #include "EditorUI/Viewport/ViewportRenderPass.h"
 
 namespace dmbrn
 {
-	class GraphicsPipeline
+	class UnLitGraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const LogicalDevice& device, const ViewportRenderPass& render_pass,
-		                 const DescriptorSetLayout& descriptor_set_layout):
+		UnLitGraphicsPipeline(const LogicalDevice& device, const ViewportRenderPass& render_pass,
+		                 const UnLitDescriptorsStatics& descriptor_set_statics):
 			pipeline_layout_(nullptr),
 			graphics_pipeline_(nullptr)
 		{
@@ -106,7 +106,7 @@ namespace dmbrn
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 			{
-				{}, **descriptor_set_layout
+				{}, *descriptor_set_statics.layout_
 			};
 
 			pipeline_layout_ = vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};

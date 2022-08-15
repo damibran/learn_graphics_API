@@ -3,10 +3,6 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "Wrappers/UniformBuffers.h"
-#include "Wrappers/DescriptorSetLayout.h"
-#include "Wrappers/DescriptorSets.h"
-#include "Wrappers/GraphicsPipeline.h"
-#include "Wrappers/Model.h"
 
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
@@ -21,11 +17,7 @@ namespace dmbrn
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, singletons,
 			            render_pass_),
-			uniform_buffers_(singletons.physical_device, singletons.device),
-			descriptor_set_layout_(singletons.device),
-			descriptor_sets_(singletons.device, descriptor_set_layout_, uniform_buffers_),
-			graphics_pipeline_(singletons.device, render_pass_, descriptor_set_layout_),
-			model_("Models\\Barrel\\barell.obj",singletons)
+		scene_(singletons,render_pass_)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
@@ -55,7 +47,7 @@ namespace dmbrn
 		{
 			const Texture& color_buffer = swap_chain_.getColorBuffers()[imageIndex];
 
-			updateUniformBuffer(current_frame, delta_time);
+			//updateUniformBuffer(current_frame, delta_time);
 
 			color_buffer.transitionImageLayoutWithCommandBuffer(command_buffer, vk::ImageLayout::eShaderReadOnlyOptimal,
 			                                                    vk::ImageLayout::eColorAttachmentOptimal);
@@ -105,11 +97,7 @@ namespace dmbrn
 		ViewportRenderPass render_pass_;
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
-		UniformBuffers uniform_buffers_;
-		DescriptorSetLayout descriptor_set_layout_;
-		DescriptorSets descriptor_sets_;
-		GraphicsPipeline graphics_pipeline_;
-		Model model_;
+		Scene scene_;
 
 		bool HandleWindowResize(const Singletons& singletons)
 		{
@@ -150,7 +138,7 @@ namespace dmbrn
 			}
 		}
 
-		void updateUniformBuffer(uint32_t currentImage, float delta_t)
+		/*void updateUniformBuffer(uint32_t currentImage, float delta_t)
 		{
 			const float speed = 90;
 
@@ -171,7 +159,7 @@ namespace dmbrn
 			void* data = uniform_buffers_.getUBMemory(currentImage).mapMemory(0, sizeof(ubo));
 			memcpy(data, &ubo, sizeof(ubo));
 			uniform_buffers_.getUBMemory(currentImage).unmapMemory();
-		}
+		}*/
 
 		ImVec2 getWindowSize()
 		{
