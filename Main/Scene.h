@@ -15,7 +15,7 @@ namespace dmbrn
 		{
 			first.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj", singletons, render_pass);
 
-			camera.getComponent<TransformComponent>().translate({0,0,2});
+			camera.getComponent<TransformComponent>().translate({-2,0,0});
 			camera.addComponent<CameraComponent>(viewportFocused, camera.getComponent<TransformComponent>(), size);
 		}
 

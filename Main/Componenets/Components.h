@@ -113,32 +113,30 @@ namespace dmbrn
 					cam_move_dir.x += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_S))
-					cam_move_dir.y += -1;
+					cam_move_dir.z += -1;
 				else if (ImGui::IsKeyDown(ImGuiKey_W))
-					cam_move_dir.y += 1;
+					cam_move_dir.z += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_E))
-					cam_move_dir.z += 1;
+					cam_move_dir.y += 1;
 				else if (ImGui::IsKeyDown(ImGuiKey_Q))
-					cam_move_dir.z += -1;
+					cam_move_dir.y += -1;
 
 				moveCamera(cam_move_dir, delta_t);
 
 				if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 				{
 					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
-					ImVec2 mouse_rot = new_mouse_delt - mouse_last_delt;
+					ImVec2 mouse_rot = new_mouse_delt - last_mouse_delt;
 
-					mouse_last_delt = new_mouse_delt;
+					last_mouse_delt = new_mouse_delt;
 
-					std::cout << mouse_rot.x << " : " << mouse_rot.y << std::endl;
-
-					rotateCamera({mouse_rot.x, -mouse_rot.y});
+					rotateCamera({-mouse_rot.x, mouse_rot.y});
 				}
 
-				if(ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 				{
-					mouse_last_delt={0,0};
+					last_mouse_delt = {0, 0};
 				}
 			}
 		}
@@ -151,13 +149,13 @@ namespace dmbrn
 	private:
 		const bool& receive_input_;
 		TransformComponent& transform_;
-		glm::vec3 front_ = glm::vec3(0.0f, 0.0f, -1.0f);
-		glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);
-		glm::vec3 right_;
-		glm::vec3 world_up_ = glm::vec3(0, 1, 0);
+		glm::vec3 front_ = {1.0f, 0.0f, 0.0f};
+		glm::vec3 up_ = {0.0f, -1.0f, 0.0f};
+		glm::vec3 right_ = {0.0f, 0, -1.0f};
+		glm::vec3 world_up_ = {0, -1, 0};
 		float mouse_sensitivity_ = 0.15f;
 		float speed_ = 7;
-		ImVec2 mouse_last_delt;
+		ImVec2 last_mouse_delt = {0, 0};
 
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{

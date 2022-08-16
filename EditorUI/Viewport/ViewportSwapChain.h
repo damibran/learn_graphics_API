@@ -2,8 +2,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/Singletons/Surface.h"
-#include "Wrappers/Singletons/PhysicalDevice.h"
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Utils/UtilsFunctions.h"
 #include "Wrappers/Depthbuffer.h"
@@ -17,8 +15,8 @@ namespace dmbrn
 	public:
 		ViewportSwapChain(vk::Extent2D extent, const Singletons& singletons, const ViewportRenderPass& render_pass):
 			extent_(extent),
-			color_buffers_(createColorBuffers(extent, singletons)),
-			depth_buffer_(singletons.surface, singletons.window, singletons.physical_device, singletons.device),
+			color_buffers_(createColorBuffers(extent_, singletons)),
+			depth_buffer_(extent_, singletons.physical_device, singletons.device),
 			framebuffers_(createFrameBuffers(singletons.device, render_pass))
 		{
 		}
@@ -30,7 +28,7 @@ namespace dmbrn
 			singletons.device->waitIdle(); // may be not
 
 			color_buffers_ = createColorBuffers(extent_, singletons);
-			depth_buffer_ = DepthBuffer(singletons.surface, singletons.window, singletons.physical_device,
+			depth_buffer_ = DepthBuffer(extent_, singletons.physical_device,
 			                            singletons.device);
 			framebuffers_ = createFrameBuffers(singletons.device, render_pass);
 		}

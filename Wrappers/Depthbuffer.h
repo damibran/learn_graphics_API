@@ -2,8 +2,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/Singletons/Surface.h"
-#include "Wrappers/Singletons/GLFWwindowWrapper.h"
 #include "Wrappers/Singletons/PhysicalDevice.h"
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Utils/UtilsFunctions.h"
@@ -13,15 +11,15 @@ namespace dmbrn
 	class DepthBuffer
 	{
 	public:
-		DepthBuffer(const Surface& surface, const GLFWwindowWrapper& window,
+		DepthBuffer(const vk::Extent2D& extent,
 		            const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			vk::Format depth_format = utils::findDepthFormat(physical_device);
-			vk::Extent2D extent = utils::chooseSwapExtent(
-				PhysicalDevice::querySurfaceCapabilities(*physical_device, surface), window);
+
 			createImage(device, physical_device, extent.width, extent.height, depth_format,
 			            vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,
 			            vk::MemoryPropertyFlagBits::eDeviceLocal, image_, image_memory_);
+
 			createImageView(device, depth_format);
 		}
 

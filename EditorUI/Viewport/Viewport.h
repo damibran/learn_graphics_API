@@ -13,7 +13,7 @@ namespace dmbrn
 	{
 	public:
 		Viewport(const Singletons& singletons) :
-			size_(getWindowSize()),
+			size_(1280,720),
 			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, singletons,
 			            render_pass_),
@@ -139,24 +139,6 @@ namespace dmbrn
 				images_[i] = (ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
 				                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 			}
-		}
-
-		ImVec2 getWindowSize()
-		{
-			ImGui_ImplVulkan_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-
-			ImGui::Begin("Viewport");
-
-			ImVec2 res = ImGui::GetContentRegionAvail();
-
-			ImGui::End();
-			ImGui::EndFrame();
-
-			ImGui::UpdatePlatformWindows();
-
-			return res;
 		}
 	};
 }
