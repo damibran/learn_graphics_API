@@ -41,10 +41,11 @@ namespace dmbrn
 		{
 			CameraComponent& camera_component = camera.getComponent<CameraComponent>();
 
-			for (const auto & entity : registry_.view<MeshRendererComponent>())
+			auto group = registry_.group<MeshRendererComponent>(entt::get<TransformComponent>);
+			for (auto entity : group)
 			{
-				const TransformComponent& transform = registry_.get<TransformComponent>(entity);
-				registry_.get<MeshRendererComponent>(entity).draw(curentFrame, device, command_buffer,
+				auto [model,transform] = group.get<MeshRendererComponent,TransformComponent>(entity);
+				model.draw(curentFrame, device, command_buffer,
 			                                                 transform,
 			                                                 camera_component.getViewMat(), camera_component.proj_);
 			}
