@@ -41,9 +41,9 @@ namespace dmbrn
 		glm::mat4 getMatrix() const
 		{
 			glm::mat4 res = glm::scale(glm::mat4(1.0f), scale);
-			res = rotate(res, rotation.x, {1, 0, 0});
-			res = rotate(res, rotation.y, {0, 1, 0});
-			res = rotate(res, rotation.z, {0, 0, 1});
+			res = glm::rotate(res, glm::radians(rotation.x), {1, 0, 0});
+			res = glm::rotate(res, glm::radians(rotation.y), {0, 1, 0});
+			res = glm::rotate(res, glm::radians(rotation.z), {0, 0, 1});
 			res = glm::translate(res, position);
 
 			return res;
@@ -52,6 +52,11 @@ namespace dmbrn
 		void translate(const glm::vec3& v)
 		{
 			position = glm::translate(glm::mat4(1), v) * glm::vec4(position, 1);
+		}
+
+		void rotate(const glm::vec3& r)
+		{
+			rotation += r;
 		}
 
 		glm::vec3 getRotationDegrees() const
