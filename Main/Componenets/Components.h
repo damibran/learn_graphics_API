@@ -68,10 +68,10 @@ namespace dmbrn
 	class MeshRendererComponent
 	{
 	public:
-		MeshRendererComponent(const std::string& modelPath, const Singletons& singletons,
+		MeshRendererComponent(const std::string& modelPath,
 		                      const ViewportRenderPass& render_pass):
-			material_(singletons, render_pass),
-			model_(modelPath, singletons)
+			material_(render_pass),
+			model_(modelPath)
 		{
 		}
 

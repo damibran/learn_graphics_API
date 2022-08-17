@@ -18,22 +18,22 @@ namespace dmbrn
 		vk::raii::ImageView image_view;
 		vk::raii::Framebuffer frame_buffer;
 
-		EditorFrame(const Singletons& singletons, const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
+		EditorFrame( const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
 		            const VkImage& image) :
-			command_buffer(std::move(createCommandBuffer(singletons.device, singletons.command_pool)[0])),
-			image_available_semaphore(singletons.device->createSemaphore({})),
-			render_finished_semaphore(singletons.device->createSemaphore({})),
-			in_flight_fence(singletons.device->createFence({vk::FenceCreateFlagBits::eSignaled})),
-			image_view(createImageView(singletons.device, image, format)),
-			frame_buffer(createFrameBuffers(singletons.device, render_pass, extent))
+			command_buffer(std::move(createCommandBuffer(Singletons::device, Singletons::command_pool)[0])),
+			image_available_semaphore(Singletons::device->createSemaphore({})),
+			render_finished_semaphore(Singletons::device->createSemaphore({})),
+			in_flight_fence(Singletons::device->createFence({vk::FenceCreateFlagBits::eSignaled})),
+			image_view(createImageView(Singletons::device, image, format)),
+			frame_buffer(createFrameBuffers(Singletons::device, render_pass, extent))
 		{
 		}
 
-		void resize(const Singletons& singletons, const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
+		void resize(const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
 		            const VkImage& image)
 		{
-			image_view = createImageView(singletons.device, image, format);
-			frame_buffer = createFrameBuffers(singletons.device, render_pass, extent);
+			image_view = createImageView(Singletons::device, image, format);
+			frame_buffer = createFrameBuffers(Singletons::device, render_pass, extent);
 		}
 
 	private:

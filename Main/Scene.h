@@ -8,14 +8,14 @@ namespace dmbrn
 	class Scene
 	{
 	public:
-		Scene(const Singletons& singletons, const ViewportRenderPass& render_pass, const bool& viewportFocused,
+		Scene(const ViewportRenderPass& render_pass, const bool& viewportFocused,
 		      ImVec2 size):
 			barrel(registry_, "First Barrel"),
 			floor(registry_,"Floor"),
 			camera(registry_, "Main Camera")
 		{
-			barrel.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj", singletons, render_pass);
-			floor.addComponent<MeshRendererComponent>("Models\\GrassPlane\\grassPlane.obj",singletons,render_pass);
+			barrel.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj", render_pass);
+			floor.addComponent<MeshRendererComponent>("Models\\GrassPlane\\grassPlane.obj",render_pass);
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 

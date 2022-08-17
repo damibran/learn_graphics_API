@@ -23,26 +23,26 @@ namespace dmbrn
 		{
 		}
 
-		Texture(vk::Extent2D extent, const Singletons& singletons) :
+		Texture(vk::Extent2D extent) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageWithSize(extent, singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
-			createTextureImageView(singletons.device);
-			createTextureSampler(singletons.device, singletons.physical_device);
+			createTextureImageWithSize(extent, Singletons::physical_device, Singletons::device, Singletons::command_pool, Singletons::graphics_queue);
+			createTextureImageView(Singletons::device);
+			createTextureSampler(Singletons::device, Singletons::physical_device);
 		}
 
-		Texture(const std::string& texPath, const Singletons& singletons) :
+		Texture(const std::string& texPath) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageFromFile(texPath, singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
-			createTextureImageView(singletons.device);
-			createTextureSampler(singletons.device, singletons.physical_device);
+			createTextureImageFromFile(texPath, Singletons::physical_device, Singletons::device, Singletons::command_pool, Singletons::graphics_queue);
+			createTextureImageView(Singletons::device);
+			createTextureSampler(Singletons::device, Singletons::physical_device);
 		}
 
 		void transitionImageLayoutWithCommandBuffer(const vk::raii::CommandBuffer& command_buffer,

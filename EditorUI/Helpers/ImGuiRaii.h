@@ -7,7 +7,7 @@ namespace dmbrn
 	class ImGuiRaii
 	{
 	public:
-		ImGuiRaii(const Singletons& singletons, const ImGUIRenderPass& render_pass):
+		ImGuiRaii(const ImGUIRenderPass& render_pass):
 			imguiPool(nullptr)
 		{
 			vk::DescriptorPoolSize pool_sizes[] =
@@ -31,7 +31,7 @@ namespace dmbrn
 				1000, pool_sizes
 			};
 
-			imguiPool = singletons.device->createDescriptorPool(pool_info);
+			imguiPool = Singletons::device->createDescriptorPool(pool_info);
 
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO();
@@ -48,26 +48,26 @@ namespace dmbrn
 				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 			}
 
-			ImGui_ImplGlfw_InitForVulkan(singletons.window.data(), true);
+			ImGui_ImplGlfw_InitForVulkan(Singletons::window.data(), true);
 
 			ImGui_ImplVulkan_InitInfo init_info = {};
-			init_info.Instance = **singletons.instance;
-			init_info.PhysicalDevice = **singletons.physical_device;
-			init_info.Device = **singletons.device;
-			init_info.QueueFamily = singletons.physical_device.getQueueFamilyIndices().graphicsFamily.value();
-			init_info.Queue = *singletons.graphics_queue;
+			init_info.Instance = **Singletons::instance;
+			init_info.PhysicalDevice = **Singletons::physical_device;
+			init_info.Device = **Singletons::device;
+			init_info.QueueFamily = Singletons::physical_device.getQueueFamilyIndices().graphicsFamily.value();
+			init_info.Queue = *Singletons::graphics_queue;
 			init_info.DescriptorPool = *imguiPool;
 			init_info.Subpass = 0;
 			init_info.MinImageCount = 2; // idk what values to put here
-			init_info.ImageCount = singletons.device.MAX_FRAMES_IN_FLIGHT; // idk what values to put here
+			init_info.ImageCount = Singletons::device.MAX_FRAMES_IN_FLIGHT; // idk what values to put here
 			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 			ImGui_ImplVulkan_Init(&init_info, **render_pass);
 
-			vk::raii::CommandBuffer cb = singletons.command_pool.beginSingleTimeCommands(singletons.device);
+			vk::raii::CommandBuffer cb = Singletons::command_pool.beginSingleTimeCommands(Singletons::device);
 
 			ImGui_ImplVulkan_CreateFontsTexture(*cb);
 
-			singletons.command_pool.endSingleTimeCommands(singletons.graphics_queue, cb);
+			Singletons::command_pool.endSingleTimeCommands(Singletons::graphics_queue, cb);
 		}
 				
 		~ImGuiRaii()

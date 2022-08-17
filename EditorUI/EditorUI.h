@@ -11,7 +11,6 @@
 #include "Helpers/ImGuiRaii.h"
 #include "Helpers/ImGUIRenderPass.h"
 #include "Helpers/ImGUISwapChain.h"
-#include "imgui_internal.h"
 #include "Viewport/Viewport.h"
 
 namespace dmbrn
@@ -19,34 +18,34 @@ namespace dmbrn
 	class EditorUI
 	{
 	public:
-		EditorUI(const Singletons& singletons) :
-			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
-			swap_chain_(singletons, render_pass_),
-			im_gui_(singletons, render_pass_),
-			viewport_(singletons)
+		EditorUI() :
+			render_pass_(),
+			swap_chain_( render_pass_),
+			im_gui_( render_pass_),
+			viewport_()
 		{
 		}
 
-		void drawFrame(Singletons& singletons, float delta_time)
+		void drawFrame(float delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
-			uint32_t imageIndex = newFrame(singletons.device, frame);
+			uint32_t imageIndex = newFrame(Singletons::device, frame);
 
 			beginDockSpace();
 
 			//showAppMainMenuBar();
 			ImGui::ShowDemoWindow();
 
-			viewport_.newImGuiFrame(singletons, delta_time, imageIndex);
+			viewport_.newImGuiFrame(delta_time, imageIndex);
 
 			ImGui::End();
 
-			render(singletons, frame, imageIndex);
+			render(Singletons::device, frame, imageIndex);
 
-			submitAndPresent(singletons, frame, imageIndex);
+			submitAndPresent(Singletons::present_queue,Singletons::graphics_queue,Singletons::window, frame, imageIndex);
 
-			current_frame_ = (current_frame_ + 1) % singletons.device.MAX_FRAMES_IN_FLIGHT;
+			current_frame_ = (current_frame_ + 1) % Singletons::device.MAX_FRAMES_IN_FLIGHT;
 		}
 
 	private:
@@ -158,7 +157,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
+		void render(const LogicalDevice& device, const EditorFrame& frame, uint32_t imageIndex)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -172,7 +171,7 @@ namespace dmbrn
 
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
-			viewport_.render(singletons.device, command_buffer, current_frame_, imageIndex);
+			viewport_.render(device, command_buffer, current_frame_, imageIndex);
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
@@ -189,7 +188,7 @@ namespace dmbrn
 			command_buffer.end();
 		}
 
-		void submitAndPresent(Singletons& singletons, const EditorFrame& frame, uint32_t imageIndex)
+		void submitAndPresent(vk::raii::Queue& present, vk::raii::Queue& graphics, GLFWwindowWrapper& window,const EditorFrame& frame, uint32_t imageIndex)
 		{
 			const vk::Semaphore waitSemaphores[] = {*frame.image_available_semaphore};
 			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -203,7 +202,7 @@ namespace dmbrn
 				signalSemaphores
 			};
 
-			singletons.graphics_queue.submit(submitInfo, *frame.in_flight_fence);
+			graphics.submit(submitInfo, *frame.in_flight_fence);
 
 			try
 			{
@@ -213,12 +212,12 @@ namespace dmbrn
 					**swap_chain_,
 					imageIndex
 				};
-				singletons.present_queue.presentKHR(presentInfo);
+				present.presentKHR(presentInfo);
 			}
 			catch (vk::OutOfDateKHRError e)
 			{
-				singletons.window.framebufferResized = false;
-				swap_chain_.recreate(singletons, render_pass_);
+				window.framebufferResized = false;
+				swap_chain_.recreate(render_pass_);
 			}
 		}
 	};

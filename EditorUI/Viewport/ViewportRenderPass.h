@@ -12,7 +12,7 @@ namespace dmbrn
 	class ViewportRenderPass
 	{
 	public:
-		ViewportRenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device):
+		ViewportRenderPass():
 			render_pass_(nullptr)
 		{
 			const vk::AttachmentDescription colorAttachment
@@ -36,7 +36,7 @@ namespace dmbrn
 			const vk::AttachmentDescription depthAttachment
 			{
 				{},
-				utils::findDepthFormat(physical_device),
+				utils::findDepthFormat(Singletons::physical_device),
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare,
@@ -80,7 +80,7 @@ namespace dmbrn
 				dependency
 			};
 
-			render_pass_ = vk::raii::RenderPass{device->createRenderPass(renderPassInfo)};
+			render_pass_ = vk::raii::RenderPass{Singletons::device->createRenderPass(renderPassInfo)};
 		}
 
 		const vk::raii::RenderPass& operator*() const

@@ -12,12 +12,12 @@ namespace dmbrn
 	class Viewport
 	{
 	public:
-		Viewport(const Singletons& singletons) :
+		Viewport() :
 			size_(1280,720),
-			render_pass_(singletons.surface, singletons.physical_device, singletons.device),
-			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)}, singletons,
+			render_pass_(),
+			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
-			scene_(singletons, render_pass_,focused,size_)
+			scene_(render_pass_,focused,size_)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
@@ -27,11 +27,11 @@ namespace dmbrn
 			}
 		}
 
-		void newImGuiFrame(const Singletons& singletons, float delta_t,uint32_t imageIndex)
+		void newImGuiFrame(float delta_t,uint32_t imageIndex)
 		{
 			ImGui::Begin("Viewport");
 
-			if (HandleWindowResize(singletons) == false)
+			if (HandleWindowResize() == false)
 			{
 				ImGui::End();
 				return;
@@ -101,7 +101,7 @@ namespace dmbrn
 		Scene scene_;
 		bool focused=false;
 
-		bool HandleWindowResize(const Singletons& singletons)
+		bool HandleWindowResize()
 		{
 			ImVec2 view = ImGui::GetContentRegionAvail();
 
@@ -116,7 +116,7 @@ namespace dmbrn
 				size_.x = view.x;
 				size_.y = view.y;
 
-				resize(singletons);
+				resize();
 				scene_.changeCameraAspect(size_	);
 
 				// The window state has been successfully changed.
@@ -127,10 +127,9 @@ namespace dmbrn
 			return true;
 		}
 
-		void resize(const Singletons& singletons)
+		void resize()
 		{
 			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
-			                     singletons,
 			                     render_pass_);
 
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)

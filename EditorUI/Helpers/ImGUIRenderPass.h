@@ -14,13 +14,13 @@ namespace dmbrn
 	class ImGUIRenderPass
 	{
 	public:
-		ImGUIRenderPass(const Surface& surface, const PhysicalDevice& physical_device, const LogicalDevice& device):
+		ImGUIRenderPass():
 			render_pass_(nullptr)
 		{
 			const vk::AttachmentDescription colorAttachment
 			{
 				{},
-				utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*physical_device, surface)).format,
+				utils::chooseSwapSurfaceFormat(PhysicalDevice::querySurfaceFormats(*Singletons::physical_device, Singletons::surface)).format,
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eStore,
@@ -62,7 +62,7 @@ namespace dmbrn
 				dependency
 			};
 
-			render_pass_ = vk::raii::RenderPass{device->createRenderPass(renderPassInfo)};
+			render_pass_ = vk::raii::RenderPass{Singletons::device->createRenderPass(renderPassInfo)};
 		}
 
 		const vk::raii::RenderPass& operator*() const

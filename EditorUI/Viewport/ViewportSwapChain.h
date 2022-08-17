@@ -13,24 +13,24 @@ namespace dmbrn
 	class ViewportSwapChain
 	{
 	public:
-		ViewportSwapChain(vk::Extent2D extent, const Singletons& singletons, const ViewportRenderPass& render_pass):
+		ViewportSwapChain(vk::Extent2D extent, const ViewportRenderPass& render_pass):
 			extent_(extent),
-			color_buffers_(createColorBuffers(extent_, singletons)),
-			depth_buffer_(extent_, singletons.physical_device, singletons.device),
-			framebuffers_(createFrameBuffers(singletons.device, render_pass))
+			color_buffers_(createColorBuffers(extent_)),
+			depth_buffer_(extent_, Singletons::physical_device,Singletons::device),
+			framebuffers_(createFrameBuffers(Singletons::device, render_pass))
 		{
 		}
 
-		void recreate(const vk::Extent2D extent, const Singletons& singletons, const ViewportRenderPass& render_pass)
+		void recreate(const vk::Extent2D extent, const ViewportRenderPass& render_pass)
 		{
 			extent_ = extent;
 
-			singletons.device->waitIdle(); // may be not
+			Singletons::device->waitIdle(); // may be not
 
-			color_buffers_ = createColorBuffers(extent_, singletons);
-			depth_buffer_ = DepthBuffer(extent_, singletons.physical_device,
-			                            singletons.device);
-			framebuffers_ = createFrameBuffers(singletons.device, render_pass);
+			color_buffers_ = createColorBuffers(extent_);
+			depth_buffer_ = DepthBuffer(extent_, Singletons::physical_device,
+			                            Singletons::device);
+			framebuffers_ = createFrameBuffers(Singletons::device, render_pass);
 		}
 
 		const vk::Extent2D& getExtent() const
@@ -54,13 +54,12 @@ namespace dmbrn
 		DepthBuffer depth_buffer_;
 		std::vector<vk::raii::Framebuffer> framebuffers_;
 
-		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent,
-		                                                      const Singletons&singletons)
+		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent)
 		{
 			std::vector<Texture> res;
-			for (int i = 0; i < utils::capabilitiesGetImageCount(singletons.physical_device, singletons.surface); ++i)
+			for (int i = 0; i < utils::capabilitiesGetImageCount(Singletons::physical_device, Singletons::surface); ++i)
 			{
-				res.emplace_back(extent, singletons);
+				res.emplace_back(extent);
 			}
 			return res;
 		}

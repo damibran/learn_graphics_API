@@ -18,38 +18,37 @@ namespace dmbrn
 	class ImGUISwapChain
 	{
 	public:
-		ImGUISwapChain(const Singletons& singletons, const ImGUIRenderPass& render_pass):
-			swap_chain_(createSwapChain(singletons.physical_device, singletons.device, singletons.surface, singletons.window)),
-			image_format_(image_format_),
-			extent_(extent_)
+		ImGUISwapChain(const ImGUIRenderPass& render_pass):
+			swap_chain_(createSwapChain(Singletons::physical_device, Singletons::device, Singletons::surface, Singletons::window))
 		{
 			for (auto image : swap_chain_.getImages())
 			{
-				editor_frames_.emplace_back(singletons,render_pass,image_format_,extent_,image);
+				editor_frames_.emplace_back(render_pass, image_format_, extent_, image);
 			}
 		}
 
-		void recreate(const Singletons& singletons, const ImGUIRenderPass& render_pass)
+		void recreate(const ImGUIRenderPass& render_pass)
 		{
 			int width = 0, height = 0;
-			const auto rec_size = singletons.window.getFrameBufferSize();
+			const auto rec_size = Singletons::window.getFrameBufferSize();
 			width = rec_size.first;
 			height = rec_size.second;
 			while (width == 0 || height == 0)
 			{
-				auto rec_size = singletons.window.getFrameBufferSize();
+				auto rec_size = Singletons::window.getFrameBufferSize();
 				width = rec_size.first;
 				height = rec_size.second;
 				glfwWaitEvents();
 			}
 
-			singletons.device->waitIdle();
+			Singletons::device->waitIdle();
 
-			swap_chain_ = createSwapChain(singletons.physical_device, singletons.device, singletons.surface, singletons.window);
+			swap_chain_ = createSwapChain(Singletons::physical_device, Singletons::device, Singletons::surface,
+			                              Singletons::window);
 			auto frame = editor_frames_.begin();
 			for (auto image : swap_chain_.getImages())
 			{
-				*frame = EditorFrame{singletons,render_pass,image_format_,extent_,image};
+				*frame = EditorFrame{render_pass, image_format_, extent_, image};
 				++frame;
 			}
 		}
@@ -66,10 +65,10 @@ namespace dmbrn
 
 		const EditorFrame& getFrame(uint32_t i)
 		{
-			return  editor_frames_[i];
+			return editor_frames_[i];
 		}
 
-		const vk::Format& getFormat()const
+		const vk::Format& getFormat() const
 		{
 			return image_format_;
 		}
@@ -80,10 +79,10 @@ namespace dmbrn
 		}
 
 	private:
+		vk::Format image_format_ = vk::Format::eR8G8B8A8Unorm;
+		vk::Extent2D extent_{1280, 720};
 		vk::raii::SwapchainKHR swap_chain_;
 		std::vector<EditorFrame> editor_frames_;
-		vk::Format image_format_;
-		vk::Extent2D extent_;
 
 		[[nodiscard]] vk::raii::SwapchainKHR createSwapChain(const PhysicalDevice& physical_device,
 		                                                     const LogicalDevice& device,
@@ -98,7 +97,7 @@ namespace dmbrn
 				PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
 			const vk::Extent2D extent = utils::chooseSwapExtent(capabilities, window);
 
-			uint32_t imageCount = utils::capabilitiesGetImageCount(physical_device,surface);
+			uint32_t imageCount = utils::capabilitiesGetImageCount(physical_device, surface);
 
 			vk::SwapchainCreateInfoKHR createInfo{}; // very easy to miss something... may be redo
 			createInfo.surface = **surface;

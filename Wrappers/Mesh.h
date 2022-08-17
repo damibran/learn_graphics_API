@@ -17,8 +17,7 @@ namespace dmbrn
 		std::vector<Texture> textures_;
 
 		// constructor
-		Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<Texture>&& textures,
-		     const Singletons& singletons) :
+		Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<Texture>&& textures) :
 			vertices_(std::move(vertices)),
 			indices_(std::move(indices)),
 			textures_(std::move(textures)),
@@ -28,12 +27,15 @@ namespace dmbrn
 			index_buffer_memory_(nullptr)
 		{
 			// now that we have all the required data, set the vertex buffers and its attribute pointers.
-			createVertexBuffer(singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
-			createIndexBuffer(singletons.physical_device, singletons.device, singletons.command_pool, singletons.graphics_queue);
+			createVertexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			                   Singletons::graphics_queue);
+			createIndexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			                  Singletons::graphics_queue);
 		}
 
 		// render the mesh
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer, const UnlitTextureMaterial& material) const
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
+		          const UnlitTextureMaterial& material) const
 		{
 			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **material.graphics_pipeline_);
 
@@ -43,7 +45,8 @@ namespace dmbrn
 
 			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 
-			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *material.graphics_pipeline_.getLayout(), 0,
+			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+			                                  *material.graphics_pipeline_.getLayout(), 0,
 			                                  *material.descriptor_sets_[frame], nullptr);
 
 			command_buffer.drawIndexed(indices_.size(), 1, 0, 0, 0);
