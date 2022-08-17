@@ -207,7 +207,7 @@
     <ClInclude Include="Main\Componenets\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\Singletons\UnLitDescriptorsStatics.h">
+    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorsStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorSets.h">
@@ -217,6 +217,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Materials\UnLitTextured\UnlitTextureMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

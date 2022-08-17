@@ -11,7 +11,6 @@ namespace dmbrn
 		UnlitTextureMaterial(const ViewportRenderPass& render_pass):
 		uniform_buffers_(Singletons::physical_device,Singletons::device),
 		descriptor_sets_(Singletons::device,Singletons::un_lit_descriptor_statics,uniform_buffers_),
-		graphics_pipeline_(Singletons::device,render_pass,Singletons::un_lit_descriptor_statics)
 		{
 		}
 
@@ -33,6 +32,5 @@ namespace dmbrn
 
 		UniformBuffers uniform_buffers_;
 		UnLitDescriptorSets descriptor_sets_;
-		UnLitGraphicsPipeline graphics_pipeline_;
 	};
 }

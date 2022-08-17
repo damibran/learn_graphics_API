@@ -12,10 +12,12 @@ namespace dmbrn
 	class UnLitGraphicsPipeline
 	{
 	public:
-		UnLitGraphicsPipeline(const LogicalDevice& device, const ViewportRenderPass& render_pass,
-		                 const UnLitDescriptorsStatics& descriptor_set_statics):
-			pipeline_layout_(nullptr),
-			graphics_pipeline_(nullptr)
+		UnLitGraphicsPipeline(): graphics_pipeline_(nullptr)
+		{
+		}
+
+		void setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
+		                   const vk::raii::PipelineLayout& pipeline_layout)
 		{
 			const auto vertShaderCode = readFile("shaders/vert.spv");
 			const auto fragShaderCode = readFile("shaders/frag.spv");
@@ -103,20 +105,13 @@ namespace dmbrn
 				VK_FALSE, VK_FALSE
 			};
 
-			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
-			{
-				{}, *descriptor_set_statics.layout_
-			};
-
-			pipeline_layout_ = vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};
-
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
 				{}, 2, shaderStages,
 				&vertexInputInfo, &inputAssembly, {},
 				&viewportState, &rasterizer, &multisampling,
 				&depth_stencil_info, &colorBlending, &dynamicState,
-				*pipeline_layout_, **render_pass
+				*pipeline_layout, *render_pass
 			};
 
 			graphics_pipeline_ = vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
@@ -127,13 +122,7 @@ namespace dmbrn
 			return graphics_pipeline_;
 		}
 
-		const vk::raii::PipelineLayout& getLayout() const
-		{
-			return pipeline_layout_;
-		}
-
 	private:
-		vk::raii::PipelineLayout pipeline_layout_;
 		vk::raii::Pipeline graphics_pipeline_;
 
 		static std::vector<char> readFile(const std::string& filename)

@@ -170,7 +170,8 @@
     <ClInclude Include="Main\Enttity.h" />
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="Main\Script.h" />
-    <ClInclude Include="Wrappers\Singletons\UnLitDescriptorsStatics.h" />
+    <ClInclude Include="Wrappers\Singletons\Renderer.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorsStatics.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorSets.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitGraphicsPipeline.h" />
     <ClInclude Include="Materials\UnLitTextured\UnlitTextureMaterial.h" />

@@ -6,7 +6,6 @@
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
-#include "UnLitDescriptorsStatics.h"
 
 namespace dmbrn
 {
@@ -25,6 +24,7 @@ namespace dmbrn
 		friend class Texture;
 		friend class UnlitTextureMaterial;
 		friend class Mesh;
+		friend class UnLitDescriptorsStatics;
 
 	private:
 		static inline GLFWwindowWrapper window{1280, 720};
@@ -40,6 +40,5 @@ namespace dmbrn
 			device->getQueue(physical_device.getQueueFamilyIndices().presentFamily.value(), 0)
 		};
 		static inline CommandPool command_pool{physical_device, device};
-		static inline UnLitDescriptorsStatics un_lit_descriptor_statics{device};
 	};
 }

@@ -3,6 +3,8 @@
 #include <vulkan/vulkan_raii.hpp>
 
 #include "Wrappers/Singletons/LogicalDevice.h"
+#include "Wrappers/Singletons/Singletons.h"
+#include "UnLitGraphicsPipeline.h"
 
 namespace dmbrn
 {
@@ -12,15 +14,28 @@ namespace dmbrn
 		const int MAX_COUNT = 10;
 
 		UnLitDescriptorsStatics(const LogicalDevice& device):
-			layout_(createLayout(device)),
+			descriptor_layout_(createDescriptorLayout(device)),
+			pipeline_layout_(createPipelineLayout(device)),
 			pool_(createDescriptorPool(device))
 		{
 		}
 
-		vk::raii::DescriptorSetLayout layout_;
+		void setRenderPass(const vk::raii::RenderPass& render_pass)
+		{
+			graphics_pipeline_.setRenderPass(Singletons::device, render_pass, pipeline_layout_);
+		}
+
+		const vk::raii::PipelineLayout& getLayout() const
+		{
+			return pipeline_layout_;
+		}
+
+		vk::raii::DescriptorSetLayout descriptor_layout_;
+		vk::raii::PipelineLayout pipeline_layout_;
 		vk::raii::DescriptorPool pool_;
+		UnLitGraphicsPipeline graphics_pipeline_;
 	private:
-		vk::raii::DescriptorSetLayout createLayout(const LogicalDevice& device)
+		vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
 		{
 			const vk::DescriptorSetLayoutBinding uboLayoutBinding
 			{
@@ -44,6 +59,16 @@ namespace dmbrn
 			};
 
 			return vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
+		}
+
+		vk::raii::PipelineLayout createPipelineLayout(const LogicalDevice& device)
+		{
+			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
+			{
+				{}, *descriptor_layout_
+			};
+
+			return vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};
 		}
 
 		vk::raii::DescriptorPool createDescriptorPool(const LogicalDevice& device) const
