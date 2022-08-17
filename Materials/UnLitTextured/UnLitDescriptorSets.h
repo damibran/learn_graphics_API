@@ -3,7 +3,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 #include "Wrappers/Singletons/LogicalDevice.h"
-#include "Wrappers/Singletons/UnLitDescriptorsStatics.h"
 #include "Wrappers/Texture.h"
 #include "Wrappers/UniformBuffers.h"
 
@@ -45,7 +44,7 @@ namespace dmbrn
 		void createDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics,
 		                          const UniformBuffers& uniform_buffers)
 		{
-			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.layout_);
+			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.descriptor_layout_);
 
 			const vk::DescriptorSetAllocateInfo allocInfo
 			{

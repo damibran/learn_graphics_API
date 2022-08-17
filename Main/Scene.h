@@ -8,14 +8,14 @@ namespace dmbrn
 	class Scene
 	{
 	public:
-		Scene(const ViewportRenderPass& render_pass, const bool& viewportFocused,
+		Scene(const bool& viewportFocused,
 		      ImVec2 size):
 			barrel(registry_, "First Barrel"),
 			floor(registry_,"Floor"),
 			camera(registry_, "Main Camera")
 		{
-			barrel.addComponent<MeshRendererComponent>("Models\\Barrel\\barell.obj", render_pass);
-			floor.addComponent<MeshRendererComponent>("Models\\GrassPlane\\grassPlane.obj",render_pass);
+			barrel.addComponent<UnLitMeshRendererComponent>("Models\\Barrel\\barell.obj");
+			floor.addComponent<UnLitMeshRendererComponent>("Models\\GrassPlane\\grassPlane.obj");
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
@@ -41,10 +41,10 @@ namespace dmbrn
 		{
 			CameraComponent& camera_component = camera.getComponent<CameraComponent>();
 
-			auto group = registry_.group<MeshRendererComponent>(entt::get<TransformComponent>);
+			auto group = registry_.group<UnLitMeshRendererComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
 			{
-				auto [model,transform] = group.get<MeshRendererComponent,TransformComponent>(entity);
+				auto [model,transform] = group.get<UnLitMeshRendererComponent,TransformComponent>(entity);
 				model.draw(curentFrame, device, command_buffer,
 			                                                 transform,
 			                                                 camera_component.getViewMat(), camera_component.proj_);

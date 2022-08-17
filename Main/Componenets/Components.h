@@ -65,12 +65,11 @@ namespace dmbrn
 		}
 	};
 
-	class MeshRendererComponent
+	class UnLitMeshRendererComponent
 	{
 	public:
-		MeshRendererComponent(const std::string& modelPath,
-		                      const ViewportRenderPass& render_pass):
-			material_(render_pass),
+		UnLitMeshRendererComponent(const std::string& modelPath):
+			material_(),
 			model_(modelPath)
 		{
 		}

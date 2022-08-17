@@ -4,6 +4,7 @@
 
 #include "Wrappers/UniformBuffers.h"
 
+#include "Wrappers/Singletons/Renderer.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
 
@@ -17,8 +18,10 @@ namespace dmbrn
 			render_pass_(),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
-			scene_(render_pass_,focused,size_)
+			scene_(focused,size_)
 		{
+			Renderer::setRenderPass(*render_pass_);
+
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
 				const Texture& buf = swap_chain_.getColorBuffers()[i];

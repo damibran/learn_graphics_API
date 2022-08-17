@@ -13,10 +13,10 @@ namespace dmbrn
 	public:
 		const int MAX_COUNT = 10;
 
-		UnLitDescriptorsStatics(const LogicalDevice& device):
-			descriptor_layout_(createDescriptorLayout(device)),
-			pipeline_layout_(createPipelineLayout(device)),
-			pool_(createDescriptorPool(device))
+		UnLitDescriptorsStatics():
+			descriptor_layout_(createDescriptorLayout(Singletons::device)),
+			pipeline_layout_(createPipelineLayout(Singletons::device)),
+			pool_(createDescriptorPool(Singletons::device))
 		{
 		}
 

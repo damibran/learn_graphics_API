@@ -7,13 +7,19 @@ namespace dmbrn
 {
 	class Renderer
 	{
-	public:
-		void setRenderPass(vk::raii::RenderPass* render_pass)
+		friend class UnlitTextureMaterial;
+
+		void drawMesh(const)
 		{
 			
 		}
+
+	public:
+		static void setRenderPass(const vk::raii::RenderPass& render_pass)
+		{
+			un_lit_descriptors_statics_.setRenderPass(render_pass);
+		}
 	private:
-		static inline vk::raii::RenderPass* render_pass_{nullptr};
-		static inline UnLitDescriptorsStatics un_lit_descriptors_statics_;
+		static inline UnLitDescriptorsStatics un_lit_descriptors_statics_{};
 	};
 }
