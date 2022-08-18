@@ -13,14 +13,19 @@ namespace dmbrn
 		Scene(const bool& viewportFocused,
 		      ImVec2 size):
 			barrel(registry_, "First Barrel"),
+			barrel2(registry_,"Barrel 2"),
 			floor(registry_, "Floor"),
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
-			//barrel.addComponent<UnlitTextureMaterial>(std::move(Renderer::createUnlitTexturedMaterial()));
+			barrel.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
+
+			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
+			barrel2.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
+			barrel2.getComponent<TransformComponent>().translate({0,-2,0});
 
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.obj");
-			//floor.addComponent<UnlitTextureMaterial>(std::move(Renderer::createUnlitTexturedMaterial()));
+			floor.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
@@ -46,11 +51,12 @@ namespace dmbrn
 		{
 			CameraComponent& camera_component = camera.getComponent<CameraComponent>();
 
-			auto group = registry_.group<UnlitTextureMaterial>(entt::get<TransformComponent, Model>);
+			auto group = registry_.group<ModelComponent, UnlitTextureMaterial>(entt::get<TransformComponent>);
 			Renderer::BeginUnlitTextureMaterial(command_buffer);
 			for (auto entity : group)
 			{
-				auto [model,material,transform] = group.get<Model, UnlitTextureMaterial, TransformComponent>(entity);
+				auto [model,material,transform] = group.get<
+					ModelComponent, UnlitTextureMaterial, TransformComponent>(entity);
 				material.updateUBO(curentFrame, transform.getMatrix(), camera_component.getViewMat(),
 				                   camera_component.proj_);
 				model.draw(curentFrame, device, command_buffer, material);
@@ -60,6 +66,7 @@ namespace dmbrn
 	private:
 		entt::registry registry_;
 		Enttity barrel;
+		Enttity barrel2;
 		Enttity floor;
 		Enttity camera;
 	};

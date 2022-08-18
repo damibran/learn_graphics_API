@@ -14,6 +14,10 @@ namespace dmbrn
 	class UniformBuffers
 	{
 	public:
+
+		UniformBuffers(UniformBuffers&& )=default;
+		UniformBuffers& operator=(UniformBuffers&&)=default;
+
 		struct UniformBufferObject
 		{
 			alignas(16) glm::mat4 model;

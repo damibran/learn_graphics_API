@@ -68,9 +68,13 @@ namespace dmbrn
 	{
 	public:
 		ModelComponent(const std::string& path):
-		model_(&Model::model_instances[path])
+		model_(&(*(Model::model_instances.emplace(std::make_pair(path,path)).first)).second)
 		{
 			
+		}
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTextureMaterial& material)
+		{
+			model_->draw(frame,device,command_buffers,material);
 		}
 	private:
 		Model* model_;

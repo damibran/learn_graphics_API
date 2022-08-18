@@ -11,17 +11,19 @@ namespace dmbrn
 		friend UnlitTextureMaterial;
 
 	public:
-		static void BeginUnlitTextureMaterial( const vk::raii::CommandBuffer& command_buffer)
+		static void BeginUnlitTextureMaterial(const vk::raii::CommandBuffer& command_buffer)
 		{
-			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **un_lit_descriptors_statics_.graphics_pipeline_);
+			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+			                            **un_lit_descriptors_statics_.graphics_pipeline_);
 		}
 
-		static UnlitTextureMaterial&& createUnlitTexturedMaterial()
+		static UnlitTextureMaterial createUnlitTexturedMaterial()
 		{
-			return UnlitTextureMaterial{Singletons::physical_device,Singletons::device,un_lit_descriptors_statics_};
+			return {Singletons::physical_device, Singletons::device, un_lit_descriptors_statics_};
 		}
 
-		static void Submit(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,const UnlitTextureMaterial& material, const Mesh& mesh)
+		static void Submit(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
+		                   const UnlitTextureMaterial& material, const Mesh& mesh)
 		{
 			material.descriptor_sets_.updateFrameDescriptorSetTexture(curentFrame, device, mesh.textures_[0]);
 
@@ -41,6 +43,7 @@ namespace dmbrn
 		{
 			un_lit_descriptors_statics_.setRenderPass(render_pass);
 		}
+
 	private:
 		static inline UnLitDescriptorsStatics un_lit_descriptors_statics_{};
 	};

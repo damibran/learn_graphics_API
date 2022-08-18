@@ -11,6 +11,10 @@ namespace dmbrn
 	class UnLitDescriptorSets
 	{
 	public:
+
+		UnLitDescriptorSets(UnLitDescriptorSets&&)=default;
+		UnLitDescriptorSets& operator=(UnLitDescriptorSets&&)=default;
+
 		UnLitDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics, 
 		               const UniformBuffers& uniform_buffers)
 		{
