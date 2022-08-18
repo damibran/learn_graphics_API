@@ -13,20 +13,6 @@ namespace dmbrn
 	{
 		Singletons() = delete;
 
-		friend class HelloTriangleApplication;
-		friend class EditorUI;
-		friend class ImGUIRenderPass;
-		friend class ImGUISwapChain;
-		friend class EditorFrame;
-		friend class ImGuiRaii;
-		friend class ViewportRenderPass;
-		friend class ViewportSwapChain;
-		friend class Texture;
-		friend class UnlitTextureMaterial;
-		friend class Mesh;
-		friend class UnLitDescriptorsStatics;
-
-	private:
 		static inline GLFWwindowWrapper window{1280, 720};
 		static inline vk::raii::Context context;
 		static inline Instance instance{context};

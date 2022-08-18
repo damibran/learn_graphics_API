@@ -1,7 +1,6 @@
 #pragma once
-#include "Wrappers/Singletons/Renderer.h"
 #include "UnLitDescriptorSets.h"
-#include "UnLitGraphicsPipeline.h"
+#include "Materials/UnLitTextured/UnLitDescriptorsStatics.h"
 #include "Wrappers/UniformBuffers.h"
 #include "Wrappers/Singletons/Singletons.h"
 
@@ -9,9 +8,9 @@ namespace dmbrn
 {
 	struct UnlitTextureMaterial
 	{
-		UnlitTextureMaterial():
-		uniform_buffers_(Singletons::physical_device,Singletons::device),
-		descriptor_sets_(Singletons::device,Renderer::un_lit_descriptors_statics_,uniform_buffers_)
+		UnlitTextureMaterial(const PhysicalDevice& physical_device, const LogicalDevice& device,const UnLitDescriptorsStatics& statics):
+		uniform_buffers_(physical_device,device),
+		descriptor_sets_(device,statics,uniform_buffers_)
 		{
 		}
 

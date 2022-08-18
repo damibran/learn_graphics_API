@@ -22,8 +22,8 @@ namespace dmbrn
 			indices_(std::move(indices)),
 			textures_(std::move(textures)),
 			vertex_buffer_(nullptr),
-			vertex_buffer_memory_(nullptr),
 			index_buffer_(nullptr),
+			vertex_buffer_memory_(nullptr),
 			index_buffer_memory_(nullptr)
 		{
 			// now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -33,31 +33,15 @@ namespace dmbrn
 			                  Singletons::graphics_queue);
 		}
 
-		// render the mesh
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
-		          const UnlitTextureMaterial& material) const
-		{
-			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, **material.graphics_pipeline_);
 
-			material.descriptor_sets_.updateFrameDescriptorSetTexture(frame, device, textures_[0]);
+		vk::raii::Buffer vertex_buffer_;
+		vk::raii::Buffer index_buffer_;
 
-			command_buffer.bindVertexBuffers(0, {*vertex_buffer_}, {0});
-
-			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
-
-			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-			                                  *material.graphics_pipeline_.getLayout(), 0,
-			                                  *material.descriptor_sets_[frame], nullptr);
-
-			command_buffer.drawIndexed(indices_.size(), 1, 0, 0, 0);
-		}
 
 	private:
 		// render data
-		vk::raii::Buffer vertex_buffer_;
 		vk::raii::DeviceMemory vertex_buffer_memory_;
 
-		vk::raii::Buffer index_buffer_;
 		vk::raii::DeviceMemory index_buffer_memory_;
 		// initializes all the buffer objects/arrays
 		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device,

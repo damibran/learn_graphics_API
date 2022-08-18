@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/Singletons/LogicalDevice.h"
+#include "UnLitDescriptorsStatics.h"
 #include "Wrappers/Texture.h"
 #include "Wrappers/UniformBuffers.h"
 

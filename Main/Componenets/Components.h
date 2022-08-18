@@ -9,7 +9,6 @@
 #include "imgui_internal.h"
 
 #include "Wrappers/Model.h"
-#include "Materials/UnLitTextured/UnlitTextureMaterial.h"
 
 namespace dmbrn
 {
@@ -65,26 +64,38 @@ namespace dmbrn
 		}
 	};
 
-	class UnLitMeshRendererComponent
+	class ModelComponent
 	{
 	public:
-		UnLitMeshRendererComponent(const std::string& modelPath):
-			material_(),
-			model_(modelPath)
+		ModelComponent(const std::string& path):
+		model_(&Model::model_instances[path])
 		{
+			
 		}
-
-		void draw(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
-		          const TransformComponent& transform, const glm::mat4& view, const glm::mat4& proj)
-		{
-			material_.updateUBO(curentFrame, transform.getMatrix(), view, proj);
-			model_.draw(curentFrame, device, command_buffer, material_);
-		}
-
 	private:
-		UnlitTextureMaterial material_;
-		Model model_;
+		Model* model_;
 	};
+
+	//class UnLitMeshRendererComponent
+	//{
+	//public:
+	//	UnLitMeshRendererComponent(const std::string& modelPath):
+	//		material_(),
+	//		model_(modelPath)
+	//	{
+	//	}
+	//
+	//	void draw(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
+	//	          const TransformComponent& transform, const glm::mat4& view, const glm::mat4& proj)
+	//	{
+	//		material_.updateUBO(curentFrame, transform.getMatrix(), view, proj);
+	//		model_.draw(curentFrame, device, command_buffer, material_);
+	//	}
+	//
+	//private:
+	//	UnlitTextureMaterial material_;
+	//	Model model_;
+	//};
 
 	class CameraComponent
 	{

@@ -11,18 +11,20 @@
 #include "Materials/UnLitTextured/UnlitTextureMaterial.h"
 #include "Mesh.h"
 #include "Texture.h"
-
-
-//unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
+#include "Singletons/Renderer.h"
 
 namespace dmbrn
 {
 	class Model
 	{
 	public:
+
+		inline static std::unordered_map<std::string,Model> model_instances;
 		// model data 
 		std::vector<Mesh> meshes;
 		std::string directory;
+
+		Model()=default;
 
 		// constructor, expects a filepath to a 3D model.
 		Model(const std::string& path)
@@ -47,7 +49,7 @@ namespace dmbrn
 		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTextureMaterial& material) const
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
-				meshes[i].draw(frame, device, command_buffers, material);
+				Renderer::Submit(frame,device,command_buffers,material,meshes[i]);
 		}
 
 	private:

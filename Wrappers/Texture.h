@@ -35,6 +35,7 @@ namespace dmbrn
 		}
 
 		Texture(const std::string& texPath) :
+			path(texPath),
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
@@ -76,6 +77,7 @@ namespace dmbrn
 		}
 
 	private:
+		std::string path;
 		vk::raii::Image texture_image;
 		vk::raii::DeviceMemory texture_image_memory_;
 		vk::raii::ImageView image_view_;
