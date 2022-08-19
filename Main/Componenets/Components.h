@@ -85,8 +85,7 @@ namespace dmbrn
 	public:
 		glm::mat4 proj_;
 
-		CameraComponent(const bool& viewportFocused, TransformComponent& cam_transform, ImVec2 size):
-			receive_input_(viewportFocused),
+		CameraComponent(TransformComponent& cam_transform, ImVec2 size):
 			transform_(cam_transform)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
@@ -101,7 +100,7 @@ namespace dmbrn
 
 		void update(float delta_t)
 		{
-			if (receive_input_)
+			if (ImGui::IsWindowFocused())
 			{
 				glm::vec3 cam_move_dir{0};
 
@@ -145,7 +144,6 @@ namespace dmbrn
 		}
 
 	private:
-		const bool& receive_input_;
 		TransformComponent& transform_;
 		glm::vec3 front_ = {1.0f, 0.0f, 0.0f};
 		glm::vec3 up_ = {0.0f, -1.0f, 0.0f};

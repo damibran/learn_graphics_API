@@ -10,10 +10,9 @@ namespace dmbrn
 	class Scene
 	{
 	public:
-		Scene(const bool& viewportFocused,
-		      ImVec2 size):
+		Scene(ImVec2 size):
 			barrel(registry_, "First Barrel"),
-			barrel2(registry_,"Barrel 2"),
+			barrel2(registry_, "Barrel 2"),
 			floor(registry_, "Floor"),
 			camera(registry_, "Main Camera")
 		{
@@ -22,7 +21,7 @@ namespace dmbrn
 
 			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
 			barrel2.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
-			barrel2.getComponent<TransformComponent>().translate({0,-2,0});
+			barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
 
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.obj");
 			floor.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
@@ -34,7 +33,7 @@ namespace dmbrn
 			floor_trans.scale = {10, 10, 10};
 
 			camera.getComponent<TransformComponent>().translate({-5, 0, 0});
-			camera.addComponent<CameraComponent>(viewportFocused, camera.getComponent<TransformComponent>(), size);
+			camera.addComponent<CameraComponent>(camera.getComponent<TransformComponent>(), size);
 		}
 
 		void changeCameraAspect(ImVec2 size)
@@ -42,6 +41,9 @@ namespace dmbrn
 			camera.getComponent<CameraComponent>().changeAspect(size);
 		}
 
+		/**
+		 * \brief should happen inside ImGui window model rendering (between begin and end), because uses ImGui window input events
+		 */
 		void update(float delta_t)
 		{
 			camera.getComponent<CameraComponent>().update(delta_t);

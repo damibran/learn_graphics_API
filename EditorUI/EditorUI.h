@@ -22,7 +22,7 @@ namespace dmbrn
 			render_pass_(),
 			swap_chain_(render_pass_),
 			im_gui_(render_pass_),
-			scene_(viewport_focused, {1280, 720}),
+			scene_({1280, 720}),
 			viewport_(scene_)
 		{
 		}
@@ -40,10 +40,6 @@ namespace dmbrn
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
 
-			ImGui::Begin("Viewport");
-			viewport_focused = ImGui::IsWindowFocused();
-			ImGui::End();
-
 			ImGui::End();
 
 			render(Singletons::device, frame, imageIndex);
@@ -58,7 +54,6 @@ namespace dmbrn
 		ImGUIRenderPass render_pass_;
 		ImGUISwapChain swap_chain_;
 		ImGuiRaii im_gui_;
-		bool viewport_focused = false;
 		Scene scene_;
 		Viewport viewport_;
 
