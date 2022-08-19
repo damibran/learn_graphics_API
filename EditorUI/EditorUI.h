@@ -40,7 +40,7 @@ namespace dmbrn
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
 
-			ImGui::End();
+			endDockSpace();
 
 			render(Singletons::device, frame, imageIndex);
 
@@ -67,8 +67,8 @@ namespace dmbrn
 			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-			// because it would be confusing to have two docking targets within each others.
-			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+			// because it would be confusing to have two docking targets within each others.ImGuiWindowFlags_MenuBar
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 			if (opt_fullscreen)
 			{
 				const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -116,6 +116,11 @@ namespace dmbrn
 			{
 				throw std::exception("Turn on docking");
 			}
+		}
+
+		void endDockSpace()
+		{
+			ImGui::End();
 		}
 
 		static void showAppMainMenuBar()
