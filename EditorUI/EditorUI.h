@@ -20,9 +20,10 @@ namespace dmbrn
 	public:
 		EditorUI() :
 			render_pass_(),
-			swap_chain_( render_pass_),
-			im_gui_( render_pass_),
-			viewport_()
+			swap_chain_(render_pass_),
+			im_gui_(render_pass_),
+			scene_(viewport_focused, {1280, 720}),
+			viewport_(scene_)
 		{
 		}
 
@@ -39,11 +40,16 @@ namespace dmbrn
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
 
+			ImGui::Begin("Viewport");
+			viewport_focused = ImGui::IsWindowFocused();
+			ImGui::End();
+
 			ImGui::End();
 
 			render(Singletons::device, frame, imageIndex);
 
-			submitAndPresent(Singletons::present_queue,Singletons::graphics_queue,Singletons::window, frame, imageIndex);
+			submitAndPresent(Singletons::present_queue, Singletons::graphics_queue, Singletons::window, frame,
+			                 imageIndex);
 
 			current_frame_ = (current_frame_ + 1) % Singletons::device.MAX_FRAMES_IN_FLIGHT;
 		}
@@ -52,13 +58,15 @@ namespace dmbrn
 		ImGUIRenderPass render_pass_;
 		ImGUISwapChain swap_chain_;
 		ImGuiRaii im_gui_;
+		bool viewport_focused = false;
+		Scene scene_;
 		Viewport viewport_;
 
 		uint32_t current_frame_ = 0;
 
 		void beginDockSpace()
 		{
-						bool p_open = true;
+			bool p_open = true;
 			static bool opt_fullscreen = true;
 			static bool opt_padding = false;
 			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -188,7 +196,8 @@ namespace dmbrn
 			command_buffer.end();
 		}
 
-		void submitAndPresent(vk::raii::Queue& present, vk::raii::Queue& graphics, GLFWwindowWrapper& window,const EditorFrame& frame, uint32_t imageIndex)
+		void submitAndPresent(vk::raii::Queue& present, vk::raii::Queue& graphics, GLFWwindowWrapper& window,
+		                      const EditorFrame& frame, uint32_t imageIndex)
 		{
 			const vk::Semaphore waitSemaphores[] = {*frame.image_available_semaphore};
 			const vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};

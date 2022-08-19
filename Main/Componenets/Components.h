@@ -80,27 +80,6 @@ namespace dmbrn
 		Model* model_;
 	};
 
-	//class UnLitMeshRendererComponent
-	//{
-	//public:
-	//	UnLitMeshRendererComponent(const std::string& modelPath):
-	//		material_(),
-	//		model_(modelPath)
-	//	{
-	//	}
-	//
-	//	void draw(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
-	//	          const TransformComponent& transform, const glm::mat4& view, const glm::mat4& proj)
-	//	{
-	//		material_.updateUBO(curentFrame, transform.getMatrix(), view, proj);
-	//		model_.draw(curentFrame, device, command_buffer, material_);
-	//	}
-	//
-	//private:
-	//	UnlitTextureMaterial material_;
-	//	Model model_;
-	//};
-
 	class CameraComponent
 	{
 	public:

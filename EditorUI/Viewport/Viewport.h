@@ -13,12 +13,12 @@ namespace dmbrn
 	class Viewport
 	{
 	public:
-		Viewport() :
+		Viewport(Scene& scene) :
 			size_(1280,720),
 			render_pass_(),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
-			scene_(focused,size_)
+			scene_(scene)
 		{
 			Renderer::setRenderPass(*render_pass_);
 
@@ -40,9 +40,7 @@ namespace dmbrn
 				return;
 			}
 
-			focused = ImGui::IsWindowFocused();
-
-			scene_.update(delta_t	);
+			scene_.update(delta_t);
 
 			ImGui::Image(images_[imageIndex], size_);
 
@@ -101,8 +99,7 @@ namespace dmbrn
 		ViewportRenderPass render_pass_;
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
-		Scene scene_;
-		bool focused=false;
+		Scene& scene_;
 
 		bool HandleWindowResize()
 		{
