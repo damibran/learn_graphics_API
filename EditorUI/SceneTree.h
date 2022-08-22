@@ -7,7 +7,8 @@ namespace dmbrn
 	{
 	public:
 		SceneTree(Scene& scene):
-			scene_(scene)
+			scene_(scene),
+			selected_(scene_.registry_)
 		{
 		}
 
@@ -21,8 +22,20 @@ namespace dmbrn
 				drawEntityNode(entity);
 			});
 
+			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
+				selected_ = {scene_.registry_};
+
 			ImGui::End();
 		}
+
+		Enttity& getSelected()
+		{
+			return selected_;
+		}
+
+	private:
+		Scene& scene_;
+		Enttity selected_;
 
 		void drawEntityNode(const Enttity& enttity)
 		{
@@ -32,19 +45,15 @@ namespace dmbrn
 				ImGuiTreeNodeFlags_OpenOnArrow;
 			bool opened = ImGui::TreeNodeEx(reinterpret_cast<const void*>(enttity.getId()), flags, tag.tag.c_str());
 
-			if(ImGui::IsItemClicked())
+			if (ImGui::IsItemClicked())
 			{
-				selected_=enttity;
+				selected_ = enttity;
 			}
 
-			if(opened)
+			if (opened)
 			{
-				ImGui::TreePop();	
+				ImGui::TreePop();
 			}
 		}
-
-	private:
-		Scene& scene_;
-		Enttity selected_;
 	};
 }

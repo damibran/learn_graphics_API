@@ -225,5 +225,8 @@
     <ClInclude Include="EditorUI\SceneTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditorUI\Inspector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

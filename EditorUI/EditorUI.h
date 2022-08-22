@@ -13,6 +13,7 @@
 #include "Helpers/ImGUISwapChain.h"
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
+#include "Inspector.h"
 
 namespace dmbrn
 {
@@ -25,7 +26,8 @@ namespace dmbrn
 			im_gui_(render_pass_),
 			scene_({1280, 720}),
 			viewport_(scene_),
-			scene_tree_(scene_)
+			scene_tree_(scene_),
+		inspector_(scene_tree_)
 		{
 		}
 
@@ -42,6 +44,7 @@ namespace dmbrn
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
 			scene_tree_.newImGuiFrame();
+			inspector_.newImGuiFrame();
 
 			endDockSpace();
 
@@ -60,6 +63,7 @@ namespace dmbrn
 		Scene scene_;
 		Viewport viewport_;
 		SceneTree scene_tree_;
+		Inspector inspector_;
 
 		uint32_t current_frame_ = 0;
 

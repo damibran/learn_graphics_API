@@ -8,8 +8,10 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
-
-		Enttity()=default;
+		Enttity(entt::registry& registry):
+		registry_(&registry)
+		{
+		}
 
 		Enttity(entt::registry& registry, const std::string& name):
 			registry_(&registry)
@@ -27,8 +29,8 @@ namespace dmbrn
 
 		void operator=(const Enttity& other)
 		{
-			registry_=other.registry_;
-			entityID_=other.entityID_;
+			registry_ = other.registry_;
+			entityID_ = other.entityID_;
 		}
 
 		uint32_t getId() const
@@ -59,8 +61,19 @@ namespace dmbrn
 			registry_->emplace<Type>(entityID_, std::forward<Args>(args)...);
 		}
 
+		template <typename T>
+		T* tryGetComponent()
+		{
+			return registry_->try_get<T>(entityID_);
+		}
+
+		operator bool() const
+		{
+			return entityID_ != entt::null;
+		}
+
 	private:
 		entt::registry* registry_;
-		entt::entity entityID_;
+		entt::entity entityID_{entt::null};
 	};
 }

@@ -12,6 +12,13 @@
 
 namespace dmbrn
 {
+
+	class Component
+	{
+		virtual ~Component()=default;
+		virtual void drawToInspector()=0;
+	};
+
 	struct TagComponent
 	{
 		std::string tag;
