@@ -131,7 +131,7 @@ namespace dmbrn
 
 			if (!file.is_open())
 			{
-				throw std::runtime_error("failed to open file!");
+				throw std::runtime_error("failed to open "+filename+" file!");
 			}
 
 			const size_t fileSize = file.tellg();
