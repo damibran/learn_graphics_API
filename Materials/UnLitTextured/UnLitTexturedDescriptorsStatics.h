@@ -4,16 +4,16 @@
 
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Singletons/Singletons.h"
-#include "UnLitGraphicsPipeline.h"
+#include "UnLitTexturedGraphicsPipeline.h"
 
 namespace dmbrn
 {
-	class UnLitDescriptorsStatics
+	class UnLitTexturedDescriptorsStatics
 	{
 	public:
 		const int MAX_COUNT = 10;
 
-		UnLitDescriptorsStatics():
+		UnLitTexturedDescriptorsStatics():
 			descriptor_layout_(createDescriptorLayout(Singletons::device)),
 			pipeline_layout_(createPipelineLayout(Singletons::device)),
 			pool_(createDescriptorPool(Singletons::device))
@@ -33,7 +33,7 @@ namespace dmbrn
 		vk::raii::DescriptorSetLayout descriptor_layout_;
 		vk::raii::PipelineLayout pipeline_layout_;
 		vk::raii::DescriptorPool pool_;
-		UnLitGraphicsPipeline graphics_pipeline_;
+		UnLitTexturedGraphicsPipeline graphics_pipeline_;
 	private:
 		vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
 		{

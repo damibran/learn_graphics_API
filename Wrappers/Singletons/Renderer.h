@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Wrappers/Singletons/Singletons.h"
-#include "Materials/UnLitTextured/UnLitDescriptorsStatics.h"
-#include "Materials/UnLitTextured/UnlitTextureMaterial.h"
+#include "Materials/UnLitTextured/UnLitTexturedDescriptorsStatics.h"
+#include "Materials/UnLitTextured/UnlitTexturedMaterial.h"
 
 namespace dmbrn
 {
 	class Renderer
 	{
-		friend UnlitTextureMaterial;
+		friend UnlitTexturedMaterial;
 
 	public:
 		static void BeginUnlitTextureMaterial(const vk::raii::CommandBuffer& command_buffer)
@@ -17,13 +17,13 @@ namespace dmbrn
 			                            **un_lit_descriptors_statics_.graphics_pipeline_);
 		}
 
-		static UnlitTextureMaterial createUnlitTexturedMaterial()
+		static UnlitTexturedMaterial createUnlitTexturedMaterial()
 		{
 			return {Singletons::physical_device, Singletons::device, un_lit_descriptors_statics_};
 		}
 
 		static void Submit(int curentFrame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
-		                   const UnlitTextureMaterial& material, const Mesh& mesh)
+		                   const UnlitTexturedMaterial& material, const Mesh& mesh)
 		{
 			material.descriptor_sets_.updateFrameDescriptorSetTexture(curentFrame, device, mesh.textures_[0]);
 
@@ -45,6 +45,6 @@ namespace dmbrn
 		}
 
 	private:
-		static inline UnLitDescriptorsStatics un_lit_descriptors_statics_{};
+		static inline UnLitTexturedDescriptorsStatics un_lit_descriptors_statics_{};
 	};
 }

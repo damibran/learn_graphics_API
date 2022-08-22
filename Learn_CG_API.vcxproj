@@ -173,10 +173,10 @@
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="Main\Script.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />
-    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorsStatics.h" />
-    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorSets.h" />
-    <ClInclude Include="Materials\UnLitTextured\UnLitGraphicsPipeline.h" />
-    <ClInclude Include="Materials\UnLitTextured\UnlitTextureMaterial.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorsStatics.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipeline.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnlitTexturedMaterial.h" />
     <ClInclude Include="Utils\Transform.h" />
     <ClInclude Include="Utils\UtilsFunctions.h" />
     <ClInclude Include="Wrappers\CommandPool.h" />

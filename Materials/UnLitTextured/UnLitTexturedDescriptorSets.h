@@ -2,20 +2,20 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "UnLitDescriptorsStatics.h"
+#include "UnLitTexturedDescriptorsStatics.h"
 #include "Wrappers/Texture.h"
 #include "Wrappers/UniformBuffers.h"
 
 namespace dmbrn
 {
-	class UnLitDescriptorSets
+	class UnLitTexturedDescriptorSets
 	{
 	public:
 
-		UnLitDescriptorSets(UnLitDescriptorSets&&)=default;
-		UnLitDescriptorSets& operator=(UnLitDescriptorSets&&)=default;
+		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&)=default;
+		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&)=default;
 
-		UnLitDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics, 
+		UnLitTexturedDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics, 
 		               const UniformBuffers& uniform_buffers)
 		{
 			createDescriptorSets(device, statics, uniform_buffers);
@@ -45,7 +45,7 @@ namespace dmbrn
 	private:
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 		
-		void createDescriptorSets(const LogicalDevice& device, const UnLitDescriptorsStatics& statics,
+		void createDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics,
 		                          const UniformBuffers& uniform_buffers)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.descriptor_layout_);

@@ -9,10 +9,10 @@
 
 namespace dmbrn
 {
-	class UnLitGraphicsPipeline
+	class UnLitTexturedGraphicsPipeline
 	{
 	public:
-		UnLitGraphicsPipeline(): graphics_pipeline_(nullptr)
+		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr)
 		{
 		}
 

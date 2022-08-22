@@ -83,7 +83,7 @@ namespace dmbrn
 		}
 
 		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers,
-		          const UnlitTextureMaterial& material)
+		          const UnlitTexturedMaterial& material)
 		{
 			model_->draw(frame, device, command_buffers, material);
 		}

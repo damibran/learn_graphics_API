@@ -18,14 +18,14 @@ namespace dmbrn
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
-			barrel.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
+			barrel.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
 
 			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
-			barrel2.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
+			barrel2.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
 			barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
 
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.obj");
-			floor.addComponent<UnlitTextureMaterial>(Renderer::createUnlitTexturedMaterial());
+			floor.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
@@ -54,12 +54,12 @@ namespace dmbrn
 		{
 			CameraComponent& camera_component = camera.getComponent<CameraComponent>();
 
-			auto group = registry_.group<ModelComponent, UnlitTextureMaterial>(entt::get<TransformComponent>);
+			auto group = registry_.group<ModelComponent, UnlitTexturedMaterial>(entt::get<TransformComponent>);
 			Renderer::BeginUnlitTextureMaterial(command_buffer);
 			for (auto entity : group)
 			{
 				auto [model,material,transform] = group.get<
-					ModelComponent, UnlitTextureMaterial, TransformComponent>(entity);
+					ModelComponent, UnlitTexturedMaterial, TransformComponent>(entity);
 				material.updateUBO(curentFrame, transform.getMatrix(), camera_component.getViewMat(),
 				                   camera_component.proj_);
 				model.draw(curentFrame, device, command_buffer, material);

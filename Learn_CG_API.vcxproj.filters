@@ -207,16 +207,16 @@
     <ClInclude Include="Main\Componenets\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorsStatics.h">
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorsStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitDescriptorSets.h">
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitGraphicsPipeline.h">
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnlitTextureMaterial.h">
+    <ClInclude Include="Materials\UnLitTextured\UnlitTexturedMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Singletons\Renderer.h">

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "Materials/UnLitTextured/UnlitTextureMaterial.h"
+#include "Materials/UnLitTextured/UnlitTexturedMaterial.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "Singletons/Renderer.h"
@@ -46,7 +46,7 @@ namespace dmbrn
 		}
 
 		// draws the model, and thus all its meshes
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTextureMaterial& material) const
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTexturedMaterial& material) const
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
 				Renderer::Submit(frame,device,command_buffers,material,meshes[i]);

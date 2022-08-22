@@ -1,19 +1,19 @@
 #pragma once
-#include "UnLitDescriptorSets.h"
-#include "Materials/UnLitTextured/UnLitDescriptorsStatics.h"
+#include "UnLitTexturedDescriptorSets.h"
+#include "Materials/UnLitTextured/UnLitTexturedDescriptorsStatics.h"
 #include "Wrappers/UniformBuffers.h"
 
 namespace dmbrn
 {
-	struct UnlitTextureMaterial
+	struct UnlitTexturedMaterial
 	{
-		UnlitTextureMaterial(UnlitTextureMaterial&& other)=default;
-		UnlitTextureMaterial& operator=(UnlitTextureMaterial&& other)=default;
+		UnlitTexturedMaterial(UnlitTexturedMaterial&& other)=default;
+		UnlitTexturedMaterial& operator=(UnlitTexturedMaterial&& other)=default;
 
-		UnlitTextureMaterial(const UnlitTextureMaterial& other)=delete;
-		UnlitTextureMaterial& operator=(const UnlitTextureMaterial& other)=delete;
+		UnlitTexturedMaterial(const UnlitTexturedMaterial& other)=delete;
+		UnlitTexturedMaterial& operator=(const UnlitTexturedMaterial& other)=delete;
 
-		UnlitTextureMaterial(const PhysicalDevice& physical_device, const LogicalDevice& device,const UnLitDescriptorsStatics& statics):
+		UnlitTexturedMaterial(const PhysicalDevice& physical_device, const LogicalDevice& device,const UnLitTexturedDescriptorsStatics& statics):
 		uniform_buffers_(physical_device,device),
 		descriptor_sets_(device,statics,uniform_buffers_)
 		{
@@ -21,8 +21,6 @@ namespace dmbrn
 
 		void updateUBO(int curentFrame, glm::mat4 modelMat,const glm::mat4& view,const glm::mat4& proj)
 		{
-			const float speed = 90;
-
 			UniformBuffers::UniformBufferObject ubo{};
 			ubo.model = modelMat;
 			ubo.view = view;
@@ -36,6 +34,6 @@ namespace dmbrn
 		}
 
 		UniformBuffers uniform_buffers_;
-		UnLitDescriptorSets descriptor_sets_;
+		UnLitTexturedDescriptorSets descriptor_sets_;
 	};
 }
