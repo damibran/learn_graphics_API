@@ -222,5 +222,8 @@
     <ClInclude Include="Wrappers\Singletons\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditorUI\SceneTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

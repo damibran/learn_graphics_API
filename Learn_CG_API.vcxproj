@@ -163,6 +163,7 @@
     <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h" />
     <ClInclude Include="EditorUI\Helpers\ImGUIRenderPass.h" />
     <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h" />
+    <ClInclude Include="EditorUI\SceneTree.h" />
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />

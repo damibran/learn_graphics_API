@@ -8,33 +8,59 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
+
+		Enttity()=default;
+
 		Enttity(entt::registry& registry, const std::string& name):
-			registry_(registry)
+			registry_(&registry)
 		{
-			entityID_ = registry_.create();
-			registry_.emplace<TagComponent>(entityID_, name);
-			registry_.emplace<TransformComponent>(entityID_);
+			entityID_ = registry_->create();
+			registry_->emplace<TagComponent>(entityID_, name);
+			registry_->emplace<TransformComponent>(entityID_);
 		}
 
-		~Enttity()
+		Enttity(entt::registry& registry, entt::entity entityID):
+			registry_(&registry),
+			entityID_(entityID)
 		{
-			registry_.destroy(entityID_);
+		}
+
+		void operator=(const Enttity& other)
+		{
+			registry_=other.registry_;
+			entityID_=other.entityID_;
+		}
+
+		uint32_t getId() const
+		{
+			return static_cast<uint32_t>(entityID_);
+		}
+
+		bool operator==(const Enttity& other)
+		{
+			return entityID_ == other.entityID_ && registry_ == other.registry_;
 		}
 
 		template <class T>
 		T& getComponent()
 		{
-			return registry_.get<T>(entityID_);
+			return registry_->get<T>(entityID_);
+		}
+
+		template <class T>
+		const T& getComponent() const
+		{
+			return registry_->get<T>(entityID_);
 		}
 
 		template <typename Type, typename... Args>
 		void addComponent(Args&&...args)
 		{
-			registry_.emplace<Type>(entityID_,std::forward<Args>(args)...);
+			registry_->emplace<Type>(entityID_, std::forward<Args>(args)...);
 		}
 
 	private:
-		entt::registry& registry_;
+		entt::registry* registry_;
 		entt::entity entityID_;
 	};
 }

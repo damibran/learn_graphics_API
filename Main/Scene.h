@@ -9,6 +9,7 @@ namespace dmbrn
 {
 	class Scene
 	{
+		friend class SceneTree;
 	public:
 		Scene(ImVec2 size):
 			barrel(registry_, "First Barrel"),
