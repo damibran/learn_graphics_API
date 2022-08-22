@@ -12,11 +12,10 @@
 
 namespace dmbrn
 {
-
 	class Component
 	{
-		virtual ~Component()=default;
-		virtual void drawToInspector()=0;
+		virtual ~Component() = default;
+		virtual void drawToInspector() =0;
 	};
 
 	struct TagComponent
@@ -44,15 +43,19 @@ namespace dmbrn
 		{
 		}
 
+		[[nodiscard]] glm::mat4 getRotationMatrix() const
+		{
+			glm::mat4 m(1.);
+			m = glm::rotate(m, glm::radians(rotation.x), {1, 0, 0});
+			m = glm::rotate(m, glm::radians(rotation.y), {0, 1, 0});
+			m = glm::rotate(m, glm::radians(rotation.z), {0, 0, 1});
+			return m;
+		}
+
 		glm::mat4 getMatrix() const
 		{
-			glm::mat4 res = glm::scale(glm::mat4(1.0f), scale);
-			res = glm::rotate(res, glm::radians(rotation.x), {1, 0, 0});
-			res = glm::rotate(res, glm::radians(rotation.y), {0, 1, 0});
-			res = glm::rotate(res, glm::radians(rotation.z), {0, 0, 1});
-			res = glm::translate(res, position);
-
-			return res;
+			return glm::translate(glm::mat4(1), position) * getRotationMatrix() *
+				glm::scale(glm::mat4(1), scale);
 		}
 
 		void translate(const glm::vec3& v)
@@ -75,14 +78,16 @@ namespace dmbrn
 	{
 	public:
 		ModelComponent(const std::string& path):
-		model_(&(*(Model::model_instances.emplace(std::make_pair(path,path)).first)).second)
+			model_(&(*(Model::model_instances.emplace(std::make_pair(path, path)).first)).second)
 		{
-			
 		}
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTextureMaterial& material)
+
+		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers,
+		          const UnlitTextureMaterial& material)
 		{
-			model_->draw(frame,device,command_buffers,material);
+			model_->draw(frame, device, command_buffers, material);
 		}
+
 	private:
 		Model* model_;
 	};
