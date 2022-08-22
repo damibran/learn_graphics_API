@@ -57,7 +57,7 @@ namespace dmbrn
 		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent)
 		{
 			std::vector<Texture> res;
-			for (int i = 0; i < utils::capabilitiesGetImageCount(Singletons::physical_device, Singletons::surface); ++i)
+			for (uint32_t i = 0; i < utils::capabilitiesGetImageCount(Singletons::physical_device, Singletons::surface); ++i)
 			{
 				res.emplace_back(extent);
 			}

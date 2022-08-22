@@ -43,7 +43,7 @@ namespace dmbrn
 
 			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
 				ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx(reinterpret_cast<const void*>(enttity.getId()), flags, tag.tag.c_str());
+			bool opened = ImGui::TreeNodeEx(reinterpret_cast<const void*>(static_cast<uint64_t>(enttity.getId())), flags, tag.tag.c_str());
 
 			if (ImGui::IsItemClicked())
 			{

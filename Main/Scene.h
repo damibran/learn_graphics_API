@@ -29,7 +29,7 @@ namespace dmbrn
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
-			floor_trans.translate({0, -0.7 / 10, 0});
+			floor_trans.translate({0, 0.7, 0});
 			floor_trans.rotate({180, 0, 0});
 			floor_trans.scale = {10, 10, 10};
 
