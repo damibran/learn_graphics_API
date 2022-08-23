@@ -14,7 +14,7 @@ namespace dmbrn
 	{
 	public:
 		Viewport(Scene& scene) :
-			size_(1280,720),
+			size_(1280, 720),
 			render_pass_(),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
@@ -30,8 +30,10 @@ namespace dmbrn
 			}
 		}
 
-		void newImGuiFrame(float delta_t,uint32_t imageIndex)
+		void newImGuiFrame(float delta_t, uint32_t imageIndex)
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+
 			ImGui::Begin("Viewport");
 
 			if (HandleWindowResize() == false)
@@ -45,6 +47,7 @@ namespace dmbrn
 			ImGui::Image(images_[imageIndex], size_);
 
 			ImGui::End();
+			ImGui::PopStyleVar();
 		}
 
 		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
@@ -117,7 +120,7 @@ namespace dmbrn
 				size_.y = view.y;
 
 				resize();
-				scene_.changeCameraAspect(size_	);
+				scene_.changeCameraAspect(size_);
 
 				// The window state has been successfully changed.
 				return true;

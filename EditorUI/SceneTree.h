@@ -41,8 +41,7 @@ namespace dmbrn
 		{
 			const auto& tag = enttity.getComponent<TagComponent>();
 
-			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
-				ImGuiTreeNodeFlags_OpenOnArrow;
+			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_Leaf;//|	ImGuiTreeNodeFlags_OpenOnArrow
 			bool opened = ImGui::TreeNodeEx(reinterpret_cast<const void*>(static_cast<uint64_t>(enttity.getId())), flags, tag.tag.c_str());
 
 			if (ImGui::IsItemClicked())
