@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -31,7 +32,7 @@ namespace dmbrn
 	struct TransformComponent
 	{
 		glm::vec3 position;
-		glm::vec3 rotation; // pitch, yaw, roll in degrees
+		glm::vec3 rotation; // pitch ,yaw, roll in degrees
 		glm::vec3 scale;
 
 		TransformComponent(glm::vec3 pos = {0, 0, 0},
@@ -45,11 +46,7 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			glm::mat4 m(1.);
-			m = glm::rotate(m, glm::radians(rotation.x), {1, 0, 0});
-			m = glm::rotate(m, glm::radians(rotation.y), {0, 1, 0});
-			m = glm::rotate(m, glm::radians(rotation.z), {0, 0, 1});
-			return m;
+			return glm::orientate4(glm::vec3{glm::radians(rotation.x),glm::radians(rotation.z),glm::radians(rotation.y)});
 		}
 
 		glm::mat4 getMatrix() const
@@ -100,6 +97,7 @@ namespace dmbrn
 		CameraComponent(TransformComponent& cam_transform, ImVec2 size):
 			transform_(cam_transform)
 		{
+			transform_.rotate({0, -90, 180});
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
 		}
@@ -122,9 +120,9 @@ namespace dmbrn
 					cam_move_dir.x += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_S))
-					cam_move_dir.z += -1;
-				else if (ImGui::IsKeyDown(ImGuiKey_W))
 					cam_move_dir.z += 1;
+				else if (ImGui::IsKeyDown(ImGuiKey_W))
+					cam_move_dir.z += -1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_E))
 					cam_move_dir.y += 1;
@@ -140,7 +138,7 @@ namespace dmbrn
 
 					last_mouse_delt = new_mouse_delt;
 
-					rotateCamera({-mouse_rot.x, mouse_rot.y});
+					rotateCamera({mouse_rot.x, mouse_rot.y});
 				}
 
 				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
@@ -152,15 +150,11 @@ namespace dmbrn
 
 		glm::mat4 getViewMat()
 		{
-			return lookAt(transform_.position, transform_.position + front_, up_);
+			return inverse(transform_.getMatrix());
 		}
 
 	private:
 		TransformComponent& transform_;
-		glm::vec3 front_ = {1.0f, 0.0f, 0.0f};
-		glm::vec3 up_ = {0.0f, -1.0f, 0.0f};
-		glm::vec3 right_ = {0.0f, 0, -1.0f};
-		glm::vec3 world_up_ = {0, -1, 0};
 		float mouse_sensitivity_ = 0.15f;
 		float speed_ = 7;
 		ImVec2 last_mouse_delt = {0, 0};
@@ -168,8 +162,7 @@ namespace dmbrn
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{
 			const float tspeed = dt * speed_;
-			const auto m = glm::mat3(right_, up_, front_);
-			transform_.translate(tspeed * m * dir);
+			transform_.translate(tspeed * glm::mat3(transform_.getRotationMatrix()) * dir);
 		}
 
 		void rotateCamera(const glm::vec2 mouse_dir)
@@ -196,24 +189,6 @@ namespace dmbrn
 				if (pitch < -89.0f)
 					transform_.rotation.x = -89.0f;
 			}
-
-			// update Front, Right and Up Vectors using the updated Euler angles
-			updateCameraVectors();
-		}
-
-		void updateCameraVectors()
-		{
-			// calculate the new Front vector
-			glm::vec3 front;
-			glm::vec3 rot(transform_.getRotationDegrees());
-			front.x = cos(glm::radians(rot.y)) * cos(glm::radians(rot.x));
-			front.y = sin(glm::radians(rot.x));
-			front.z = sin(glm::radians(rot.y)) * cos(glm::radians(rot.x));
-			front_ = normalize(front);
-			// also re-calculate the Right and Up vector
-			right_ = normalize(cross(front_, world_up_));
-			// normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-			up_ = normalize(cross(right_, front_));
 		}
 	};
 }
