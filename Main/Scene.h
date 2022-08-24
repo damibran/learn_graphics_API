@@ -15,28 +15,27 @@ namespace dmbrn
 			barrel(registry_, "First Barrel"),
 			barrel2(registry_, "Barrel 2"),
 			floor(registry_, "Floor"),
-			frame(registry_,"Frame"),
+			//frame(registry_,"Frame"),
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
 			barrel.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
-
+			
 			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
 			barrel2.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
 			barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
 
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.obj");
 			floor.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
-
-			frame.addComponent<ModelComponent>("Models\\Frame\\Frame.obj");
-			frame.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
-
-
+			
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
 			floor_trans.translate({0, 0.7, 0});
 			floor_trans.rotate({180, 0, 0});
 			floor_trans.scale = {10, 10, 10};
+
+			//frame.addComponent<ModelComponent>("Models\\Frame\\Frame.obj");
+			//frame.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
 
 			camera.getComponent<TransformComponent>().translate({-5, 0, 0});
 			camera.addComponent<CameraComponent>(camera.getComponent<TransformComponent>(), size);
@@ -76,7 +75,7 @@ namespace dmbrn
 		Enttity barrel;
 		Enttity barrel2;
 		Enttity floor;
-		Enttity frame;
+		//Enttity frame;
 		Enttity camera;
 	};
 }

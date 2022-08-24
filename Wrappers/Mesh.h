@@ -11,10 +11,10 @@ namespace dmbrn
 	class Mesh
 	{
 	public:
-		// mesh Data
-		std::vector<Vertex> vertices_;
-		std::vector<uint16_t> indices_;
+
 		std::vector<Texture> textures_;
+
+		uint32_t indices_count;
 
 		Mesh(const Mesh& other) = delete;
 		Mesh& operator=(const Mesh& other) = delete;
@@ -30,27 +30,11 @@ namespace dmbrn
 			vertex_buffer_memory_(nullptr),
 			index_buffer_memory_(nullptr)
 		{
-			fillVectors(dir,mesh,scene);
-			createVertexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			auto [vertices,indices] = fillVectors(dir,mesh,scene);
+			indices_count = indices.size();
+			createVertexBuffer(vertices,Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                   Singletons::graphics_queue);
-			createIndexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
-			                  Singletons::graphics_queue);
-		}
-
-		// constructor
-		Mesh(std::vector<Vertex>&& vertices, std::vector<uint16_t>&& indices, std::vector<Texture>&& textures) :
-			vertices_(std::move(vertices)),
-			indices_(std::move(indices)),
-			textures_(std::move(textures)),
-			vertex_buffer_(nullptr),
-			index_buffer_(nullptr),
-			vertex_buffer_memory_(nullptr),
-			index_buffer_memory_(nullptr)
-		{
-			// now that we have all the required data, set the vertex buffers and its attribute pointers.
-			createVertexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
-			                   Singletons::graphics_queue);
-			createIndexBuffer(Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			createIndexBuffer(indices,Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                  Singletons::graphics_queue);
 		}
 
@@ -61,10 +45,10 @@ namespace dmbrn
 		vk::raii::DeviceMemory vertex_buffer_memory_;
 		vk::raii::DeviceMemory index_buffer_memory_;
 		// initializes all the buffer objects/arrays
-		void createVertexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device,
+		void createVertexBuffer(const std::vector<Vertex>& vertices,const PhysicalDevice& physical_device, const LogicalDevice& device,
 		                        const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
 		{
-			const vk::DeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
+			const vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 			vk::BufferCreateInfo bufferInfo
 			{
@@ -87,7 +71,7 @@ namespace dmbrn
 
 			void* data;
 			data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-			memcpy(data, vertices_.data(), bufferSize);
+			memcpy(data, vertices.data(), bufferSize);
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
@@ -107,10 +91,10 @@ namespace dmbrn
 			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, vertex_buffer_, bufferSize);
 		}
 
-		void createIndexBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device,
+		void createIndexBuffer(const std::vector<uint16_t>& indices,const PhysicalDevice& physical_device, const LogicalDevice& device,
 		                       const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
-			const vk::DeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
+			const vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
 			vk::BufferCreateInfo bufferInfo
 			{
@@ -132,7 +116,7 @@ namespace dmbrn
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-			memcpy(data, indices_.data(), bufferSize);
+			memcpy(data, indices.data(), bufferSize);
 			stagingBufferMemory.unmapMemory();
 
 			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
@@ -183,9 +167,13 @@ namespace dmbrn
 			return textures;
 		}
 
-		void fillVectors(const std::string& dir, aiMesh* mesh, const aiScene* scene)
+		std::pair<std::vector<Vertex>,std::vector<uint16_t>> fillVectors(const std::string& dir, aiMesh* mesh, const aiScene* scene)
 		{
-						// walk through each of the mesh's vertices
+
+			std::vector<Vertex> vertices;
+			std::vector<uint16_t> indices;
+
+			// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
@@ -227,7 +215,7 @@ namespace dmbrn
 				else
 					vertex.texCoord = glm::vec2(0.0f, 0.0f);
 
-				vertices_.push_back(vertex);
+				vertices.push_back(vertex);
 			}
 			// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -235,7 +223,7 @@ namespace dmbrn
 				aiFace face = mesh->mFaces[i];
 				// retrieve all indices of the face and store them in the indices vector
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
-					indices_.push_back(face.mIndices[j]);
+					indices.push_back(face.mIndices[j]);
 			}
 			// process materials
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -260,6 +248,8 @@ namespace dmbrn
 			//// 4. height maps
 			//std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 			//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+			return {vertices,indices};
 		}
 	};
 }

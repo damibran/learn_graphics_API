@@ -35,7 +35,7 @@ namespace dmbrn
 			                                  *un_lit_descriptors_statics_.pipeline_layout_, 0,
 			                                  *material.descriptor_sets_[curentFrame], nullptr);
 
-			command_buffer.drawIndexed(static_cast<uint32_t>(mesh.indices_.size()), 1, 0, 0, 0);
+			command_buffer.drawIndexed(mesh.indices_count, 1, 0, 0, 0);
 		}
 
 	public:
