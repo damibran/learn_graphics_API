@@ -15,6 +15,7 @@ namespace dmbrn
 			barrel(registry_, "First Barrel"),
 			barrel2(registry_, "Barrel 2"),
 			floor(registry_, "Floor"),
+			frame(registry_,"Frame"),
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barell.obj");
@@ -26,6 +27,10 @@ namespace dmbrn
 
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.obj");
 			floor.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
+
+			frame.addComponent<ModelComponent>("Models\\Frame\\Frame.obj");
+			frame.addComponent<UnlitTexturedMaterial>(Renderer::createUnlitTexturedMaterial());
+
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 
@@ -71,6 +76,7 @@ namespace dmbrn
 		Enttity barrel;
 		Enttity barrel2;
 		Enttity floor;
+		Enttity frame;
 		Enttity camera;
 	};
 }
