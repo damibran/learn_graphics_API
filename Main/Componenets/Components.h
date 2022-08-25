@@ -75,14 +75,14 @@ namespace dmbrn
 	{
 	public:
 		ModelComponent(const std::string& path):
-			model_(&(*(Model::model_instances.emplace(std::make_pair(path, path)).first)).second)
+			model_(&(*Model::model_instances.emplace(path, path).first).second)
 		{
 		}
 
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers,
-		          const UnlitTexturedMaterial& material)
+		void draw(int frame,const vk::raii::CommandBuffer& command_buffers, glm::mat4 modelMat, const glm::mat4& view,
+		          const glm::mat4& proj)
 		{
-			model_->draw(frame, device, command_buffers, material);
+			model_->draw(frame, command_buffers,modelMat,view,proj);
 		}
 
 	private:

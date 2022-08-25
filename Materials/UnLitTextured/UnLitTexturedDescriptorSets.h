@@ -11,14 +11,13 @@ namespace dmbrn
 	class UnLitTexturedDescriptorSets
 	{
 	public:
+		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&) = default;
+		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&) = default;
 
-		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&)=default;
-		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&)=default;
-
-		UnLitTexturedDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics, 
-		               const UniformBuffers& uniform_buffers)
+		UnLitTexturedDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics,
+		                            const UniformBuffers& uniform_buffers, const Texture& texture)
 		{
-			createDescriptorSets(device, statics, uniform_buffers);
+			createDescriptorSets(device, statics, uniform_buffers, texture);
 		}
 
 		void updateFrameDescriptorSetTexture(uint32_t frame, const LogicalDevice& device, const Texture& texture) const
@@ -44,9 +43,9 @@ namespace dmbrn
 
 	private:
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
-		
+
 		void createDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics,
-		                          const UniformBuffers& uniform_buffers)
+		                          const UniformBuffers& uniform_buffers, const Texture& texture)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.descriptor_layout_);
 
@@ -66,12 +65,12 @@ namespace dmbrn
 					*uniform_buffers[i], 0, sizeof(UniformBuffers::UniformBufferObject)
 				};
 
-				//vk::DescriptorImageInfo imageInfo
-				//{
-				//	*texture.getSampler(),*texture.getImageView(),texture.getLayout()
-				//};
+				vk::DescriptorImageInfo imageInfo
+				{
+					*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
+				};
 
-				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
+				std::array<vk::WriteDescriptorSet, 2> descriptorWrites{};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{
@@ -79,11 +78,11 @@ namespace dmbrn
 					{}, bufferInfo
 				};
 
-				//descriptorWrites[1]=vk::WriteDescriptorSet
-				//{
-				//	*descriptor_sets_[i], 1,0, vk::DescriptorType::eCombinedImageSampler,
-				//	imageInfo
-				//};
+				descriptorWrites[1] = vk::WriteDescriptorSet
+				{
+					*descriptor_sets_[i], 1, 0, vk::DescriptorType::eCombinedImageSampler,
+					imageInfo
+				};
 
 				device->updateDescriptorSets(descriptorWrites, nullptr);
 			}

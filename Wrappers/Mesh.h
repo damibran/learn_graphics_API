@@ -11,8 +11,7 @@ namespace dmbrn
 	class Mesh
 	{
 	public:
-
-		std::vector<Texture> textures_;
+		UnlitTexturedMaterial* material_;
 
 		uint32_t indices_count;
 
@@ -24,17 +23,20 @@ namespace dmbrn
 
 		Mesh& operator=(Mesh&& other) = default;
 
-		Mesh(const std::string& dir, aiMesh* mesh, const aiScene* scene):
+		Mesh(const std::string& dir, const std::string& model_name, const aiMaterial* ai_material, aiMesh* mesh):
 			vertex_buffer_(nullptr),
 			index_buffer_(nullptr),
 			vertex_buffer_memory_(nullptr),
 			index_buffer_memory_(nullptr)
 		{
-			auto [vertices,indices] = fillVectors(dir,mesh,scene);
+			material_ = UnlitTexturedMaterial::GetMaterialPtr(dir, model_name, ai_material);
+
+			auto [vertices,indices] = fillVectors(mesh);
 			indices_count = indices.size();
-			createVertexBuffer(vertices,Singletons::physical_device, Singletons::device, Singletons::command_pool,
+
+			createVertexBuffer(vertices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                   Singletons::graphics_queue);
-			createIndexBuffer(indices,Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                  Singletons::graphics_queue);
 		}
 
@@ -45,7 +47,8 @@ namespace dmbrn
 		vk::raii::DeviceMemory vertex_buffer_memory_;
 		vk::raii::DeviceMemory index_buffer_memory_;
 		// initializes all the buffer objects/arrays
-		void createVertexBuffer(const std::vector<Vertex>& vertices,const PhysicalDevice& physical_device, const LogicalDevice& device,
+		void createVertexBuffer(const std::vector<Vertex>& vertices, const PhysicalDevice& physical_device,
+		                        const LogicalDevice& device,
 		                        const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
 		{
 			const vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
@@ -91,7 +94,8 @@ namespace dmbrn
 			copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, vertex_buffer_, bufferSize);
 		}
 
-		void createIndexBuffer(const std::vector<uint16_t>& indices,const PhysicalDevice& physical_device, const LogicalDevice& device,
+		void createIndexBuffer(const std::vector<uint16_t>& indices, const PhysicalDevice& physical_device,
+		                       const LogicalDevice& device,
 		                       const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
 		{
 			const vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
@@ -149,27 +153,8 @@ namespace dmbrn
 			command_pool.endSingleTimeCommands(gragraphics_queue, commandBuffer);
 		}
 
-
-		// checks all material textures of a given type and loads the textures if they're not loaded yet.
-		// the required info is returned as a Texture struct.
-		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string directory,
-		                                          const std::string& typeName)
+		std::pair<std::vector<Vertex>, std::vector<uint16_t>> fillVectors(aiMesh* mesh)
 		{
-			std::vector<Texture> textures;
-			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-			{
-				aiString str;
-				mat->GetTexture(type, i, &str);
-				std::string filename = directory + '\\' + std::string(str.C_Str());
-
-				textures.emplace_back(Texture{filename});
-			}
-			return textures;
-		}
-
-		std::pair<std::vector<Vertex>,std::vector<uint16_t>> fillVectors(const std::string& dir, aiMesh* mesh, const aiScene* scene)
-		{
-
 			std::vector<Vertex> vertices;
 			std::vector<uint16_t> indices;
 
@@ -225,31 +210,8 @@ namespace dmbrn
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
 					indices.push_back(face.mIndices[j]);
 			}
-			// process materials
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-			// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-			// Same applies to other texture as the following list summarizes:
-			// diffuse: texture_diffuseN
-			// specular: texture_specularN
-			// normal: texture_normalN
 
-			// 1. diffuse maps
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, dir,
-			                                                        "texture_diffuse");
-			textures_.insert(textures_.end(), std::make_move_iterator(diffuseMaps.begin()),
-			                std::make_move_iterator(diffuseMaps.end()));
-			// 2. specular maps
-			//std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			//// 3. normal maps
-			//std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-			//textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-			//// 4. height maps
-			//std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-			//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-
-			return {vertices,indices};
+			return {vertices, indices};
 		}
 	};
 }

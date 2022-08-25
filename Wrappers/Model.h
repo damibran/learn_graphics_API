@@ -18,13 +18,13 @@ namespace dmbrn
 	class Model
 	{
 	public:
-
-		inline static std::unordered_map<std::string,Model> model_instances;
+		inline static std::unordered_map<std::string, Model> model_instances;
 		// model data 
 		std::vector<Mesh> meshes;
 		std::string directory;
+		std::string name;
 
-		Model(Model&)=delete;
+		Model(Model&) = delete;
 
 		// constructor, expects a filepath to a 3D model.
 		Model(const std::string& path)
@@ -40,16 +40,23 @@ namespace dmbrn
 			}
 			// retrieve the directory path of the filepath
 			directory = path.substr(0, path.find_last_of('\\'));
+			name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
 
 			// process ASSIMP's root node recursively
 			processNode(scene->mRootNode, scene);
 		}
 
 		// draws the model, and thus all its meshes
-		void draw(int frame, const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffers, const UnlitTexturedMaterial& material) const
+		void draw(int frame, const vk::raii::CommandBuffer& command_buffers, glm::mat4 modelMat, const glm::mat4& view,
+		          const glm::mat4& proj) const
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
-				Renderer::Submit(frame,device,command_buffers,material,meshes[i]);
+			{
+				UnlitTexturedMaterial* mat = meshes[i].material_;
+				mat->updateUBO(frame, modelMat, view,
+				               proj);
+				Renderer::Submit(frame, command_buffers, mat, meshes[i]);
+			}
 		}
 
 	private:
@@ -62,7 +69,8 @@ namespace dmbrn
 				// the node object only contains indices to index the actual objects in the scene. 
 				// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.emplace_back(directory,mesh,scene);
+				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+				meshes.emplace_back(directory, name, material, mesh);
 			}
 			// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 			for (unsigned int i = 0; i < node->mNumChildren; i++)

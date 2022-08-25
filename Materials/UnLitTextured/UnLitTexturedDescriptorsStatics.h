@@ -34,6 +34,7 @@ namespace dmbrn
 		vk::raii::PipelineLayout pipeline_layout_;
 		vk::raii::DescriptorPool pool_;
 		UnLitTexturedGraphicsPipeline graphics_pipeline_;
+
 	private:
 		vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
 		{
