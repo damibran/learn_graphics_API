@@ -46,7 +46,7 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			return glm::orientate4(glm::vec3{glm::radians(rotation.x),glm::radians(rotation.z),glm::radians(rotation.y)});
+			return orientate4(glm::vec3{glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y)});
 		}
 
 		glm::mat4 getMatrix() const
@@ -79,10 +79,10 @@ namespace dmbrn
 		{
 		}
 
-		void draw(int frame,const vk::raii::CommandBuffer& command_buffers, glm::mat4 modelMat, const glm::mat4& view,
+		void draw(int frame, const vk::raii::CommandBuffer& command_buffers, glm::mat4 modelMat, const glm::mat4& view,
 		          const glm::mat4& proj)
 		{
-			model_->draw(frame, command_buffers,modelMat,view,proj);
+			model_->draw(frame, command_buffers, modelMat, view, proj);
 		}
 
 	private:
@@ -100,12 +100,14 @@ namespace dmbrn
 			transform_.rotate({0, -90, 180});
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
+			proj_[1][1] *= -1;
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
+			proj_[1][1] *= -1;
 		}
 
 		void update(float delta_t)

@@ -46,6 +46,7 @@
   <ItemGroup>
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shader.frag" />
+    <None Include="Shaders\shader_push_const.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h">

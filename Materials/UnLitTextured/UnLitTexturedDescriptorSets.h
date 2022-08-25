@@ -14,26 +14,9 @@ namespace dmbrn
 		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&) = default;
 		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&) = default;
 
-		UnLitTexturedDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics,
-		                            const UniformBuffers& uniform_buffers, const Texture& texture)
+		UnLitTexturedDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics, const Texture& texture)
 		{
-			createDescriptorSets(device, statics, uniform_buffers, texture);
-		}
-
-		void updateFrameDescriptorSetTexture(uint32_t frame, const LogicalDevice& device, const Texture& texture) const
-		{
-			vk::DescriptorImageInfo imageInfo
-			{
-				*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
-			};
-
-			vk::WriteDescriptorSet descriptor_write
-			{
-				*descriptor_sets_[frame], 1, 0, vk::DescriptorType::eCombinedImageSampler,
-				imageInfo
-			};
-
-			device->updateDescriptorSets(descriptor_write, nullptr);
+			createDescriptorSets(device, statics, texture);
 		}
 
 		const vk::raii::DescriptorSet& operator[](uint32_t index) const
@@ -44,8 +27,7 @@ namespace dmbrn
 	private:
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
-		void createDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics,
-		                          const UniformBuffers& uniform_buffers, const Texture& texture)
+		void createDescriptorSets(const LogicalDevice& device, const UnLitTexturedDescriptorsStatics& statics, const Texture& texture)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *statics.descriptor_layout_);
 
@@ -60,27 +42,27 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				vk::DescriptorBufferInfo bufferInfo
-				{
-					*uniform_buffers[i], 0, sizeof(UniformBuffers::UniformBufferObject)
-				};
+				//vk::DescriptorBufferInfo bufferInfo
+				//{
+				//	*uniform_buffers[i], 0, sizeof(UniformBuffers::UniformBufferObject)
+				//};
 
 				vk::DescriptorImageInfo imageInfo
 				{
 					*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
 				};
 
-				std::array<vk::WriteDescriptorSet, 2> descriptorWrites{};
+				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
+
+				//descriptorWrites[0] = vk::WriteDescriptorSet
+				//{
+				//	*descriptor_sets_[i], 0, 0, vk::DescriptorType::eUniformBuffer,
+				//	{}, bufferInfo
+				//};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{
-					*descriptor_sets_[i], 0, 0, vk::DescriptorType::eUniformBuffer,
-					{}, bufferInfo
-				};
-
-				descriptorWrites[1] = vk::WriteDescriptorSet
-				{
-					*descriptor_sets_[i], 1, 0, vk::DescriptorType::eCombinedImageSampler,
+					*descriptor_sets_[i], 0, 0, vk::DescriptorType::eCombinedImageSampler,
 					imageInfo
 				};
 
