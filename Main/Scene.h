@@ -15,7 +15,7 @@ namespace dmbrn
 			barrel(registry_, "First Barrel"),
 			barrel2(registry_, "Barrel 2"),
 			floor(registry_, "Floor"),
-			frame(registry_, "Frame"),
+			//frame(registry_, "Frame"),
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
@@ -28,12 +28,12 @@ namespace dmbrn
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 			
 			floor_trans.translate({0, 0.7, 0});
-			floor_trans.rotate({180, 0, 0});
-			floor_trans.scale = {10, 10, 10};
+			floor_trans.rotate({-180, 0, 0});
+			//floor_trans.scale = {10, 10, 10};
 
-			frame.addComponent<ModelComponent>("Models\\Frame\\Frame.dae");
+			//frame.addComponent<ModelComponent>("Models\\Frame\\Frame.dae");
 
-			camera.getComponent<TransformComponent>().translate({-5, 0, 0});
+			camera.getComponent<TransformComponent>().translate({0, 0, -7});
 			camera.addComponent<CameraComponent>(camera.getComponent<TransformComponent>(), size);
 		}
 
@@ -69,7 +69,7 @@ namespace dmbrn
 		Enttity barrel;
 		Enttity barrel2;
 		Enttity floor;
-		Enttity frame;
+		//Enttity frame;
 		Enttity camera;
 	};
 }

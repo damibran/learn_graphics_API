@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 3.2.2 commit date:2022-08-02, commit time:18:15, hash:bcfdb14560e7</authoring_tool>
     </contributor>
-    <created>2022-08-24T18:11:45</created>
-    <modified>2022-08-24T18:11:45</modified>
+    <created>2022-08-26T14:21:38</created>
+    <modified>2022-08-26T14:21:38</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -53,7 +53,7 @@
     <geometry id="Plane-mesh" name="Plane">
       <mesh>
         <source id="Plane-mesh-positions">
-          <float_array id="Plane-mesh-positions-array" count="12">6 0 6 -6 0 -5 -6 0 6 6 0 -5</float_array>
+          <float_array id="Plane-mesh-positions-array" count="12">6 -6 0 -6 5 0 -6 -6 0 6 5 0</float_array>
           <technique_common>
             <accessor source="#Plane-mesh-positions-array" count="4" stride="3">
               <param name="X" type="float"/>
@@ -63,7 +63,7 @@
           </technique_common>
         </source>
         <source id="Plane-mesh-normals">
-          <float_array id="Plane-mesh-normals-array" count="3">0 1 0</float_array>
+          <float_array id="Plane-mesh-normals-array" count="3">0 0 1</float_array>
           <technique_common>
             <accessor source="#Plane-mesh-normals-array" count="1" stride="3">
               <param name="X" type="float"/>
@@ -96,7 +96,7 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Plane" name="Plane" type="NODE">
-        <matrix sid="transform">0 -1.62921e-7 -10 0 0 -1 1.62921e-6 0 -10 0 0 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 -1.62921e-7 -1 0 0 1 -1.62921e-7 0 0 0 0 1</matrix>
         <instance_geometry url="#Plane-mesh" name="Plane">
           <bind_material>
             <technique_common>

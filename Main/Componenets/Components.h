@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
+#define GLM_FORCE_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
-
 #include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
@@ -97,17 +97,14 @@ namespace dmbrn
 		CameraComponent(TransformComponent& cam_transform, ImVec2 size):
 			transform_(cam_transform)
 		{
-			transform_.rotate({0, -90, 180});
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
-			proj_[1][1] *= -1;
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
-			proj_[1][1] *= -1;
 		}
 
 		void update(float delta_t)
@@ -117,19 +114,19 @@ namespace dmbrn
 				glm::vec3 cam_move_dir{0};
 
 				if (ImGui::IsKeyDown(ImGuiKey_A))
-					cam_move_dir.x += -1;
+					cam_move_dir.x -= 1;
 				else if (ImGui::IsKeyDown(ImGuiKey_D))
 					cam_move_dir.x += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_S))
-					cam_move_dir.z += 1;
+					cam_move_dir.z -= 1;
 				else if (ImGui::IsKeyDown(ImGuiKey_W))
-					cam_move_dir.z += -1;
+					cam_move_dir.z += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_E))
-					cam_move_dir.y += 1;
+					cam_move_dir.y -= 1;
 				else if (ImGui::IsKeyDown(ImGuiKey_Q))
-					cam_move_dir.y += -1;
+					cam_move_dir.y += 1;
 
 				moveCamera(cam_move_dir, delta_t);
 
@@ -140,7 +137,7 @@ namespace dmbrn
 
 					last_mouse_delt = new_mouse_delt;
 
-					rotateCamera({mouse_rot.x, mouse_rot.y});
+					rotateCamera({mouse_rot.x, -mouse_rot.y});
 				}
 
 				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))

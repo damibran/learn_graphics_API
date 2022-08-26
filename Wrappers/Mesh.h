@@ -8,12 +8,24 @@
 
 namespace dmbrn
 {
+	glm::mat4 toGlmMat(const aiMatrix4x4& mat)
+	{
+		return glm::mat4
+		{mat.a1,mat.a2,mat.a3,mat.a4,
+			mat.b1,mat.b2,mat.b3,mat.b4,
+			mat.c1,mat.c2,mat.c3,mat.c4,
+			mat.d1,mat.d2,mat.d3,mat.d4,
+		};
+	}
+
 	class Mesh
 	{
 	public:
 		UnlitTexturedMaterial* material_;
 
 		uint32_t indices_count;
+
+		glm::mat4 transform_;
 
 		Mesh(const Mesh& other) = delete;
 		Mesh& operator=(const Mesh& other) = delete;
@@ -23,7 +35,9 @@ namespace dmbrn
 
 		Mesh& operator=(Mesh&& other) = default;
 
-		Mesh(const std::string& dir, const std::string& model_name, const aiMaterial* ai_material, aiMesh* mesh):
+		Mesh(const std::string& dir, const std::string& model_name, const aiMaterial* ai_material, aiMesh* mesh,
+		     const aiMatrix4x4& transform):
+			transform_(toGlmMat(transform)),
 			vertex_buffer_(nullptr),
 			index_buffer_(nullptr),
 			vertex_buffer_memory_(nullptr),

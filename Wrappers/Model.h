@@ -43,7 +43,7 @@ namespace dmbrn
 			name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
 
 			// process ASSIMP's root node recursively
-			processNode(scene->mRootNode, scene);
+			processNode(scene->mRootNode, scene, aiMatrix4x4{});
 		}
 
 		// draws the model, and thus all its meshes
@@ -56,8 +56,10 @@ namespace dmbrn
 
 				command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
 				                            **material->un_lit_descriptors_statics_.graphics_pipeline_);
-
-				const vk::ArrayProxy<const UniformBuffers::UniformBufferObject> obj{{modelMat, view, proj}};
+				//meshes[i].transform_ * 
+				const vk::ArrayProxy<const UniformBuffers::UniformBufferObject> obj{
+					{modelMat*meshes[i].transform_ , view, proj}
+				};
 				command_buffer.pushConstants(*material->un_lit_descriptors_statics_.pipeline_layout_,
 				                             vk::ShaderStageFlagBits::eVertex, 0, obj);
 
@@ -75,8 +77,9 @@ namespace dmbrn
 
 	private:
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-		void processNode(aiNode* node, const aiScene* scene)
+		void processNode(aiNode* node, const aiScene* scene, const aiMatrix4x4& parentTransform)
 		{
+			aiMatrix4x4 trans_this = parentTransform * node->mTransformation;
 			// process each mesh located at the current node
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
 			{
@@ -84,12 +87,12 @@ namespace dmbrn
 				// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-				meshes.emplace_back(directory, name, material, mesh);
+				meshes.emplace_back(directory, name, material, mesh, trans_this);
 			}
 			// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 			for (unsigned int i = 0; i < node->mNumChildren; i++)
 			{
-				processNode(node->mChildren[i], scene);
+				processNode(node->mChildren[i], scene, trans_this);
 			}
 		}
 	};
