@@ -20,11 +20,11 @@ namespace dmbrn
 	class EditorUI
 	{
 	public:
-		EditorUI() :
+		EditorUI(Scene& scene) :
 			render_pass_(),
 			swap_chain_(render_pass_),
 			im_gui_(render_pass_),
-			scene_({1280, 720}),
+			scene_(scene),
 			viewport_(scene_),
 			scene_tree_(scene_),
 		inspector_(scene_tree_)
@@ -60,7 +60,7 @@ namespace dmbrn
 		ImGUIRenderPass render_pass_;
 		ImGUISwapChain swap_chain_;
 		ImGuiRaii im_gui_;
-		Scene scene_;
+		Scene& scene_;
 		Viewport viewport_;
 		SceneTree scene_tree_;
 		Inspector inspector_;

@@ -17,6 +17,12 @@ namespace dmbrn
 	class HelloTriangleApplication
 	{
 	public:
+		HelloTriangleApplication():
+			scene_({1280, 720}),
+			editor_ui_(scene_)
+		{
+		}
+
 		void run()
 		{
 			while (!Singletons::window.windowShouldClose())
@@ -35,6 +41,7 @@ namespace dmbrn
 		}
 
 	private:
+		Scene scene_;
 		EditorUI editor_ui_;
 
 		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
