@@ -27,7 +27,7 @@ namespace dmbrn
 			scene_(scene),
 			viewport_(scene_),
 			scene_tree_(scene_),
-		inspector_(scene_tree_)
+			inspector_(scene_tree_)
 		{
 		}
 
