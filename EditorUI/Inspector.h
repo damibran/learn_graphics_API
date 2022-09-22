@@ -38,6 +38,19 @@ namespace dmbrn
 					DrawVec3Control("Rotation", comp->rotation);
 					DrawVec3Control("Scale", comp->scale, 1.0f);
 				}
+
+				if (auto* comp = entity.tryGetComponent<ModelComponent>())
+				{
+					std::string text = comp->getModel()->getPath();
+					char buf[256];
+					memset(buf, 0, sizeof(buf));
+					strcpy_s(buf, sizeof(buf), text.c_str());
+					bool newPath = false;
+					if (ImGui::InputText("Model", buf, sizeof(buf),ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						comp->setNewModel(buf);
+					}
+				}
 			}
 
 			ImGui::End();

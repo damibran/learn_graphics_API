@@ -23,6 +23,7 @@ namespace dmbrn
 		std::vector<Mesh> meshes;
 		std::string directory;
 		std::string name;
+		std::string extension;
 
 		Model(Model&) = delete;
 
@@ -41,6 +42,7 @@ namespace dmbrn
 			// retrieve the directory path of the filepath
 			directory = path.substr(0, path.find_last_of('\\'));
 			name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
+			extension = path.substr(path.find_last_of('.'));
 
 			// process ASSIMP's root node recursively
 			processNode(scene->mRootNode, scene, aiMatrix4x4{});
@@ -58,7 +60,7 @@ namespace dmbrn
 				                            **material->un_lit_descriptors_statics_.graphics_pipeline_);
 				//meshes[i].transform_ * 
 				const vk::ArrayProxy<const UniformBuffers::UniformBufferObject> obj{
-					{modelMat*meshes[i].transform_ , view, proj}
+					{modelMat * meshes[i].transform_, view, proj}
 				};
 				command_buffer.pushConstants(*material->un_lit_descriptors_statics_.pipeline_layout_,
 				                             vk::ShaderStageFlagBits::eVertex, 0, obj);
@@ -73,6 +75,11 @@ namespace dmbrn
 
 				command_buffer.drawIndexed(meshes[i].indices_count, 1, 0, 0, 0);
 			}
+		}
+
+		std::string getPath()const
+		{
+			return directory + "\\" + name + extension;
 		}
 
 	private:

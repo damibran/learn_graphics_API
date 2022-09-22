@@ -85,6 +85,16 @@ namespace dmbrn
 			model_->draw(frame, command_buffers, modelMat, view, proj);
 		}
 
+		void setNewModel(const std::string& path)
+		{
+			model_ = &(*Model::model_instances.emplace(path, path).first).second;
+		}
+
+		const Model* getModel()
+		{
+			return model_;
+		}
+
 	private:
 		Model* model_;
 	};
