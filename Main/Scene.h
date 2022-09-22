@@ -19,14 +19,14 @@ namespace dmbrn
 			camera(registry_, "Main Camera")
 		{
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
-			
+
 			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
 			barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
-			
+
 			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.dae");
-			
+
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
-			
+
 			floor_trans.translate({0, 0.7, 0});
 			floor_trans.rotate({-180, 0, 0});
 			//floor_trans.scale = {10, 10, 10};
@@ -40,6 +40,16 @@ namespace dmbrn
 		void changeCameraAspect(ImVec2 size)
 		{
 			camera.getComponent<CameraComponent>().changeAspect(size);
+		}
+
+		void addNewEntity(const std::string& name = std::string{})
+		{
+			Enttity enttity{registry_, name};
+		}
+
+		void deleteEntity(Enttity enttity)
+		{
+			registry_.destroy(enttity);
 		}
 
 		/**

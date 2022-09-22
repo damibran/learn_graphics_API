@@ -9,7 +9,7 @@ namespace dmbrn
 	{
 	public:
 		Enttity(entt::registry& registry):
-		registry_(&registry)
+			registry_(&registry)
 		{
 		}
 
@@ -31,11 +31,6 @@ namespace dmbrn
 		{
 			registry_ = other.registry_;
 			entityID_ = other.entityID_;
-		}
-
-		uint32_t getId() const
-		{
-			return static_cast<uint32_t>(entityID_);
 		}
 
 		bool operator==(const Enttity& other)
@@ -71,6 +66,9 @@ namespace dmbrn
 		{
 			return entityID_ != entt::null;
 		}
+
+		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }
+		operator entt::entity() const { return entityID_; };
 
 	private:
 		entt::registry* registry_;

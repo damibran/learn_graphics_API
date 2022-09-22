@@ -25,6 +25,14 @@ namespace dmbrn
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
 				selected_ = {scene_.registry_};
 
+			if (ImGui::BeginPopupContextWindow(nullptr, 1, false))
+			{
+				if (ImGui::MenuItem("Create Empty Entity"))
+					scene_.addNewEntity("Empty Entity");
+
+				ImGui::EndPopup();
+			}
+
 			ImGui::End();
 		}
 
@@ -41,18 +49,36 @@ namespace dmbrn
 		{
 			const auto& tag = enttity.getComponent<TagComponent>();
 
-			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_Leaf;//|	ImGuiTreeNodeFlags_OpenOnArrow
-			bool opened = ImGui::TreeNodeEx(reinterpret_cast<const void*>(static_cast<uint64_t>(enttity.getId())), flags, tag.tag.c_str());
+			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
+				ImGuiTreeNodeFlags_Leaf; //|	ImGuiTreeNodeFlags_OpenOnArrow
+			bool opened = ImGui::TreeNodeEx(
+				reinterpret_cast<const void*>(static_cast<uint64_t>(static_cast<uint32_t>(enttity))),
+				flags, tag.tag.c_str());
 
 			if (ImGui::IsItemClicked())
 			{
 				selected_ = enttity;
 			}
 
+			bool deletedEntity = false;
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Delete Entity"))
+				{
+					deletedEntity = true;
+					if (selected_ == enttity)
+						selected_ = {scene_.registry_};
+				}
+				ImGui::EndPopup();
+			}
+
 			if (opened)
 			{
 				ImGui::TreePop();
 			}
+
+			if (deletedEntity)
+				scene_.deleteEntity(enttity);
 		}
 	};
 }
