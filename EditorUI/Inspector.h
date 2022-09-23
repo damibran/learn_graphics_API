@@ -20,36 +20,20 @@ namespace dmbrn
 			{
 				Enttity& entity = scene_tree_.getSelected();
 
-				if (auto* comp = entity.tryGetComponent<TagComponent>())
-				{
-					char buf[256];
-					memset(buf, 0, sizeof(buf));
-					strcpy_s(buf, sizeof(buf), comp->tag.c_str());
+				drawComponents(entity);
 
-					if (ImGui::InputText("Tag", buf, sizeof(buf)))
+				if (ImGui::Button("Add Component"))
+					ImGui::OpenPopup("Add Component");
+
+				if (ImGui::BeginPopup("Add Component"))
+				{
+					if (ImGui::MenuItem("Model Component"))
 					{
-						comp->tag = std::string(buf);
+						entity.addComponent<ModelComponent>("");
+						ImGui::CloseCurrentPopup();
 					}
-				}
 
-				if (auto* comp = entity.tryGetComponent<TransformComponent>())
-				{
-					DrawVec3Control("Translation", comp->position);
-					DrawVec3Control("Rotation", comp->rotation);
-					DrawVec3Control("Scale", comp->scale, 1.0f);
-				}
-
-				if (auto* comp = entity.tryGetComponent<ModelComponent>())
-				{
-					std::string text = comp->getModel()->getPath();
-					char buf[256];
-					memset(buf, 0, sizeof(buf));
-					strcpy_s(buf, sizeof(buf), text.c_str());
-					bool newPath = false;
-					if (ImGui::InputText("Model", buf, sizeof(buf),ImGuiInputTextFlags_EnterReturnsTrue))
-					{
-						comp->setNewModel(buf);
-					}
+					ImGui::EndPopup();
 				}
 			}
 
@@ -59,7 +43,54 @@ namespace dmbrn
 	private:
 		SceneTree& scene_tree_;
 
-		static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,
+		void drawComponents(Enttity entity)
+		{
+			if (auto* comp = entity.tryGetComponent<TagComponent>())
+			{
+				char buf[256];
+				memset(buf, 0, sizeof(buf));
+				strcpy_s(buf, sizeof(buf), comp->tag.c_str());
+
+				if (ImGui::InputText("Tag", buf, sizeof(buf)))
+				{
+					comp->tag = std::string(buf);
+				}
+			}
+
+			if (auto* comp = entity.tryGetComponent<TransformComponent>())
+			{
+				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					drawVec3Control("Translation", comp->position);
+					drawVec3Control("Rotation", comp->rotation);
+					drawVec3Control("Scale", comp->scale, 1.0f);
+					ImGui::TreePop();
+				}
+			}
+
+			if (auto* comp = entity.tryGetComponent<ModelComponent>())
+			{
+				if (ImGui::TreeNodeEx("ModelComponent", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					const Model* model = comp->getModel();
+					std::string text = model ? model->getPath() : "";
+					char buf[256];
+					memset(buf, 0, sizeof(buf));
+					strcpy_s(buf, sizeof(buf), text.c_str());
+					bool newPath = false;
+					ImGui::Text("Model: ");
+					ImGui::SameLine();
+					if (ImGui::InputText("##ModelPathLabel", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						comp->setNewModel(buf);
+					}
+
+					ImGui::TreePop();
+				}
+			}
+		}
+
+		static void drawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,
 		                            float columnWidth = 100.0f)
 		{
 			ImGuiIO& io = ImGui::GetIO();
