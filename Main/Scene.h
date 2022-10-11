@@ -12,12 +12,11 @@ namespace dmbrn
 		friend class SceneTree;
 	public:
 		Scene(ImVec2 size):
-			barrel(registry_, "First Barrel"),
-			barrel2(registry_, "Barrel 2"),
-			floor(registry_, "Floor"),
-			//frame(registry_, "Frame"),
 			camera(registry_, "Main Camera")
 		{
+			Enttity barrel{registry_, "Barrel 1"};
+			Enttity barrel2{registry_, "Barrel 2"};
+			Enttity floor{registry_, "Floor"};
 			barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
 
 			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
@@ -76,9 +75,7 @@ namespace dmbrn
 
 	private:
 		entt::registry registry_;
-		Enttity barrel;
-		Enttity barrel2;
-		Enttity floor;
+
 		//Enttity frame;
 		Enttity camera;
 	};
