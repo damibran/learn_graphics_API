@@ -226,5 +226,8 @@
     <ClInclude Include="EditorUI\Inspector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditorUI\Viewport\ViewportCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

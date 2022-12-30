@@ -26,9 +26,11 @@ namespace dmbrn
 			im_gui_(render_pass_),
 			scene_(scene),
 			viewport_(scene_),
+			viewport_2(scene_,"Viewport 2"),
 			scene_tree_(scene_),
 			inspector_(scene_tree_)
 		{
+			Renderer::setRenderPass(*Viewport::render_pass_);
 		}
 
 		void drawFrame(float delta_time)
@@ -43,6 +45,7 @@ namespace dmbrn
 			ImGui::ShowDemoWindow();
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
+			viewport_2.newImGuiFrame(delta_time,imageIndex);
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame();
 
@@ -62,6 +65,7 @@ namespace dmbrn
 		ImGuiRaii im_gui_;
 		Scene& scene_;
 		Viewport viewport_;
+		Viewport viewport_2;
 		SceneTree scene_tree_;
 		Inspector inspector_;
 
@@ -188,6 +192,7 @@ namespace dmbrn
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
 			viewport_.render(device, command_buffer, current_frame_, imageIndex);
+			viewport_2.render(device, command_buffer, current_frame_, imageIndex);
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
