@@ -7,21 +7,24 @@
 #include "Wrappers/Singletons/Renderer.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
+#include "EditorUI/Viewport/ViewportCamera.h"
 
 namespace dmbrn
 {
 	class Viewport
 	{
 	public:
-		Viewport(Scene& scene) :
+
+		const static inline ViewportRenderPass render_pass_;
+
+		Viewport(Scene& scene,const std::string& name="Viewport") :
+			window_name_(name),
 			size_(1280, 720),
-			render_pass_(),
+			camera_(size_),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
 			scene_(scene)
 		{
-			Renderer::setRenderPass(*render_pass_);
-
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
 				const Texture& buf = swap_chain_.getColorBuffers()[i];
@@ -34,7 +37,7 @@ namespace dmbrn
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
-			ImGui::Begin("Viewport");
+			ImGui::Begin(window_name_.c_str());
 
 			if (HandleWindowResize() == false)
 			{
@@ -42,7 +45,7 @@ namespace dmbrn
 				return;
 			}
 
-			scene_.update(delta_t);
+			camera_.update(delta_t);
 
 			ImGui::Image(images_[imageIndex], size_);
 
@@ -92,14 +95,22 @@ namespace dmbrn
 			command_buffer.setScissor(0, scissor);
 
 			//model drawing
-			scene_.draw(current_frame, device, command_buffer);
+			auto group = scene_.getModelsToDraw();
+
+			for (auto entity : group)
+			{
+				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
+				model.draw(current_frame, command_buffer, transform.getMatrix(), camera_.getViewMat(),
+				           camera_.camera_comp.getMatrix());
+			}
 
 			command_buffer.endRenderPass();
 		}
 
 	private:
+		std::string window_name_="Viewport";
 		ImVec2 size_;
-		ViewportRenderPass render_pass_;
+		ViewportCamera camera_;
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
