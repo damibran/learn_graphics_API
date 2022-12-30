@@ -14,10 +14,9 @@ namespace dmbrn
 	class Viewport
 	{
 	public:
-
 		const static inline ViewportRenderPass render_pass_;
 
-		Viewport(Scene& scene,const std::string& name="Viewport") :
+		Viewport(Scene& scene, const std::string& name = "Viewport") :
 			window_name_(name),
 			size_(1280, 720),
 			camera_(size_),
@@ -108,7 +107,7 @@ namespace dmbrn
 		}
 
 	private:
-		std::string window_name_="Viewport";
+		std::string window_name_ = "Viewport";
 		ImVec2 size_;
 		ViewportCamera camera_;
 		ViewportSwapChain swap_chain_;
@@ -131,7 +130,6 @@ namespace dmbrn
 				size_.y = view.y;
 
 				resize();
-				scene_.changeCameraAspect(size_);
 
 				// The window state has been successfully changed.
 				return true;
@@ -152,6 +150,8 @@ namespace dmbrn
 				images_[i] = (ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
 				                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 			}
+
+			camera_.updateAspectRatio({size_.x, size_.y});
 		}
 	};
 }
