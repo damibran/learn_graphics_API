@@ -20,6 +20,8 @@ namespace dmbrn
 
 		void update(float delta_t)
 		{
+			ImGuiContext& g = *GImGui;
+			auto window = ImGui::GetCurrentWindow();
 			if (ImGui::IsWindowFocused())
 			{
 				glm::vec3 cam_move_dir{0};
@@ -41,7 +43,7 @@ namespace dmbrn
 
 				moveCamera(cam_move_dir, delta_t);
 
-				if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+				if (ImGui::IsWindowHovered()&&ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !window->TitleBarRect().Contains(g.IO.MousePos))
 				{
 					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
 					ImVec2 mouse_rot = new_mouse_delt - last_mouse_delt;
@@ -58,6 +60,23 @@ namespace dmbrn
 			}
 		}
 
+		glm::mat4 getViewMat()
+		{
+			return inverse(transform_.getMatrix());
+		}
+
+		void updateAspectRatio(ImVec2 size)
+		{
+			camera_comp.changeAspect(size);
+		}
+
+	private:
+		float mouse_sensitivity_ = 0.15f;
+		float speed_ = 7;
+		ImVec2 last_mouse_delt = {0, 0};
+		TransformComponent transform_;
+		CameraComponent camera_comp;
+				
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{
 			const float tspeed = dt * speed_;
@@ -89,17 +108,5 @@ namespace dmbrn
 					transform_.rotation.x = -89.0f;
 			}
 		}
-
-		glm::mat4 getViewMat()
-		{
-			return inverse(transform_.getMatrix());
-		}
-
-	private:
-		float mouse_sensitivity_ = 0.15f;
-		float speed_ = 7;
-		ImVec2 last_mouse_delt = {0, 0};
-		TransformComponent transform_;
-		CameraComponent camera_comp;
 	};
 }

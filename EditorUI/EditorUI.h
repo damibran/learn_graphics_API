@@ -31,6 +31,7 @@ namespace dmbrn
 			inspector_(scene_tree_)
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
+			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 		}
 
 		void drawFrame(float delta_time)

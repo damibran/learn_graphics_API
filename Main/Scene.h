@@ -36,11 +36,6 @@ namespace dmbrn
 			//camera.addComponent<CameraComponent>(camera.getComponent<TransformComponent>(), size);
 		}
 
-		void changeCameraAspect(ImVec2 size)
-		{
-			//camera.getComponent<CameraComponent>().changeAspect(size);
-		}
-
 		void addNewEntity(const std::string& name = std::string{})
 		{
 			Enttity enttity{registry_, name};
