@@ -70,6 +70,21 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,14 +119,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\entt\src;$(SolutionDir);$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\imgui\backends;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\glfw\include;C:\VulkanSDK\1.3.216.0\Include;$(SolutionDir)Dependencies\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);C:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glm\out\build\x64-Release\glm;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\lib;$(SolutionDir)Dependencies\glfw\out\build\x64-Release\src;C:\VulkanSDK\1.3.216.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mt.lib;glm_static.lib;glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -122,43 +138,29 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\glfw\include;C:\VulkanSDK\1.3.216.0\Include;$(SolutionDir)Dependencies\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);C:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\glm\out\build\x64-Release\glm;$(SolutionDir)Dependencies\assimp\out\build\x64-Release\lib;$(SolutionDir)Dependencies\glfw\out\build\x64-Release\src;C:\VulkanSDK\1.3.216.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mt.lib;glm_static.lib;glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.216.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dependencies\imgui\backends\imgui_impl_glfw.cpp" />
-    <ClCompile Include="Dependencies\imgui\backends\imgui_impl_vulkan.cpp" />
-    <ClCompile Include="Dependencies\imgui\imgui.cpp" />
-    <ClCompile Include="Dependencies\imgui\imgui_demo.cpp" />
-    <ClCompile Include="Dependencies\imgui\imgui_draw.cpp" />
-    <ClCompile Include="Dependencies\imgui\imgui_tables.cpp" />
-    <ClCompile Include="Dependencies\imgui\imgui_widgets.cpp" />
     <ClCompile Include="MainHpp.cpp" />
-    <ClCompile Include="stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shader_push_const.vert" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dependencies\imgui\backends\imgui_impl_glfw.h" />
-    <ClInclude Include="Dependencies\imgui\backends\imgui_impl_vulkan.h" />
-    <ClInclude Include="Dependencies\imgui\imconfig.h" />
-    <ClInclude Include="Dependencies\imgui\imgui.h" />
-    <ClInclude Include="Dependencies\imgui\imgui_internal.h" />
-    <ClInclude Include="Dependencies\imgui\imstb_rectpack.h" />
-    <ClInclude Include="Dependencies\imgui\imstb_textedit.h" />
-    <ClInclude Include="Dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="EditorUI\EditorUI.h" />
     <ClInclude Include="EditorUI\Helpers\EditorFrame.h" />
     <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h" />
