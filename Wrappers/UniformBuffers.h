@@ -14,6 +14,8 @@ namespace dmbrn
 	class UniformBuffers
 	{
 	public:
+		~UniformBuffers()=delete;
+		UniformBuffers(const UniformBuffers& )=delete;
 
 		UniformBuffers(UniformBuffers&& )=default;
 		UniformBuffers& operator=(UniformBuffers&&)=default;

@@ -11,6 +11,8 @@ namespace dmbrn
 	class UnLitTexturedDescriptorSets
 	{
 	public:
+		~UnLitTexturedDescriptorSets()=default;
+		UnLitTexturedDescriptorSets(const UnLitTexturedDescriptorSets&)=delete;
 		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&) = default;
 		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&) = default;
 

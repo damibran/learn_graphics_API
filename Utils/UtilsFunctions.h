@@ -19,6 +19,17 @@ namespace dmbrn::utils
 		return availableFormats[0];
 	}
 
+	[[nodiscard]] std::string matrix_to_str_row_maj(const glm::mat4& m)
+	{
+		std::string res;
+		for (int i = 0; i < 4; ++i)
+		{
+			res += std::to_string(m[0][i]) + " " + std::to_string(m[1][i]) + " " + std::to_string(m[2][i]) + " " +
+				std::to_string(m[3][i]) + "\n";
+		}
+		return res;
+	}
+
 	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities, const GLFWwindowWrapper& window)
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
@@ -69,7 +80,7 @@ namespace dmbrn::utils
 		);
 	}
 
-	uint32_t capabilitiesGetImageCount(const PhysicalDevice& physical_device,const Surface& surface)
+	uint32_t capabilitiesGetImageCount(const PhysicalDevice& physical_device, const Surface& surface)
 	{
 		const auto capabilities = PhysicalDevice::querySurfaceCapabilities(*physical_device, surface);
 

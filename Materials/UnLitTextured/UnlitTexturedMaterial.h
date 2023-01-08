@@ -8,6 +8,7 @@ namespace dmbrn
 {
 	struct UnlitTexturedMaterial
 	{
+		~UnlitTexturedMaterial()=default;
 
 		UnlitTexturedMaterial(UnlitTexturedMaterial&& other) = default;
 		UnlitTexturedMaterial& operator=(UnlitTexturedMaterial&& other) = default;
@@ -59,7 +60,7 @@ namespace dmbrn
 	private:
 		// checks all material textures of a given type and loads the textures if they're not loaded yet.
 		// the required info is returned as a Texture struct.
-		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string directory)
+		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& directory)
 		{
 			std::vector<Texture> textures;
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -73,7 +74,7 @@ namespace dmbrn
 			return textures;
 		}
 
-		std::string getDeffuseTexturePath(const aiMaterial* mat, aiTextureType type, const std::string directory)
+		std::string getDeffuseTexturePath(const aiMaterial* mat, aiTextureType type, const std::string& directory)
 		{
 			aiString str;
 			mat->GetTexture(type, 0, &str);
