@@ -12,7 +12,7 @@ namespace dmbrn
 	class UnLitTexturedGraphicsPipeline
 	{
 	public:
-		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr)
+		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
 		{
 		}
 
@@ -99,11 +99,7 @@ namespace dmbrn
 				dynamicStates.data()
 			};
 
-			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info
-			{
-				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
-				VK_FALSE, VK_FALSE
-			};
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info = getDepthStencilInfo();
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
@@ -125,13 +121,21 @@ namespace dmbrn
 	private:
 		vk::raii::Pipeline graphics_pipeline_;
 
+		vk::PipelineDepthStencilStateCreateInfo getDepthStencilInfo()
+		{
+			return vk::PipelineDepthStencilStateCreateInfo{
+				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
+				VK_FALSE, VK_FALSE
+			};
+		}
+
 		static std::vector<char> readFile(const std::string& filename)
 		{
 			std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
 			if (!file.is_open())
 			{
-				throw std::runtime_error("failed to open "+filename+" file!");
+				throw std::runtime_error("failed to open " + filename + " file!");
 			}
 
 			const size_t fileSize = file.tellg();

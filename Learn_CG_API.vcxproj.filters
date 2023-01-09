@@ -185,5 +185,8 @@
     <ClInclude Include="Materials\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Materials\Outline\OutlinedMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

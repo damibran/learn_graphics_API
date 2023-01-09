@@ -25,12 +25,7 @@ namespace dmbrn
 		{
 			graphics_pipeline_.setRenderPass(Singletons::device, render_pass, pipeline_layout_);
 		}
-
-		const vk::raii::PipelineLayout& getLayout() const
-		{
-			return pipeline_layout_;
-		}
-
+		
 		vk::raii::DescriptorSetLayout descriptor_layout_;
 		vk::raii::PipelineLayout pipeline_layout_;
 		vk::raii::DescriptorPool pool_;

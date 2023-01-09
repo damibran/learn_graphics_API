@@ -2,8 +2,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/Singletons/Surface.h"
-#include "Wrappers/Singletons/PhysicalDevice.h"
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Utils/UtilsFunctions.h"
 
@@ -15,7 +13,7 @@ namespace dmbrn
 		ViewportRenderPass():
 			render_pass_(nullptr)
 		{
-			const vk::AttachmentDescription colorAttachment
+			constexpr vk::AttachmentDescription colorAttachment
 			{
 				{},
 				vk::Format::eR8G8B8A8Srgb,
@@ -28,7 +26,7 @@ namespace dmbrn
 				vk::ImageLayout::eShaderReadOnlyOptimal
 			};
 
-			const vk::AttachmentReference colorAttachmentRef
+			constexpr vk::AttachmentReference colorAttachmentRef
 			{
 				0, vk::ImageLayout::eColorAttachmentOptimal
 			};
@@ -40,13 +38,13 @@ namespace dmbrn
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare,
-				vk::AttachmentLoadOp::eDontCare,
+				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare,
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eDepthStencilAttachmentOptimal
 			};
 
-			const vk::AttachmentReference depthAttachmentRef
+			constexpr vk::AttachmentReference depthAttachmentRef
 			{
 				1, vk::ImageLayout::eDepthStencilAttachmentOptimal
 			};
@@ -61,23 +59,35 @@ namespace dmbrn
 				&depthAttachmentRef
 			};
 
-			const vk::SubpassDependency dependency
+			constexpr vk::SubpassDependency depthStencilDependency
 			{
-				VK_SUBPASS_EXTERNAL, 0,
-				vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-				vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+				VK_SUBPASS_EXTERNAL,0,
+				vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
+				vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
+				 vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+				vk::AccessFlagBits::eDepthStencilAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentRead,{}
+			};
+
+			constexpr vk::SubpassDependency colorDependency
+			{
+				VK_SUBPASS_EXTERNAL,
+				0,
+				vk::PipelineStageFlagBits::eColorAttachmentOutput,
+				vk::PipelineStageFlagBits::eColorAttachmentOutput,
 				vk::AccessFlagBits::eNone,
-				vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
+				vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead
 			};
 
 			const std::array<vk::AttachmentDescription, 2> attachments{colorAttachment, depthAttachment};
+
+			constexpr std::array<vk::SubpassDependency, 2> dependencies{colorDependency,depthStencilDependency};
 
 			const vk::RenderPassCreateInfo renderPassInfo
 			{
 				{},
 				attachments,
 				subpass,
-				dependency
+				dependencies
 			};
 
 			render_pass_ = vk::raii::RenderPass{Singletons::device->createRenderPass(renderPassInfo)};
