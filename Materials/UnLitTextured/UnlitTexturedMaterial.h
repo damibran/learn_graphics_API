@@ -1,14 +1,15 @@
 #pragma once
 #include <assimp/material.h>
 #include "UnLitTexturedDescriptorSets.h"
+#include "Materials/Material.h"
 #include "Materials/UnLitTextured/UnLitTexturedDescriptorsStatics.h"
 #include "Wrappers/UniformBuffers.h"
 
 namespace dmbrn
 {
-	struct UnlitTexturedMaterial
+	struct UnlitTexturedMaterial : Material
 	{
-		~UnlitTexturedMaterial()=default;
+		~UnlitTexturedMaterial() override = default;
 
 		UnlitTexturedMaterial(UnlitTexturedMaterial&& other) = default;
 		UnlitTexturedMaterial& operator=(UnlitTexturedMaterial&& other) = default;
@@ -19,7 +20,7 @@ namespace dmbrn
 		UnlitTexturedMaterial(const std::string& dir,
 		                      const aiMaterial* ai_material):
 			diffuse(getDeffuseTexturePath(ai_material, aiTextureType_DIFFUSE, dir)),
-		descriptor_sets_(Singletons::device, un_lit_descriptors_statics_,diffuse)
+			descriptor_sets_(Singletons::device, un_lit_descriptors_statics_, diffuse)
 		{
 		}
 
@@ -33,20 +34,32 @@ namespace dmbrn
 			                                    std::forward_as_tuple(dir, ai_material)).first).second;
 		}
 
-		//void updateUBO(int curentFrame, glm::mat4 modelMat, const glm::mat4& view, const glm::mat4& proj)
-		//{
-		//	UniformBuffers::UniformBufferObject ubo{};
-		//	ubo.model = modelMat;
-		//	ubo.view = view;
-		//	ubo.proj = proj;
-		//
-		//	ubo.proj[1][1] *= -1;
-		//
-		//	void* data = uniform_buffers_.getUBMemory(curentFrame).mapMemory(0, sizeof(ubo));
-		//	memcpy(data, &ubo, sizeof(ubo));
-		//	uniform_buffers_.getUBMemory(curentFrame).unmapMemory();
-		//}
+		void draw(const vk::raii::Buffer& vertex_buffer_ ,const vk::raii::Buffer& index_buffer_ ,uint32_t indices_count,int frame, const vk::raii::CommandBuffer& command_buffer, const glm::mat4& modelMat,
+		                  const glm::mat4& view,
+		                  const glm::mat4& proj) const override
+		{
+			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+			                            **un_lit_descriptors_statics_.graphics_pipeline_);
 
+			std::array<UniformBuffers::UniformBufferObject, 1> arr{
+				{modelMat, view, proj}
+			};
+
+			command_buffer.pushConstants<UniformBuffers::UniformBufferObject>(
+				*un_lit_descriptors_statics_.pipeline_layout_,
+				vk::ShaderStageFlagBits::eVertex, 0, arr);
+
+			command_buffer.bindVertexBuffers(0, *vertex_buffer_, {0});
+
+			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
+
+			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+			                                  *un_lit_descriptors_statics_.pipeline_layout_, 0,
+			                                  *descriptor_sets_[frame], nullptr);
+
+			command_buffer.drawIndexed(indices_count, 1, 0, 0, 0);
+		}
+		
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
 			un_lit_descriptors_statics_.setRenderPass(render_pass);

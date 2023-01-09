@@ -21,7 +21,7 @@ namespace dmbrn
 	class Mesh
 	{
 	public:
-		UnlitTexturedMaterial* material_;
+		Material* material_;
 
 		uint32_t indices_count;
 

@@ -182,5 +182,8 @@
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Materials\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

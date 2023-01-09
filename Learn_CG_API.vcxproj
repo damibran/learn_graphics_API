@@ -175,6 +175,7 @@
     <ClInclude Include="Main\Componenets\Components.h" />
     <ClInclude Include="Main\Enttity.h" />
     <ClInclude Include="Main\Scene.h" />
+    <ClInclude Include="Materials\Material.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorsStatics.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h" />

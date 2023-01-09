@@ -51,33 +51,13 @@ namespace dmbrn
 		}
 
 		// draws the model, and thus all its meshes
-		void draw(int frame, const vk::raii::CommandBuffer& command_buffer, glm::mat4 modelMat, const glm::mat4& view,
+		void draw(int frame, const vk::raii::CommandBuffer& command_buffer, const glm::mat4& modelMat, const glm::mat4& view,
 		          const glm::mat4& proj) const
 		{
 			//std::cout<<utils::matrix_to_str_row_maj(proj);
-			for (unsigned int i = 0; i < meshes.size(); i++)
+			for (const auto & mesh : meshes)
 			{
-				const UnlitTexturedMaterial* material = meshes[i].material_;
-
-				command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-				                            **UnlitTexturedMaterial::un_lit_descriptors_statics_.graphics_pipeline_);
-
-				std::array<UniformBuffers::UniformBufferObject,1> arr{
-					{modelMat * meshes[i].transform_, view, proj}
-				};
-
-				command_buffer.pushConstants<UniformBuffers::UniformBufferObject>(*UnlitTexturedMaterial::un_lit_descriptors_statics_.pipeline_layout_,
-				                             vk::ShaderStageFlagBits::eVertex, 0, arr);
-
-				command_buffer.bindVertexBuffers(0, {*meshes[i].vertex_buffer_}, {0});
-
-				command_buffer.bindIndexBuffer(*meshes[i].index_buffer_, 0, vk::IndexType::eUint16);
-
-				command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-				                                  *UnlitTexturedMaterial::un_lit_descriptors_statics_.pipeline_layout_, 0,
-				                                  *material->descriptor_sets_[frame], nullptr);
-
-				command_buffer.drawIndexed(meshes[i].indices_count, 1, 0, 0, 0);
+				mesh.material_->draw(mesh.vertex_buffer_,mesh.index_buffer_, mesh.indices_count,frame,command_buffer,modelMat * mesh.transform_,view,proj);
 			}
 		}
 
