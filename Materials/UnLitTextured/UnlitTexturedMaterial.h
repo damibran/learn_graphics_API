@@ -35,14 +35,14 @@ namespace dmbrn
 		          const glm::mat4& proj) const override
 		{
 			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-			                            **un_lit_descriptors_statics_.graphics_pipeline_);
+			                            **un_lit_graphics_pipeline_statics_.graphics_pipeline_);
 
 			std::array<UniformBuffers::UniformBufferObject, 1> arr{
 				{modelMat, view, proj}
 			};
 
 			command_buffer.pushConstants<UniformBuffers::UniformBufferObject>(
-				*un_lit_descriptors_statics_.pipeline_layout_,
+				*un_lit_graphics_pipeline_statics_.pipeline_layout_,
 				vk::ShaderStageFlagBits::eVertex, 0, arr);
 
 			command_buffer.bindVertexBuffers(0, *vertex_buffer_, {0});
@@ -50,7 +50,7 @@ namespace dmbrn
 			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-			                                  *un_lit_descriptors_statics_.pipeline_layout_, 0,
+			                                  *un_lit_graphics_pipeline_statics_.pipeline_layout_, 0,
 			                                  *descriptor_sets_[frame], nullptr);
 
 			command_buffer.drawIndexed(indices_count, 1, 0, 0, 0);
@@ -58,14 +58,13 @@ namespace dmbrn
 
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
-			un_lit_descriptors_statics_.setRenderPass(render_pass);
+			un_lit_graphics_pipeline_statics_.setRenderPass(render_pass);
 		}
 
 		Texture diffuse;
 		UnLitTexturedDescriptorSets descriptor_sets_;
-		static inline UnLitTexturedDescriptorsStatics un_lit_descriptors_statics_{};
+		static inline UnLitTexturedGraphicsPipelineStatics un_lit_graphics_pipeline_statics_{};
 		static inline std::unordered_map<std::string, UnlitTexturedMaterial> material_registry;
-		friend std::tuple<const std::string, UnlitTexturedMaterial>;
 
 	private:
 		// checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -87,7 +86,7 @@ namespace dmbrn
 		UnlitTexturedMaterial(const std::string& dir,
 		                      const aiMaterial* ai_material):
 			diffuse(getDeffuseTexturePath(ai_material, aiTextureType_DIFFUSE, dir)),
-			descriptor_sets_(Singletons::device, un_lit_descriptors_statics_, diffuse)
+			descriptor_sets_(Singletons::device, diffuse)
 		{
 		}
 
