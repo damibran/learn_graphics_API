@@ -3,14 +3,12 @@
 #include <vulkan/vulkan_raii.hpp>
 
 #include "Wrappers/Texture.h"
-#include "Wrappers/UniformBuffers.h"
 
 namespace dmbrn
 {
 	class UnLitTexturedDescriptorSets
 	{
 	public:
-		static const int MAX_COUNT = 10;
 
 		~UnLitTexturedDescriptorSets() = default;
 		UnLitTexturedDescriptorSets(const UnLitTexturedDescriptorSets&) = delete;
@@ -87,7 +85,7 @@ namespace dmbrn
 
 			const vk::DescriptorSetAllocateInfo allocInfo
 			{
-				*pool_,
+				**Singletons::descriptor_pool,
 				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
 				layouts.data()
 			};
@@ -123,54 +121,5 @@ namespace dmbrn
 				device->updateDescriptorSets(descriptorWrites, nullptr);
 			}
 		}
-
-		static vk::raii::DescriptorPool createDescriptorPoolPushConst(const LogicalDevice& device)
-		{
-			std::array<vk::DescriptorPoolSize, 1> poolSizes{};
-
-			poolSizes[0] = vk::DescriptorPoolSize
-			{
-				vk::DescriptorType::eCombinedImageSampler,
-				MAX_COUNT * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
-			};
-
-			vk::DescriptorPoolCreateInfo poolInfo
-			{
-				vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-				MAX_COUNT * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
-				static_cast<uint32_t>(poolSizes.size()),
-				poolSizes.data()
-			};
-
-			return vk::raii::DescriptorPool{device->createDescriptorPool(poolInfo)};
-		}
-
-		static vk::raii::DescriptorPool createDescriptorPool(const LogicalDevice& device)
-		{
-			std::array<vk::DescriptorPoolSize, 2> poolSizes{};
-
-			poolSizes[0] = vk::DescriptorPoolSize
-			{
-				vk::DescriptorType::eUniformBuffer,
-				MAX_COUNT * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
-			};
-			poolSizes[1] = vk::DescriptorPoolSize
-			{
-				vk::DescriptorType::eCombinedImageSampler,
-				MAX_COUNT * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
-			};
-
-			vk::DescriptorPoolCreateInfo poolInfo
-			{
-				vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-				MAX_COUNT * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
-				static_cast<uint32_t>(poolSizes.size()),
-				poolSizes.data()
-			};
-
-			return vk::raii::DescriptorPool{device->createDescriptorPool(poolInfo)};
-		}
-
-		static inline vk::raii::DescriptorPool pool_{createDescriptorPoolPushConst(Singletons::device)};
 	};
 }

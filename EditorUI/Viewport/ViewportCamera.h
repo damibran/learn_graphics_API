@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+#include "CameraRenderData.h"
 #include "imgui.h"
 
 #include "Main/Componenets/Components.h"
@@ -76,6 +77,7 @@ namespace dmbrn
 		ImVec2 last_mouse_delt = {0, 0};
 		TransformComponent transform_;
 		CameraComponent camera_comp;
+		//CameraRenderData renderer_data_;
 				
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{

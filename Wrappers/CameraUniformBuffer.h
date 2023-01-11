@@ -11,14 +11,14 @@
 
 namespace dmbrn
 {
-	class UniformBuffers
+	class CameraUniformBuffer
 	{
 	public:
-		~UniformBuffers()=delete;
-		UniformBuffers(const UniformBuffers& )=delete;
+		~CameraUniformBuffer()=default;
+		CameraUniformBuffer(const CameraUniformBuffer& )=delete;
 
-		UniformBuffers(UniformBuffers&& )=default;
-		UniformBuffers& operator=(UniformBuffers&&)=default;
+		CameraUniformBuffer(CameraUniformBuffer&& )=default;
+		CameraUniformBuffer& operator=(CameraUniformBuffer&&)=default;
 
 		struct UniformBufferObject
 		{
@@ -27,7 +27,7 @@ namespace dmbrn
 			alignas(16) glm::mat4 proj;
 		};
 
-		UniformBuffers(const PhysicalDevice& physical_device, const LogicalDevice& device)
+		CameraUniformBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 

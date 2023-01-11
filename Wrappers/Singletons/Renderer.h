@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Wrappers/Singletons/Singletons.h"
-#include "Materials/UnLitTextured/UnLitTexturedDescriptorsStatics.h"
 #include "Materials/UnLitTextured/UnlitTexturedMaterial.h"
 
 namespace dmbrn

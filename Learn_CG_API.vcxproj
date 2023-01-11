@@ -168,6 +168,7 @@
     <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h" />
     <ClInclude Include="EditorUI\Inspector.h" />
     <ClInclude Include="EditorUI\SceneTree.h" />
+    <ClInclude Include="EditorUI\Viewport\CameraRenderData.h" />
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
@@ -177,8 +178,9 @@
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="Materials\Material.h" />
     <ClInclude Include="Materials\Outline\OutlinedMaterial.h" />
+    <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />
-    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorsStatics.h" />
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h" />
     <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipeline.h" />
     <ClInclude Include="Materials\UnLitTextured\UnlitTexturedMaterial.h" />
@@ -209,7 +211,7 @@
     <ClInclude Include="Wrappers\Surface.h" />
     <ClInclude Include="Wrappers\SwapChain.h" />
     <ClInclude Include="Wrappers\Texture.h" />
-    <ClInclude Include="Wrappers\UniformBuffers.h" />
+    <ClInclude Include="Wrappers\CameraUniformBuffer.h" />
     <ClInclude Include="Wrappers\Vertex.h" />
     <ClInclude Include="Wrappers\VertexIndexBuffers.h" />
     <ClInclude Include="Wrappers\Viewport.h" />

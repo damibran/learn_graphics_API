@@ -6,6 +6,7 @@
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
+#include "DescriptorPool.h"
 
 namespace dmbrn
 {
@@ -26,5 +27,6 @@ namespace dmbrn
 			device->getQueue(physical_device.getQueueFamilyIndices().presentFamily.value(), 0)
 		};
 		static inline CommandPool command_pool{physical_device, device};
+		static inline DescriptorPool descriptor_pool{device};
 	};
 }

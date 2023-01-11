@@ -2,8 +2,6 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-#include "Wrappers/UniformBuffers.h"
-
 #include "Wrappers/Singletons/Renderer.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"

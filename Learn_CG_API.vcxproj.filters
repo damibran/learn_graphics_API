@@ -59,7 +59,7 @@
     <ClInclude Include="Wrappers\VertexIndexBuffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\UniformBuffers.h">
+    <ClInclude Include="Wrappers\CameraUniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\UtilsFunctions.h">
@@ -158,7 +158,7 @@
     <ClInclude Include="Main\Componenets\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorsStatics.h">
+    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h">
@@ -186,6 +186,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Materials\Outline\OutlinedMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorUI\Viewport\CameraRenderData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\DescriptorPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

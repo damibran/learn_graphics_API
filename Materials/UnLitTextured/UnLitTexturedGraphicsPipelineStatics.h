@@ -2,18 +2,18 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/UniformBuffers.h"
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Singletons/Singletons.h"
 #include "UnLitTexturedGraphicsPipeline.h"
+#include "Wrappers/CameraUniformBuffer.h"
 
 namespace dmbrn
 {
-	class UnLitTexturedDescriptorsStatics
+	class UnLitTexturedGraphicsPipelineStatics
 	{
 	public:
 
-		UnLitTexturedDescriptorsStatics():
+		UnLitTexturedGraphicsPipelineStatics():
 			pipeline_layout_(createPipelineLayoutPushConst(Singletons::device))
 		{
 		}
@@ -32,7 +32,7 @@ namespace dmbrn
 		{
 			const vk::PushConstantRange push_constant_range
 			{
-				vk::ShaderStageFlagBits::eVertex,0,sizeof(UniformBuffers::UniformBufferObject)
+				vk::ShaderStageFlagBits::eVertex,0,sizeof(CameraUniformBuffer::UniformBufferObject)
 			};
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo

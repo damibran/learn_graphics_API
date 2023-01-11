@@ -2,8 +2,7 @@
 #include <assimp/material.h>
 #include "UnLitTexturedDescriptorSets.h"
 #include "Materials/Material.h"
-#include "Materials/UnLitTextured/UnLitTexturedDescriptorsStatics.h"
-#include "Wrappers/UniformBuffers.h"
+#include "Materials/UnLitTextured/UnLitTexturedGraphicsPipelineStatics.h"
 
 namespace dmbrn
 {
@@ -23,8 +22,8 @@ namespace dmbrn
 			std::string material_name = model_name + "." + std::string{ai_material->GetName().data};
 
 			auto it = material_registry.find(material_name);
-			if(it == material_registry.end())
-				it = material_registry.emplace(material_name,UnlitTexturedMaterial{dir, ai_material}).first;
+			if (it == material_registry.end())
+				it = material_registry.emplace(material_name, UnlitTexturedMaterial{dir, ai_material}).first;
 
 			return &it->second;
 		}
@@ -34,14 +33,11 @@ namespace dmbrn
 		          const glm::mat4& view,
 		          const glm::mat4& proj) const override
 		{
-			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-			                            **un_lit_graphics_pipeline_statics_.graphics_pipeline_);
-
-			std::array<UniformBuffers::UniformBufferObject, 1> arr{
+			std::array<CameraUniformBuffer::UniformBufferObject, 1> arr{
 				{modelMat, view, proj}
 			};
 
-			command_buffer.pushConstants<UniformBuffers::UniformBufferObject>(
+			command_buffer.pushConstants<CameraUniformBuffer::UniformBufferObject>(
 				*un_lit_graphics_pipeline_statics_.pipeline_layout_,
 				vk::ShaderStageFlagBits::eVertex, 0, arr);
 
@@ -52,6 +48,9 @@ namespace dmbrn
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
 			                                  *un_lit_graphics_pipeline_statics_.pipeline_layout_, 0,
 			                                  *descriptor_sets_[frame], nullptr);
+
+			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+			                            **un_lit_graphics_pipeline_statics_.graphics_pipeline_);
 
 			command_buffer.drawIndexed(indices_count, 1, 0, 0, 0);
 		}
