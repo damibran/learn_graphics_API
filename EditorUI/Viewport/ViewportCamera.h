@@ -73,7 +73,7 @@ namespace dmbrn
 
 		void updateRenderData(int frame)
 		{
-			renderer_data_.update(frame,transform_.getMatrix(),camera_comp.getMatrix());
+			renderer_data_.update(frame,glm::inverse(transform_.getMatrix()),camera_comp.getMatrix());
 		}
 
 		void bindData(int frame,const vk::raii::CommandBuffer& command_buffer)const
