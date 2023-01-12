@@ -59,7 +59,7 @@
     <ClInclude Include="Wrappers\VertexIndexBuffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\CameraUniformBuffer.h">
+    <ClInclude Include="EditorUI\Viewport\CameraUniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\UtilsFunctions.h">

@@ -91,6 +91,8 @@ namespace dmbrn
 			};
 			command_buffer.setScissor(0, scissor);
 
+			Renderer::newView(current_frame, camera_, command_buffer);
+
 			//model drawing
 			auto group = scene_.getModelsToDraw();
 

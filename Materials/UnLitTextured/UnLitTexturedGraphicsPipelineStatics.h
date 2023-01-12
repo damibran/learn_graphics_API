@@ -4,8 +4,8 @@
 
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Singletons/Singletons.h"
+#include "EditorUI/Viewport/CameraRenderData.h"
 #include "UnLitTexturedGraphicsPipeline.h"
-#include "Wrappers/CameraUniformBuffer.h"
 
 namespace dmbrn
 {
@@ -32,12 +32,14 @@ namespace dmbrn
 		{
 			const vk::PushConstantRange push_constant_range
 			{
-				vk::ShaderStageFlagBits::eVertex,0,sizeof(CameraUniformBuffer::UniformBufferObject)
+				vk::ShaderStageFlagBits::eVertex,0,sizeof(glm::mat4)
 			};
+
+			std::array<vk::DescriptorSetLayout,2> descriptor_set_layouts{*CameraRenderData::getDescriptorSetLayout(), *UnLitTexturedDescriptorSets::descriptor_layout_};
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 			{
-				{}, *UnLitTexturedDescriptorSets::descriptor_layout_,push_constant_range
+				{}, descriptor_set_layouts,push_constant_range
 			};
 
 			return vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};

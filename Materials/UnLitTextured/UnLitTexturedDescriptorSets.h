@@ -39,34 +39,7 @@ namespace dmbrn
 			const vk::DescriptorSetLayoutCreateInfo layoutInfo
 			{
 				{},
-				static_cast<uint32_t>(bindings.size()),
-				bindings.data()
-			};
-
-			return vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
-		}
-
-		static vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
-		{
-			const vk::DescriptorSetLayoutBinding uboLayoutBinding
-			{
-				0, vk::DescriptorType::eUniformBuffer,
-				1, vk::ShaderStageFlagBits::eVertex
-			};
-
-			const vk::DescriptorSetLayoutBinding samplerLayoutBinding
-			{
-				1, vk::DescriptorType::eCombinedImageSampler,
-				1, vk::ShaderStageFlagBits::eFragment
-			};
-
-			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
-
-			const vk::DescriptorSetLayoutCreateInfo layoutInfo
-			{
-				{},
-				static_cast<uint32_t>(bindings.size()),
-				bindings.data()
+				bindings
 			};
 
 			return vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
@@ -94,23 +67,12 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				//vk::DescriptorBufferInfo bufferInfo
-				//{
-				//	*uniform_buffers[i], 0, sizeof(UniformBuffers::UniformBufferObject)
-				//};
-
 				vk::DescriptorImageInfo imageInfo
 				{
 					*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
 				};
 
 				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
-
-				//descriptorWrites[0] = vk::WriteDescriptorSet
-				//{
-				//	*descriptor_sets_[i], 0, 0, vk::DescriptorType::eUniformBuffer,
-				//	{}, bufferInfo
-				//};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{

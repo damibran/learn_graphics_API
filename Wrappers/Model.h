@@ -11,7 +11,6 @@
 #include "Materials/UnLitTextured/UnlitTexturedMaterial.h"
 #include "Mesh.h"
 #include "Texture.h"
-#include "Singletons/Renderer.h"
 
 namespace dmbrn
 {

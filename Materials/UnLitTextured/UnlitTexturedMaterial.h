@@ -33,11 +33,11 @@ namespace dmbrn
 		          const glm::mat4& view,
 		          const glm::mat4& proj) const override
 		{
-			std::array<CameraUniformBuffer::UniformBufferObject, 1> arr{
-				{modelMat, view, proj}
+			std::array<glm::mat4, 1> arr{
+				{modelMat}
 			};
 
-			command_buffer.pushConstants<CameraUniformBuffer::UniformBufferObject>(
+			command_buffer.pushConstants<glm::mat4>(
 				*un_lit_graphics_pipeline_statics_.pipeline_layout_,
 				vk::ShaderStageFlagBits::eVertex, 0, arr);
 
@@ -46,7 +46,7 @@ namespace dmbrn
 			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-			                                  *un_lit_graphics_pipeline_statics_.pipeline_layout_, 0,
+			                                  *un_lit_graphics_pipeline_statics_.pipeline_layout_, 1,
 			                                  *descriptor_sets_[frame], nullptr);
 
 			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,

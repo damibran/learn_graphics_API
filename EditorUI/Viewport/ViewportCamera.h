@@ -63,12 +63,22 @@ namespace dmbrn
 
 		glm::mat4 getViewMat()
 		{
-			return inverse(transform_.getMatrix());
+			return glm::inverse(transform_.getMatrix());
 		}
 
 		void updateAspectRatio(ImVec2 size)
 		{
 			camera_comp.changeAspect(size);
+		}
+
+		void updateRenderData(int frame)
+		{
+			renderer_data_.update(frame,transform_.getMatrix(),camera_comp.getMatrix());
+		}
+
+		void bindData(int frame,const vk::raii::CommandBuffer& command_buffer)const
+		{
+			renderer_data_.bind(frame, command_buffer);
 		}
 
 	private:
@@ -77,7 +87,7 @@ namespace dmbrn
 		ImVec2 last_mouse_delt = {0, 0};
 		TransformComponent transform_;
 		CameraComponent camera_comp;
-		//CameraRenderData renderer_data_;
+		CameraRenderData renderer_data_;
 				
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{
