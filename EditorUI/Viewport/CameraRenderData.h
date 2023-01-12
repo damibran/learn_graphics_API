@@ -24,17 +24,9 @@ namespace dmbrn
 
 		void bind(int frame, const vk::raii::CommandBuffer& command_buffer)const
 		{
-			const vk::PushConstantRange push_constant_range
-			{
-				vk::ShaderStageFlagBits::eVertex,0,sizeof(glm::mat4)
-			};
 
-			const vk::PipelineLayoutCreateInfo info
-			{
-				{}, *descriptor_set_layout_, push_constant_range
-			};
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-			                                  *Singletons::device->createPipelineLayout(info), 0,
+			                                  *pipeline_layout_, 0,
 			                                  *descriptor_sets_[frame], nullptr);
 		}
 
@@ -100,5 +92,22 @@ namespace dmbrn
 		}
 
 		static inline vk::raii::DescriptorSetLayout descriptor_set_layout_{createDescriptorLayout(Singletons::device)};
+
+		static vk::raii::PipelineLayout createPipelineLayout()
+		{
+			const vk::PushConstantRange push_constant_range
+			{
+				vk::ShaderStageFlagBits::eVertex,0,sizeof(glm::mat4)
+			};
+
+			const vk::PipelineLayoutCreateInfo info
+			{
+				{}, *descriptor_set_layout_, push_constant_range
+			};
+
+			return Singletons::device->createPipelineLayout(info);
+		}
+
+		static inline vk::raii::PipelineLayout pipeline_layout_{createPipelineLayout()};
 	};
 }
