@@ -17,12 +17,12 @@ namespace dmbrn
 			Enttity barrel{registry_, "Barrel 1"};
 			Enttity barrel2{registry_, "Barrel 2"};
 			Enttity floor{registry_, "Floor"};
-			barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
+			barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae",&Renderer::un_lit_textured);
 
-			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae");
+			barrel2.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae",&Renderer::un_lit_textured);
 			barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
 
-			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.dae");
+			floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.dae",&Renderer::un_lit_textured);
 
 			TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
 

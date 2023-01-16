@@ -99,9 +99,10 @@ namespace dmbrn
 			for (auto entity : group)
 			{
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
-				model.draw(current_frame, command_buffer, transform.getMatrix(), camera_.getViewMat(),
-				           camera_.camera_comp.getMatrix());
+				model.addToRenderQueue(transform.getMatrix());
 			}
+
+			Renderer::un_lit_textured.draw(current_frame, command_buffer);
 
 			command_buffer.endRenderPass();
 		}

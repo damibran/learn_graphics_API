@@ -3,8 +3,11 @@
 #include <string>
 #include <vector>
 
+#include<glm/glm.hpp>
+#include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "Texture.h"
 #include "Vertex.h"
+#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 
 namespace dmbrn
 {
@@ -43,7 +46,7 @@ namespace dmbrn
 			vertex_buffer_memory_(nullptr),
 			index_buffer_memory_(nullptr)
 		{
-			material_ = UnlitTexturedMaterial::GetMaterialPtr(dir, model_name, ai_material);
+			material_ = DiffusionMaterial::GetMaterialPtr(dir, model_name, ai_material);
 
 			auto [vertices,indices] = fillVectors(mesh);
 			indices_count = indices.size();
@@ -52,6 +55,18 @@ namespace dmbrn
 			                   Singletons::graphics_queue);
 			createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                  Singletons::graphics_queue);
+		}
+
+		void addToRenderQueue(ShaderEffect* shader, const glm::mat4& model)const
+		{
+			shader->addToRenderQueue({this,material_,model});
+		}
+
+		void bind(const vk::raii::CommandBuffer& command_buffer)const 
+		{
+			command_buffer.bindVertexBuffers(0, *vertex_buffer_, {0});
+
+			command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 		}
 
 		vk::raii::Buffer vertex_buffer_;

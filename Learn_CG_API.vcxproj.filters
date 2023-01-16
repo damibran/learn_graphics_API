@@ -158,16 +158,16 @@
     <ClInclude Include="Main\Componenets\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedDescriptorSets.h">
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\UnLitTexturedDescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnLitTexturedGraphicsPipeline.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\UnLitTextured\UnlitTexturedMaterial.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnlitTexturedShaderEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Singletons\Renderer.h">
@@ -182,16 +182,22 @@
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\Material.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Materials\Outline\OutlinedMaterial.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlinedMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EditorUI\Viewport\CameraRenderData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\Materials\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

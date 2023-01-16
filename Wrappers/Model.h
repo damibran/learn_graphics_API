@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "Materials/UnLitTextured/UnlitTexturedMaterial.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 
 namespace dmbrn
 {
@@ -49,15 +49,10 @@ namespace dmbrn
 			processNode(scene->mRootNode, scene, aiMatrix4x4{});
 		}
 
-		// draws the model, and thus all its meshes
-		void draw(int frame, const vk::raii::CommandBuffer& command_buffer, const glm::mat4& modelMat, const glm::mat4& view,
-		          const glm::mat4& proj) const
+		void addToRenderQueue(ShaderEffect* shader,const glm::mat4& model)
 		{
-			//std::cout<<utils::matrix_to_str_row_maj(proj);
 			for (const auto & mesh : meshes)
-			{
-				mesh.material_->draw(mesh.vertex_buffer_,mesh.index_buffer_, mesh.indices_count,frame,command_buffer,modelMat * mesh.transform_,view,proj);
-			}
+				mesh.addToRenderQueue(shader,model);
 		}
 
 		std::string getPath()const

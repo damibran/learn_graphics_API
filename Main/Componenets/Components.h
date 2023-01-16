@@ -10,13 +10,14 @@
 #include "imgui_internal.h"
 
 #include "Wrappers/Model.h"
+#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 
 namespace dmbrn
 {
 	class Component
 	{
 		virtual ~Component() = default;
-		virtual void drawToInspector() =0;
+		virtual void drawToInspector() = 0;
 	};
 
 	struct TagComponent
@@ -35,9 +36,9 @@ namespace dmbrn
 		glm::vec3 rotation; // pitch ,yaw, roll in degrees
 		glm::vec3 scale;
 
-		TransformComponent(glm::vec3 pos = {0, 0, 0},
-		                   glm::vec3 rot = {0, 0, 0},
-		                   glm::vec3 scale = {1, 1, 1}):
+		TransformComponent(glm::vec3 pos = { 0, 0, 0 },
+			glm::vec3 rot = { 0, 0, 0 },
+			glm::vec3 scale = { 1, 1, 1 }) :
 			position(pos),
 			rotation(rot),
 			scale(scale)
@@ -46,7 +47,7 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			return orientate4(glm::vec3{glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y)});
+			return orientate4(glm::vec3{ glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y) });
 		}
 
 		glm::mat4 getMatrix() const
@@ -74,7 +75,8 @@ namespace dmbrn
 	class ModelComponent
 	{
 	public:
-		ModelComponent(const std::string& path)
+		ModelComponent(const std::string& path, ShaderEffect* shader) :
+			shader_(shader)
 		{
 			if (!path.empty())
 			{
@@ -82,25 +84,24 @@ namespace dmbrn
 			}
 		}
 
-		void draw(int frame, const vk::raii::CommandBuffer& command_buffers, glm::mat4 modelMat, const glm::mat4& view,
-		          const glm::mat4& proj)
-		{
-			if (model_)
-				model_->draw(frame, command_buffers, modelMat, view, proj);
-		}
-
 		void setNewModel(const std::string& path)
 		{
 			model_ = &(*Model::model_instances.emplace(path, path).first).second;
 		}
 
-		const Model* getModel()
+		Model* getModel()
 		{
 			return model_;
 		}
 
+		void addToRenderQueue(const glm::mat4& model)
+		{
+			model_->addToRenderQueue(shader_,model);
+		}
+
 	private:
 		Model* model_ = nullptr;
+		ShaderEffect* shader_ = nullptr;
 	};
 
 	class CameraComponent
@@ -110,13 +111,13 @@ namespace dmbrn
 		CameraComponent(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
-			                         size.x / size.y, 0.1f, 500.0f);
+				size.x / size.y, 0.1f, 500.0f);
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
-			                         size.x / size.y, 0.1f, 500.0f);
+				size.x / size.y, 0.1f, 500.0f);
 		}
 
 		glm::mat4 getMatrix() const

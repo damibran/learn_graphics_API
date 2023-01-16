@@ -7,7 +7,7 @@
 namespace dmbrn
 {
 	template<class M, typename ... Args>
-	struct OutlinedMaterial : Material
+	struct OutlinedMaterial : ShaderEffect
 	{
 		~OutlinedMaterial() override = default;
 
