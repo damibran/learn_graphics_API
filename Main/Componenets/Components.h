@@ -75,7 +75,7 @@ namespace dmbrn
 	class ModelComponent
 	{
 	public:
-		ModelComponent(const std::string& path, ShaderEffect* shader) :
+		ModelComponent(const std::string& path="", ShaderEffect* shader=nullptr) :
 			shader_(shader)
 		{
 			if (!path.empty())
@@ -89,14 +89,14 @@ namespace dmbrn
 			model_ = &(*Model::model_instances.emplace(path, path).first).second;
 		}
 
-		Model* getModel()
+		const Model* getModel()const
 		{
 			return model_;
 		}
 
-		void addToRenderQueue(const glm::mat4& model)
+		ShaderEffect* getShader()
 		{
-			model_->addToRenderQueue(shader_,model);
+			return shader_;
 		}
 
 	private:

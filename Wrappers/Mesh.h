@@ -7,7 +7,6 @@
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "Texture.h"
 #include "Vertex.h"
-#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 
 namespace dmbrn
 {
@@ -55,11 +54,6 @@ namespace dmbrn
 			                   Singletons::graphics_queue);
 			createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
 			                  Singletons::graphics_queue);
-		}
-
-		void addToRenderQueue(ShaderEffect* shader, const glm::mat4& model)const
-		{
-			shader->addToRenderQueue({this,material_,model});
 		}
 
 		void bind(const vk::raii::CommandBuffer& command_buffer)const 

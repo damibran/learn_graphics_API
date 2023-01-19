@@ -154,7 +154,7 @@ namespace dmbrn
 				ImGui::EndMainMenuBar();
 			}
 		}
-
+		
 		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)
 		{
 			device->waitForFences(*frame.in_flight_fence, true, UINT64_MAX);

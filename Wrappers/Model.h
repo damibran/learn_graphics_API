@@ -49,12 +49,6 @@ namespace dmbrn
 			processNode(scene->mRootNode, scene, aiMatrix4x4{});
 		}
 
-		void addToRenderQueue(ShaderEffect* shader,const glm::mat4& model)
-		{
-			for (const auto & mesh : meshes)
-				mesh.addToRenderQueue(shader,model);
-		}
-
 		std::string getPath()const
 		{
 			return directory + "\\" + name + extension;

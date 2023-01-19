@@ -29,7 +29,7 @@ namespace dmbrn
 				{
 					if (ImGui::MenuItem("Model Component"))
 					{
-						entity.addComponent<ModelComponent>("");
+						entity.addComponent<ModelComponent>();
 						ImGui::CloseCurrentPopup();
 					}
 
@@ -47,8 +47,7 @@ namespace dmbrn
 		{
 			if (auto* comp = entity.tryGetComponent<TagComponent>())
 			{
-				char buf[256];
-				memset(buf, 0, sizeof(buf));
+				char buf[256]={0};
 				strcpy_s(buf, sizeof(buf), comp->tag.c_str());
 
 				if (ImGui::InputText("Tag", buf, sizeof(buf)))

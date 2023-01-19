@@ -99,7 +99,10 @@ namespace dmbrn
 			for (auto entity : group)
 			{
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
-				model.addToRenderQueue(transform.getMatrix());
+				for(const auto& mesh: model.getModel()->meshes)
+				{
+					model.getShader()->addToRenderQueue({&mesh,mesh.material_,transform.getMatrix()});
+				}
 			}
 
 			Renderer::un_lit_textured.draw(current_frame, command_buffer);

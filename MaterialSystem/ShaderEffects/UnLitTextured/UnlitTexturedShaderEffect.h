@@ -29,6 +29,7 @@ namespace dmbrn
 
 				mesh->bind(command_buffer);
 				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
+
 				std::array<glm::mat4, 1> arr{
 				{matrix}
 				};
