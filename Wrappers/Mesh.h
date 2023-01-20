@@ -7,16 +7,19 @@
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "Texture.h"
 #include "Vertex.h"
+#include "Singletons/PerObjectDataBuffer.h"
+
 
 namespace dmbrn
 {
 	glm::mat4 toGlmMat(const aiMatrix4x4& mat)
 	{
 		return glm::mat4
-		{mat.a1,mat.a2,mat.a3,mat.a4,
-			mat.b1,mat.b2,mat.b3,mat.b4,
-			mat.c1,mat.c2,mat.c3,mat.c4,
-			mat.d1,mat.d2,mat.d3,mat.d4,
+		{
+			mat.a1, mat.b1, mat.c1, mat.d1,
+			mat.a2, mat.b2, mat.c2, mat.d2,
+			mat.a3, mat.b3, mat.c3, mat.d3,
+			mat.a4, mat.b4, mat.c4, mat.d4,
 		};
 	}
 
@@ -27,7 +30,7 @@ namespace dmbrn
 
 		uint32_t indices_count;
 
-		glm::mat4 transform_;
+		glm::mat4 import_transform_;
 
 		Mesh(const Mesh& other) = delete;
 		Mesh& operator=(const Mesh& other) = delete;
@@ -39,14 +42,13 @@ namespace dmbrn
 
 		Mesh(const std::string& dir, const std::string& model_name, const aiMaterial* ai_material, aiMesh* mesh,
 		     const aiMatrix4x4& transform):
-			transform_(toGlmMat(transform)),
+			material_(DiffusionMaterial::GetMaterialPtr(dir, model_name, ai_material)),
+			import_transform_(toGlmMat(transform)),
 			vertex_buffer_(nullptr),
 			index_buffer_(nullptr),
 			vertex_buffer_memory_(nullptr),
 			index_buffer_memory_(nullptr)
 		{
-			material_ = DiffusionMaterial::GetMaterialPtr(dir, model_name, ai_material);
-
 			auto [vertices,indices] = fillVectors(mesh);
 			indices_count = indices.size();
 
@@ -56,7 +58,7 @@ namespace dmbrn
 			                  Singletons::graphics_queue);
 		}
 
-		void bind(const vk::raii::CommandBuffer& command_buffer)const 
+		void bind(const vk::raii::CommandBuffer& command_buffer) const
 		{
 			command_buffer.bindVertexBuffers(0, *vertex_buffer_, {0});
 

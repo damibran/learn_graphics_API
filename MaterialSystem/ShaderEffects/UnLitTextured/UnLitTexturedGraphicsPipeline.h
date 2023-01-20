@@ -19,8 +19,8 @@ namespace dmbrn
 		void setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
 		                   const vk::raii::PipelineLayout& pipeline_layout)
 		{
-			const auto vertShaderCode = readFile("shaders/vert_shader_push_const.spv");
-			const auto fragShaderCode = readFile("shaders/frag_shader_push_const.spv");
+			const auto vertShaderCode = readFile("shaders/vert.spv");
+			const auto fragShaderCode = readFile("shaders/frag.spv");
 
 			const vk::raii::ShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
 			const vk::raii::ShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);

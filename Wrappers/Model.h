@@ -46,7 +46,7 @@ namespace dmbrn
 			extension = path.substr(path.find_last_of('.'));
 
 			// process ASSIMP's root node recursively
-			processNode(scene->mRootNode, scene, aiMatrix4x4{});
+			processNode( scene->mRootNode, scene, aiMatrix4x4{});
 		}
 
 		std::string getPath()const

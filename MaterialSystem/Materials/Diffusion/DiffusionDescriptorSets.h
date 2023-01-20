@@ -6,17 +6,15 @@
 
 namespace dmbrn
 {
-	class UnLitTexturedDescriptorSets
+	class DiffusionDescriptorSets
 	{
 	public:
+		~DiffusionDescriptorSets() = default;
+		DiffusionDescriptorSets(const DiffusionDescriptorSets&) = delete;
+		DiffusionDescriptorSets(DiffusionDescriptorSets&&) = default;
+		DiffusionDescriptorSets& operator=(DiffusionDescriptorSets&&) = default;
 
-		~UnLitTexturedDescriptorSets() = default;
-		UnLitTexturedDescriptorSets(const UnLitTexturedDescriptorSets&) = delete;
-		UnLitTexturedDescriptorSets(UnLitTexturedDescriptorSets&&) = default;
-		UnLitTexturedDescriptorSets& operator=(UnLitTexturedDescriptorSets&&) = default;
-
-		UnLitTexturedDescriptorSets(const LogicalDevice& device,
-		                            const Texture& texture)
+		DiffusionDescriptorSets(const LogicalDevice& device, const Texture& texture)
 		{
 			createDescriptorSets(device, texture);
 		}
@@ -26,7 +24,7 @@ namespace dmbrn
 			return descriptor_sets_[index];
 		}
 
-		static vk::raii::DescriptorSetLayout createDescriptorLayoutPushConst(const LogicalDevice& device)
+		static vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
 		{
 			const vk::DescriptorSetLayoutBinding samplerLayoutBinding
 			{
@@ -46,7 +44,7 @@ namespace dmbrn
 		}
 
 		static inline vk::raii::DescriptorSetLayout descriptor_layout_{
-			createDescriptorLayoutPushConst(Singletons::device)
+			createDescriptorLayout(Singletons::device)
 		};
 
 	private:

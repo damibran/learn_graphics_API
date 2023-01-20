@@ -161,7 +161,7 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\Materials\Diffusion\UnLitTexturedDescriptorSets.h">
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionDescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipeline.h">
@@ -198,6 +198,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\Materials\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

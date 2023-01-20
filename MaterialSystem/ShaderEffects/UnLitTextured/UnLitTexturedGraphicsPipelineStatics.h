@@ -14,7 +14,7 @@ namespace dmbrn
 	public:
 
 		UnLitTexturedGraphicsPipelineStatics():
-			pipeline_layout_(createPipelineLayoutPushConst(Singletons::device))
+			pipeline_layout_(createPipelineLayout(Singletons::device))
 		{
 		}
 
@@ -28,28 +28,13 @@ namespace dmbrn
 
 	private:
 
-		vk::raii::PipelineLayout createPipelineLayoutPushConst(const LogicalDevice& device)
-		{
-			const vk::PushConstantRange push_constant_range
-			{
-				vk::ShaderStageFlagBits::eVertex,0,sizeof(glm::mat4)
-			};
-
-			std::array<vk::DescriptorSetLayout,2> descriptor_set_layouts{*CameraRenderData::getDescriptorSetLayout(), *UnLitTexturedDescriptorSets::descriptor_layout_};
-
-			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
-			{
-				{}, descriptor_set_layouts,push_constant_range
-			};
-
-			return vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};
-		}
-
 		vk::raii::PipelineLayout createPipelineLayout(const LogicalDevice& device)
 		{
+			std::array<vk::DescriptorSetLayout,3> descriptor_set_layouts{*CameraRenderData::getDescriptorSetLayout(), *DiffusionDescriptorSets::descriptor_layout_, *PerObjectDataBuffer::descriptor_layout_};
+
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 			{
-				{}, *UnLitTexturedDescriptorSets::descriptor_layout_
+				{}, descriptor_set_layouts
 			};
 
 			return vk::raii::PipelineLayout{device->createPipelineLayout(pipelineLayoutInfo)};

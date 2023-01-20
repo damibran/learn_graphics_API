@@ -193,9 +193,10 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlinedMaterial.h" />
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
+    <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h" />
-    <ClInclude Include="MaterialSystem\Materials\Diffusion\UnLitTexturedDescriptorSets.h" />
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionDescriptorSets.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipeline.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnlitTexturedShaderEffect.h" />
     <ClInclude Include="Utils\Transform.h" />

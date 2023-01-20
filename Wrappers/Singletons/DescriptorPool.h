@@ -23,7 +23,7 @@ namespace dmbrn
 
 		static vk::raii::DescriptorPool createDescriptorPool(const LogicalDevice& device)
 		{
-			std::array<vk::DescriptorPoolSize, 2> poolSizes{};
+			std::array<vk::DescriptorPoolSize, 3> poolSizes{};
 
 			poolSizes[0] = vk::DescriptorPoolSize
 			{
@@ -31,6 +31,11 @@ namespace dmbrn
 				MAX_UB * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
 			};
 			poolSizes[1] = vk::DescriptorPoolSize
+			{
+				vk::DescriptorType::eUniformBufferDynamic,
+				2 * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)
+			};
+			poolSizes[2] = vk::DescriptorPoolSize
 			{
 				vk::DescriptorType::eCombinedImageSampler,
 				MAX_IMG_SAMPLR * static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT)

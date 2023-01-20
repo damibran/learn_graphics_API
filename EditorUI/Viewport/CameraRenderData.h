@@ -95,14 +95,9 @@ namespace dmbrn
 
 		static vk::raii::PipelineLayout createPipelineLayout()
 		{
-			const vk::PushConstantRange push_constant_range
-			{
-				vk::ShaderStageFlagBits::eVertex,0,sizeof(glm::mat4)
-			};
-
 			const vk::PipelineLayoutCreateInfo info
 			{
-				{}, *descriptor_set_layout_, push_constant_range
+				{}, *descriptor_set_layout_
 			};
 
 			return Singletons::device->createPipelineLayout(info);

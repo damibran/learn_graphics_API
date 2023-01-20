@@ -36,9 +36,9 @@ namespace dmbrn
 		glm::vec3 rotation; // pitch ,yaw, roll in degrees
 		glm::vec3 scale;
 
-		TransformComponent(glm::vec3 pos = { 0, 0, 0 },
-			glm::vec3 rot = { 0, 0, 0 },
-			glm::vec3 scale = { 1, 1, 1 }) :
+		TransformComponent(glm::vec3 pos = {0, 0, 0},
+		                   glm::vec3 rot = {0, 0, 0},
+		                   glm::vec3 scale = {1, 1, 1}) :
 			position(pos),
 			rotation(rot),
 			scale(scale)
@@ -47,7 +47,7 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			return orientate4(glm::vec3{ glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y) });
+			return orientate4(glm::vec3{glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y)});
 		}
 
 		glm::mat4 getMatrix() const
@@ -72,11 +72,13 @@ namespace dmbrn
 		}
 	};
 
-	class ModelComponent
+	struct ModelComponent
 	{
-	public:
-		ModelComponent(const std::string& path="", ShaderEffect* shader=nullptr) :
-			shader_(shader)
+		static inline PerObjectDataBuffer per_object_data_buffer_{Singletons::device, Singletons::physical_device};
+
+		ModelComponent(const std::string& path = "", ShaderEffect* shader = nullptr) :
+			shader_(shader),
+			inGPU_transform_offset(per_object_data_buffer_.registerObject())
 		{
 			if (!path.empty())
 			{
@@ -89,7 +91,7 @@ namespace dmbrn
 			model_ = &(*Model::model_instances.emplace(path, path).first).second;
 		}
 
-		const Model* getModel()const
+		const Model* getModel() const
 		{
 			return model_;
 		}
@@ -99,25 +101,24 @@ namespace dmbrn
 			return shader_;
 		}
 
-	private:
 		Model* model_ = nullptr;
 		ShaderEffect* shader_ = nullptr;
+		size_t inGPU_transform_offset;
 	};
 
 	class CameraComponent
 	{
 	public:
-
 		CameraComponent(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
-				size.x / size.y, 0.1f, 500.0f);
+			                         size.x / size.y, 0.1f, 500.0f);
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
-				size.x / size.y, 0.1f, 500.0f);
+			                         size.x / size.y, 0.1f, 500.0f);
 		}
 
 		glm::mat4 getMatrix() const
@@ -127,6 +128,5 @@ namespace dmbrn
 
 	private:
 		glm::mat4 proj_;
-
 	};
 }

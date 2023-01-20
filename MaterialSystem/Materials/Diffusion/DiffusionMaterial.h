@@ -1,6 +1,6 @@
 #pragma once
 #include"MaterialSystem/Materials/Material.h"
-#include"MaterialSystem/Materials/Diffusion/UnLitTexturedDescriptorSets.h"
+#include"MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
 #include"Wrappers/Texture.h"
 
 namespace dmbrn
@@ -47,7 +47,7 @@ namespace dmbrn
 		}
 
 		Texture diffuse;
-		UnLitTexturedDescriptorSets descriptor_sets_;
+		DiffusionDescriptorSets descriptor_sets_;
 		static inline std::unordered_map<std::string, DiffusionMaterial> material_registry;
 	};
 }

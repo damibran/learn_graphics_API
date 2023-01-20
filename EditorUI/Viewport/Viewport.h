@@ -101,11 +101,11 @@ namespace dmbrn
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
 				for(const auto& mesh: model.getModel()->meshes)
 				{
-					model.getShader()->addToRenderQueue({&mesh,mesh.material_,transform.getMatrix()});
+					model.getShader()->addToRenderQueue({&mesh,mesh.material_,model.inGPU_transform_offset});
 				}
 			}
 
-			Renderer::un_lit_textured.draw(current_frame, command_buffer);
+			Renderer::un_lit_textured.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);
 
 			command_buffer.endRenderPass();
 		}

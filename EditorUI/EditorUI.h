@@ -44,6 +44,8 @@ namespace dmbrn
 			//showAppMainMenuBar();
 			ImGui::ShowDemoWindow();
 
+			scene_.updatePerObjectData(current_frame_);
+
 			viewport_.newImGuiFrame(delta_time, imageIndex);
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame();
