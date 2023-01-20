@@ -71,7 +71,7 @@
     <ClInclude Include="Wrappers\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\Model.h">
+    <ClInclude Include="Wrappers\ModelImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\ImGUIRenderPass.h">

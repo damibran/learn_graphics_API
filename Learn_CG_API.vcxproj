@@ -212,7 +212,7 @@
     <ClInclude Include="Wrappers\Instance.h" />
     <ClInclude Include="Wrappers\LogicalDevice.h" />
     <ClInclude Include="Wrappers\Mesh.h" />
-    <ClInclude Include="Wrappers\Model.h" />
+    <ClInclude Include="Wrappers\ModelImporter.h" />
     <ClInclude Include="Wrappers\PhysicalDevice.h" />
     <ClInclude Include="Wrappers\RenderPass.h" />
     <ClInclude Include="Wrappers\Singletons.h" />

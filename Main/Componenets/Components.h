@@ -9,8 +9,9 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
-#include "Wrappers/Model.h"
+#include "Wrappers/Mesh.h"
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
+#include "Wrappers/Singletons/PerObjectDataBuffer.h"
 
 namespace dmbrn
 {
@@ -82,16 +83,16 @@ namespace dmbrn
 		{
 			if (!path.empty())
 			{
-				model_ = &(*Model::model_instances.emplace(path, path).first).second;
+				model_ = get
 			}
 		}
 
 		void setNewModel(const std::string& path)
 		{
-			model_ = &(*Model::model_instances.emplace(path, path).first).second;
+			model_ = &(*Mesh::model_instances.emplace(path, path).first).second;
 		}
 
-		const Model* getModel() const
+		const Mesh* getModel() const
 		{
 			return model_;
 		}
@@ -101,7 +102,7 @@ namespace dmbrn
 			return shader_;
 		}
 
-		Model* model_ = nullptr;
+		Mesh* model_ = nullptr;
 		ShaderEffect* shader_ = nullptr;
 		size_t inGPU_transform_offset;
 	};

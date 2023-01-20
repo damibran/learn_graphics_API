@@ -3,7 +3,7 @@
 #include <entt/entt.hpp>
 #include "Enttity.h"
 #include "Wrappers/Singletons/Renderer.h"
-#include "Wrappers/Model.h"
+#include "Wrappers/ModelImporter.h"
 
 namespace dmbrn
 {
@@ -19,7 +19,7 @@ namespace dmbrn
 			//Enttity floor{registry_, "Floor"};
 			//barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae", &Renderer::un_lit_textured);
 
-			barrel2.addComponent<ModelComponent>("Models\\Double_Barrel\\Double_Barrel.dae", &Renderer::un_lit_textured);
+			barrel2.addComponent<ModelComponent>("Models\\Double_Barrel\\Double_Barrel.fbx", &Renderer::un_lit_textured);
 			//barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
 
 			//floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.dae", &Renderer::un_lit_textured);
@@ -46,6 +46,11 @@ namespace dmbrn
 			registry_.destroy(enttity);
 		}
 
+		void addModel(const std::string& path)
+		{
+			
+		}
+
 		void updatePerObjectData(uint32_t frame)
 		{
 			auto group = registry_.group<ModelComponent>(entt::get<TransformComponent>);
@@ -55,12 +60,12 @@ namespace dmbrn
 			for (auto entity : group)
 			{
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
-				for (const auto& mesh : model.getModel()->meshes)
-				{
-					auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
-						inGPU_transform_offset);
-					ubo_data->model = transform.getMatrix() * mesh.import_transform_;
-				}
+				//for (const auto& mesh : model.getModel()->meshes)
+				//{
+				//	auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
+				//		inGPU_transform_offset);
+				//	ubo_data->model = transform.getMatrix() * mesh.import_transform_;
+				//}
 			}
 
 			ModelComponent::per_object_data_buffer_.unMap(frame);

@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <Wrappers/Mesh.h>
+#include <Wrappers/Singletons/PerObjectDataBuffer.h>
 #include <MaterialSystem/Materials/Material.h>
 
 namespace dmbrn

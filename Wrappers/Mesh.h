@@ -3,26 +3,47 @@
 #include <string>
 #include <vector>
 
+#include <assimp/material.h>
+#include <assimp/mesh.h>
 #include<glm/glm.hpp>
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "Texture.h"
 #include "Vertex.h"
-#include "Singletons/PerObjectDataBuffer.h"
 
+namespace std
+{
+	template <>
+	struct hash<aiVector3D>
+	{
+		size_t operator()(const aiVector3D& vec) const
+		{
+			const std::hash<float> hasher;
+			size_t res = 0;
+			res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.y);
+
+			return res;
+		}
+	};
+
+	template <>
+	struct hash<aiMesh>
+	{
+		size_t operator()(const aiMesh& mesh) const
+		{
+			const std::hash<aiVector3D> hasher;
+			size_t res = 0;
+			for (int i = 0; i < mesh.mNumVertices; ++i)
+			{
+				res ^= hasher(mesh.mVertices[i]);
+			}
+
+			return res;
+		}
+	};
+}
 
 namespace dmbrn
 {
-	glm::mat4 toGlmMat(const aiMatrix4x4& mat)
-	{
-		return glm::mat4
-		{
-			mat.a1, mat.b1, mat.c1, mat.d1,
-			mat.a2, mat.b2, mat.c2, mat.d2,
-			mat.a3, mat.b3, mat.c3, mat.d3,
-			mat.a4, mat.b4, mat.c4, mat.d4,
-		};
-	}
-
 	class Mesh
 	{
 	public:
@@ -30,8 +51,7 @@ namespace dmbrn
 
 		uint32_t indices_count;
 
-		glm::mat4 import_transform_;
-
+		Mesh() = delete;
 		Mesh(const Mesh& other) = delete;
 		Mesh& operator=(const Mesh& other) = delete;
 		~Mesh() = default;
@@ -40,22 +60,18 @@ namespace dmbrn
 
 		Mesh& operator=(Mesh&& other) = default;
 
-		Mesh(const std::string& dir, const std::string& model_name, const aiMaterial* ai_material, aiMesh* mesh,
-		     const aiMatrix4x4& transform):
-			material_(DiffusionMaterial::GetMaterialPtr(dir, model_name, ai_material)),
-			import_transform_(toGlmMat(transform)),
-			vertex_buffer_(nullptr),
-			index_buffer_(nullptr),
-			vertex_buffer_memory_(nullptr),
-			index_buffer_memory_(nullptr)
+		static Mesh* GetMeshPtr(const std::string& dir, const std::string& full_mesh_name,
+		                        const aiMaterial* ai_material, aiMesh* mesh)
 		{
-			auto [vertices,indices] = fillVectors(mesh);
-			indices_count = indices.size();
+			const std::hash<aiMesh> hasher;
+			size_t h = hasher(*mesh);
+			auto it = mesh_registry_.find(h);
+			if (it == mesh_registry_.end())
+				it = mesh_registry_.emplace(h, Mesh{dir, full_mesh_name, ai_material, mesh}).first;
+			else
+				it->second.use_this_mesh_.push_back(full_mesh_name);
 
-			createVertexBuffer(vertices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
-			                   Singletons::graphics_queue);
-			createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
-			                  Singletons::graphics_queue);
+			return &it->second;
 		}
 
 		void bind(const vk::raii::CommandBuffer& command_buffer) const
@@ -68,6 +84,27 @@ namespace dmbrn
 		vk::raii::Buffer vertex_buffer_;
 		vk::raii::Buffer index_buffer_;
 	private:
+		static std::unordered_map<size_t, Mesh> mesh_registry_;
+
+		std::vector<std::string> use_this_mesh_;
+
+		Mesh(const std::string& dir, const std::string& mesh_name, const aiMaterial* ai_material, aiMesh* mesh):
+			material_(DiffusionMaterial::GetMaterialPtr(dir, mesh_name, ai_material)),
+			vertex_buffer_(nullptr),
+			index_buffer_(nullptr),
+			vertex_buffer_memory_(nullptr),
+			index_buffer_memory_(nullptr),
+			use_this_mesh_({mesh_name})
+		{
+			auto [vertices,indices] = fillVectors(mesh);
+			indices_count = indices.size();
+
+			createVertexBuffer(vertices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			                   Singletons::graphics_queue);
+			createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
+			                  Singletons::graphics_queue);
+		}
+
 		// render data
 		vk::raii::DeviceMemory vertex_buffer_memory_;
 		vk::raii::DeviceMemory index_buffer_memory_;

@@ -71,7 +71,7 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("ModelComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					const Model* model = comp->getModel();
+					const Mesh* model = comp->getModel();
 					std::string text = model ? model->getPath() : "";
 					char buf[256];
 					memset(buf, 0, sizeof(buf));
