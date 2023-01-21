@@ -40,6 +40,21 @@ namespace std
 			return res;
 		}
 	};
+
+	template <>
+	struct hash<std::set<aiVector3D>>
+	{
+		size_t operator()(const std::set<aiVector3D>& vertices) const
+		{
+			const std::hash<aiVector3D> hasher;
+			size_t res = 0;
+			for (const auto& vec : vertices)
+			{
+				res ^= hasher(vec);
+			}
+			return res;
+		}
+	};
 }
 
 namespace dmbrn
@@ -63,11 +78,13 @@ namespace dmbrn
 		static Mesh* GetMeshPtr(const std::string& dir, const std::string& full_mesh_name,
 		                        const aiMaterial* ai_material, aiMesh* mesh)
 		{
-			const std::hash<aiMesh> hasher;
-			size_t h = hasher(*mesh);
-			auto it = mesh_registry_.find(h);
+			std::set<aiVector3D> temp_set;
+			std::insert_iterator insrt_it{temp_set, temp_set.begin()};
+			std::copy_n(mesh->mVertices, mesh->mNumVertices, insrt_it);
+
+			auto it = mesh_registry_.find(temp_set);
 			if (it == mesh_registry_.end())
-				it = mesh_registry_.emplace(h, Mesh{dir, full_mesh_name, ai_material, mesh}).first;
+				it = mesh_registry_.emplace(temp_set, Mesh{dir, full_mesh_name, ai_material, mesh}).first;
 			else
 				it->second.use_this_mesh_.push_back(full_mesh_name);
 
@@ -84,7 +101,7 @@ namespace dmbrn
 		vk::raii::Buffer vertex_buffer_;
 		vk::raii::Buffer index_buffer_;
 	private:
-		static std::unordered_map<size_t, Mesh> mesh_registry_;
+		static std::unordered_map<std::set<aiVector3D>, Mesh> mesh_registry_;
 
 		std::vector<std::string> use_this_mesh_;
 
