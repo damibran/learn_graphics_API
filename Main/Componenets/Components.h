@@ -9,9 +9,10 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
-#include "Wrappers/Mesh.h"
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 #include "Wrappers/Singletons/PerObjectDataBuffer.h"
+#include "Wrappers/Mesh.h"
+
 
 namespace dmbrn
 {
@@ -77,24 +78,14 @@ namespace dmbrn
 	{
 		static inline PerObjectDataBuffer per_object_data_buffer_{Singletons::device, Singletons::physical_device};
 
-		ModelComponent(const std::string& path = "", ShaderEffect* shader = nullptr) :
+		ModelComponent()=default;
+
+		ModelComponent(Mesh* mesh, ShaderEffect* shader = nullptr) :
+			mesh(mesh),
 			shader_(shader),
 			inGPU_transform_offset(per_object_data_buffer_.registerObject())
 		{
-			if (!path.empty())
-			{
-				model_ = get
-			}
-		}
 
-		void setNewModel(const std::string& path)
-		{
-			model_ = &(*Mesh::model_instances.emplace(path, path).first).second;
-		}
-
-		const Mesh* getModel() const
-		{
-			return model_;
 		}
 
 		ShaderEffect* getShader()
@@ -102,7 +93,7 @@ namespace dmbrn
 			return shader_;
 		}
 
-		Mesh* model_ = nullptr;
+		Mesh* mesh = nullptr;
 		ShaderEffect* shader_ = nullptr;
 		size_t inGPU_transform_offset;
 	};

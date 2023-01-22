@@ -71,19 +71,19 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("ModelComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					const Mesh* model = comp->getModel();
-					std::string text = model ? model->getPath() : "";
-					char buf[256];
-					memset(buf, 0, sizeof(buf));
-					strcpy_s(buf, sizeof(buf), text.c_str());
-					bool newPath = false;
-					ImGui::Text("Model: ");
-					ImGui::SameLine();
-					if (ImGui::InputText("##ModelPathLabel", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue))
-					{
-						comp->setNewModel(buf);
-					}
-
+					//const Mesh* model = comp->getModel();
+					//std::string text = model ? model->getPath() : "";
+					//char buf[256];
+					//memset(buf, 0, sizeof(buf));
+					//strcpy_s(buf, sizeof(buf), text.c_str());
+					//bool newPath = false;
+					//ImGui::Text("Model: ");
+					//ImGui::SameLine();
+					//if (ImGui::InputText("##ModelPathLabel", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue))
+					//{
+					//	//comp->setNewModel(buf);
+					//}
+					//
 					ImGui::TreePop();
 				}
 			}

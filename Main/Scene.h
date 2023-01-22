@@ -11,29 +11,9 @@ namespace dmbrn
 	{
 		friend class SceneTree;
 	public:
-		Scene(ImVec2 size) //:
-		//camera(registry_, "Main Camera")
+		Scene(ImVec2 size)
 		{
-			//Enttity barrel{registry_, "Barrel 1"};
-			Enttity barrel2{registry_, "Barrel 2"};
-			//Enttity floor{registry_, "Floor"};
-			//barrel.addComponent<ModelComponent>("Models\\Barrel\\barrel.dae", &Renderer::un_lit_textured);
-
-			barrel2.addComponent<ModelComponent>("Models\\Double_Barrel\\Double_Barrel.fbx", &Renderer::un_lit_textured);
-			//barrel2.getComponent<TransformComponent>().translate({0, -2, 0});
-
-			//floor.addComponent<ModelComponent>("Models\\GrassPlane\\grassPlane.dae", &Renderer::un_lit_textured);
-
-			//TransformComponent& floor_trans = floor.getComponent<TransformComponent>();
-
-			//floor_trans.translate({0, 0.7, 0});
-			//floor_trans.rotate({-180, 0, 0});
-			//floor_trans.scale = {10, 10, 10};
-
-			//frame.addComponent<ModelComponent>("Models\\Frame\\Frame.dae");
-
-			//camera.getComponent<TransformComponent>().translate({0, 0, -7});
-			//camera.addComponent<CameraComponent>(camera.getComponent<TransformComponent>(), size);
+			addModel("Models\\Double_Barrel\\Double_Barrel.fbx");
 		}
 
 		void addNewEntity(const std::string& name = std::string{})
@@ -48,7 +28,22 @@ namespace dmbrn
 
 		void addModel(const std::string& path)
 		{
-			
+			auto import = ModelImporter::Import(path);
+
+			std::string model_name = path.substr(path.find_last_of('\\') + 1,
+			                                     path.find_last_of('.') - path.find_last_of('\\') - 1);
+
+			for (const auto& pair : import)
+			{
+				Enttity ent{registry_, pair.first->name};
+
+				ent.addComponent<ModelComponent>(pair.first,&Renderer::un_lit_textured);
+
+				TransformComponent& t = ent.getComponent<TransformComponent>();
+				t.position = pair.second.position;
+				t.rotation = pair.second.rotation;
+				t.scale = pair.second.scale;
+			}
 		}
 
 		void updatePerObjectData(uint32_t frame)
@@ -60,12 +55,11 @@ namespace dmbrn
 			for (auto entity : group)
 			{
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
-				//for (const auto& mesh : model.getModel()->meshes)
-				//{
-				//	auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
-				//		inGPU_transform_offset);
-				//	ubo_data->model = transform.getMatrix() * mesh.import_transform_;
-				//}
+
+				auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
+					inGPU_transform_offset);
+
+				ubo_data->model = transform.getMatrix();
 			}
 
 			ModelComponent::per_object_data_buffer_.unMap(frame);

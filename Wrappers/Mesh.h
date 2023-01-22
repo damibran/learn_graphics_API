@@ -15,44 +15,47 @@ namespace std
 	template <>
 	struct hash<aiVector3D>
 	{
-		size_t operator()(const aiVector3D& vec) const
+		size_t operator()(const aiVector3D& vec)const noexcept
 		{
-			const std::hash<float> hasher;
+			std::hash<float> hasher;
 			size_t res = 0;
-			res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.y);
+			res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.z);
 
 			return res;
 		}
 	};
 
 	template <>
-	struct hash<aiMesh>
+	struct hash<std::vector<aiVector3D>>
 	{
-		size_t operator()(const aiMesh& mesh) const
+		size_t operator()(const std::vector<aiVector3D>& vertices)const noexcept
 		{
-			const std::hash<aiVector3D> hasher;
-			size_t res = 0;
-			for (int i = 0; i < mesh.mNumVertices; ++i)
-			{
-				res ^= hasher(mesh.mVertices[i]);
-			}
-
-			return res;
-		}
-	};
-
-	template <>
-	struct hash<std::set<aiVector3D>>
-	{
-		size_t operator()(const std::set<aiVector3D>& vertices) const
-		{
-			const std::hash<aiVector3D> hasher;
+			std::hash<aiVector3D> hasher;
 			size_t res = 0;
 			for (const auto& vec : vertices)
 			{
 				res ^= hasher(vec);
 			}
 			return res;
+		}
+	};
+
+	template <>
+	struct equal_to<std::vector<aiVector3D>>
+	{
+		bool operator()(const std::vector<aiVector3D>& lhs, const std::vector<aiVector3D>& rhs) const
+		{
+			if (lhs.size() != rhs.size())
+				return false;
+
+			bool same = true;
+			for (size_t i = 0; i < lhs.size() && same; ++i)
+			{
+				if(lhs[i] != rhs[i])
+					same = false;
+			}
+
+			return same;
 		}
 	};
 }
@@ -66,6 +69,8 @@ namespace dmbrn
 
 		uint32_t indices_count;
 
+		std::string name;
+
 		Mesh() = delete;
 		Mesh(const Mesh& other) = delete;
 		Mesh& operator=(const Mesh& other) = delete;
@@ -75,16 +80,15 @@ namespace dmbrn
 
 		Mesh& operator=(Mesh&& other) = default;
 
-		static Mesh* GetMeshPtr(const std::string& dir, const std::string& full_mesh_name,
-		                        const aiMaterial* ai_material, aiMesh* mesh)
+		static Mesh* GetMeshPtr(Material* material, const std::string& full_mesh_name, aiMesh* mesh)
 		{
-			std::set<aiVector3D> temp_set;
-			std::insert_iterator insrt_it{temp_set, temp_set.begin()};
+			std::vector<aiVector3D> temp;
+			std::insert_iterator insrt_it{temp, temp.begin()};
 			std::copy_n(mesh->mVertices, mesh->mNumVertices, insrt_it);
 
-			auto it = mesh_registry_.find(temp_set);
+			auto it = mesh_registry_.find(temp);
 			if (it == mesh_registry_.end())
-				it = mesh_registry_.emplace(temp_set, Mesh{dir, full_mesh_name, ai_material, mesh}).first;
+				it = mesh_registry_.emplace(temp, Mesh{material, full_mesh_name, mesh}).first;
 			else
 				it->second.use_this_mesh_.push_back(full_mesh_name);
 
@@ -101,12 +105,13 @@ namespace dmbrn
 		vk::raii::Buffer vertex_buffer_;
 		vk::raii::Buffer index_buffer_;
 	private:
-		static std::unordered_map<std::set<aiVector3D>, Mesh> mesh_registry_;
+		static inline std::unordered_map<std::vector<aiVector3D>, Mesh> mesh_registry_;
 
 		std::vector<std::string> use_this_mesh_;
 
-		Mesh(const std::string& dir, const std::string& mesh_name, const aiMaterial* ai_material, aiMesh* mesh):
-			material_(DiffusionMaterial::GetMaterialPtr(dir, mesh_name, ai_material)),
+		Mesh(Material* material, const std::string& mesh_name, aiMesh* mesh):
+			material_(material),
+			name(mesh->mName.C_Str()),
 			vertex_buffer_(nullptr),
 			index_buffer_(nullptr),
 			vertex_buffer_memory_(nullptr),
