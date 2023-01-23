@@ -8,9 +8,6 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
-
-		Enttity(const Enttity&)=delete;
-
 		Enttity(entt::registry& registry):
 			registry_(&registry)
 		{
@@ -52,6 +49,12 @@ namespace dmbrn
 		{
 		}
 
+		Enttity(const Enttity& other)
+		{
+			registry_ = other.registry_;
+			entityID_ = other.entityID_;
+		}
+
 		void operator=(const Enttity& other)
 		{
 			registry_ = other.registry_;
@@ -83,6 +86,12 @@ namespace dmbrn
 
 		template <typename T>
 		T* tryGetComponent()
+		{
+			return registry_->try_get<T>(entityID_);
+		}
+
+		template <typename T>
+		const T* tryGetComponent() const
 		{
 			return registry_->try_get<T>(entityID_);
 		}

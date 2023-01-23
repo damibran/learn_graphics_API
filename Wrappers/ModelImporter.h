@@ -56,7 +56,7 @@ namespace dmbrn
 			                                     path.find_last_of('.') - path.find_last_of('\\') - 1);
 
 			// process ASSIMP's root node recursively
-			processNode(res, scene->mRootNode, scene, directory, model_name, aiMatrix4x4{});
+			processNode(res, scene->mRootNode, scene, directory, model_name);
 
 			res.name = model_name;
 
@@ -67,11 +67,9 @@ namespace dmbrn
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 		static void processNode(SceneNode& node, aiNode* ai_node, const aiScene* scene,
 		                        const std::string& directory,
-		                        const std::string& parentName,
-		                        const aiMatrix4x4& parentTransform)
+		                        const std::string& parentName)
 		{
 			node.name = ai_node->mName.C_Str();
-			aiMatrix4x4 trans_this = parentTransform * ai_node->mTransformation;
 			std::string name_this = parentName + "." + ai_node->mName.C_Str();
 			// process each mesh located at the current node
 			for (unsigned int i = 0; i < ai_node->mNumMeshes; i++)
@@ -88,7 +86,7 @@ namespace dmbrn
 				aiVector3D orientation;
 				aiVector3D scale;
 
-				trans_this.Decompose(scale, orientation, translation);
+				ai_node->mTransformation.Decompose(scale, orientation, translation);
 
 				node.children.push_back(SceneNode{
 					mesh->mName.C_Str(),
@@ -100,7 +98,7 @@ namespace dmbrn
 			for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 			{
 				node.children.push_back(SceneNode{});
-				processNode(node.children.back(), ai_node->mChildren[i], scene, directory, name_this, trans_this);
+				processNode(node.children.back(), ai_node->mChildren[i], scene, directory, name_this);
 			}
 		}
 	};

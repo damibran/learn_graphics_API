@@ -16,15 +16,14 @@ namespace dmbrn
 		{
 			ImGui::Begin("Scene Tree");
 
-			auto& cur_comp = scene_.scene_root_.getComponent<RelationshipComponent>();
-			auto cur_ind = cur_comp.first;
+			auto& root_relation = scene_.scene_root_.getComponent<RelationshipComponent>();
+			auto cur_id = root_relation.first;
 
-			while (cur_ind != entt::null)
+			while (cur_id != entt::null)
 			{
-				recursivelyDraw(Enttity{scene_.registry_, cur_ind});
+				recursivelyDraw(Enttity{scene_.registry_, cur_id});
 
-				cur_ind = cur_comp.next;
-				cur_comp = scene_.registry_.get<RelationshipComponent>(cur_ind);
+				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
 			}
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
