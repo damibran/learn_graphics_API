@@ -38,9 +38,9 @@ namespace dmbrn
 	{
 	public:
 		// constructor, expects a filepath to a 3D model.
-		static std::vector<std::pair<Mesh*, Transform>> Import(const std::string& path)
+		static SceneNode Import(const std::string& path)
 		{
-			std::vector<std::pair<Mesh*, Transform>> res;
+			SceneNode res;
 			// read file via ASSIMP
 			Assimp::Importer importer;
 			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -63,21 +63,21 @@ namespace dmbrn
 
 	private:
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-		static void processNode(std::vector<std::pair<Mesh*, Transform>>& meshes, aiNode* node, const aiScene* scene,
+		static void processNode(SceneNode& node, aiNode* ai_node, const aiScene* scene,
 		                        const std::string& directory,
 		                        const std::string& parentName,
 		                        const aiMatrix4x4& parentTransform)
 		{
-			aiMatrix4x4 trans_this = parentTransform * node->mTransformation;
-			std::string name_this = parentName + "." + node->mName.C_Str();
+			node.name = ai_node->mName.C_Str();
+			aiMatrix4x4 trans_this = parentTransform * ai_node->mTransformation;
+			std::string name_this = parentName + "." + ai_node->mName.C_Str();
 			// process each mesh located at the current node
-			for (unsigned int i = 0; i < node->mNumMeshes; i++)
+			for (unsigned int i = 0; i < ai_node->mNumMeshes; i++)
 			{
 				// the node object only contains indices to index the actual objects in the scene. 
 				// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-
-
-				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+				
+				aiMesh* mesh = scene->mMeshes[ai_node->mMeshes[i]];
 				std::string mesh_name = name_this + + "." + std::string(mesh->mName.C_Str());
 				aiMaterial* ai_material = scene->mMaterials[mesh->mMaterialIndex];
 				Material* material = DiffusionMaterial::GetMaterialPtr(directory, mesh_name, ai_material);
@@ -88,14 +88,17 @@ namespace dmbrn
 
 				trans_this.Decompose(scale, orientation, translation);
 
-				meshes.push_back(std::make_pair(
-					Mesh::GetMeshPtr(material, mesh_name, mesh),
-					Transform{toGlm(translation) / 100, toGlm(orientation), toGlm(scale) / 100}));
+				node.children.push_back(SceneNode{
+					mesh->mName.C_Str(),
+					Transform{toGlm(translation) / 100, toGlm(orientation), toGlm(scale) / 100},
+					Mesh::GetMeshPtr(material, mesh_name, mesh)
+				});
 			}
 			// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
-			for (unsigned int i = 0; i < node->mNumChildren; i++)
+			for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 			{
-				processNode(meshes, node->mChildren[i], scene, directory, name_this, trans_this);
+				node.children.push_back(SceneNode{});
+				processNode(node.children.back(), ai_node->mChildren[i], scene, directory, name_this, trans_this);
 			}
 		}
 	};

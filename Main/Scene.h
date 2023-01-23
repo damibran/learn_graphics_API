@@ -28,21 +28,26 @@ namespace dmbrn
 
 		void addModel(const std::string& path)
 		{
-			auto import = ModelImporter::Import(path);
+			SceneNode root = ModelImporter::Import(path);
 
-			std::string model_name = path.substr(path.find_last_of('\\') + 1,
-			                                     path.find_last_of('.') - path.find_last_of('\\') - 1);
+			recursivelyAdd(root);			
+		}
 
-			for (const auto& pair : import)
+		void recursivelyAdd(const SceneNode& node)
+		{
+			Enttity ent{registry_, node.name};
+
+			if(node.mesh)
+				ent.addComponent<ModelComponent>(node.mesh,&Renderer::un_lit_textured );
+
+			TransformComponent& t = ent.getComponent<TransformComponent>();
+			t.position = node.transform.position;
+			t.rotation = node.transform.rotation;
+			t.scale = node.transform.scale;
+
+			for (const auto & child : node.children)
 			{
-				Enttity ent{registry_, pair.first->name};
-
-				ent.addComponent<ModelComponent>(pair.first,&Renderer::un_lit_textured);
-
-				TransformComponent& t = ent.getComponent<TransformComponent>();
-				t.position = pair.second.position;
-				t.rotation = pair.second.rotation;
-				t.scale = pair.second.scale;
+				recursivelyAdd(child);
 			}
 		}
 
