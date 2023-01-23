@@ -32,6 +32,13 @@ namespace dmbrn
 		}
 	};
 
+	struct RelationshipComponent
+	{
+		entt::entity first{entt::null};
+		entt::entity prev{entt::null};
+		entt::entity next{entt::null};
+	};
+
 	struct TransformComponent
 	{
 		glm::vec3 position;
@@ -78,14 +85,13 @@ namespace dmbrn
 	{
 		static inline PerObjectDataBuffer per_object_data_buffer_{Singletons::device, Singletons::physical_device};
 
-		ModelComponent()=default;
+		ModelComponent() = default;
 
 		ModelComponent(Mesh* mesh, ShaderEffect* shader = nullptr) :
 			mesh(mesh),
 			shader_(shader),
 			inGPU_transform_offset(per_object_data_buffer_.registerObject())
 		{
-
 		}
 
 		ShaderEffect* getShader()

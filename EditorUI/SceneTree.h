@@ -16,11 +16,16 @@ namespace dmbrn
 		{
 			ImGui::Begin("Scene Tree");
 
-			scene_.registry_.each([&](auto entityId)
+			auto& cur_comp = scene_.scene_root_.getComponent<RelationshipComponent>();
+			auto cur_ind = cur_comp.first;
+
+			while (cur_ind != entt::null)
 			{
-				Enttity entity{scene_.registry_, entityId};
-				drawEntityNode(entity);
-			});
+				recursivelyDraw(Enttity{scene_.registry_, cur_ind});
+
+				cur_ind = cur_comp.next;
+				cur_comp = scene_.registry_.get<RelationshipComponent>(cur_ind);
+			}
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
 				selected_ = {scene_.registry_};
@@ -45,7 +50,40 @@ namespace dmbrn
 		Scene& scene_;
 		Enttity selected_;
 
-		void drawEntityNode(const Enttity& enttity)
+		void recursivelyDraw(const Enttity& enttity)
+		{
+			const auto& tag = enttity.getComponent<TagComponent>();
+			auto relation_comp = enttity.getComponent<RelationshipComponent>();
+
+			ImGuiTreeNodeFlags flags = 
+				(selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
+				(relation_comp.first == entt::null ? ImGuiTreeNodeFlags_Leaf : 0) | 
+				ImGuiTreeNodeFlags_OpenOnArrow;
+
+			bool opened = ImGui::TreeNodeEx(
+				reinterpret_cast<const void*>(static_cast<uint64_t>(static_cast<uint32_t>(enttity))),
+				flags, tag.tag.c_str());
+
+			if (ImGui::IsItemClicked())
+			{
+				selected_ = enttity;
+			}
+
+			if (opened)
+			{
+				auto cur_ind = relation_comp.first;
+				while (cur_ind != entt::null)
+				{
+					recursivelyDraw(Enttity{scene_.registry_, cur_ind});
+
+					cur_ind = scene_.registry_.get<RelationshipComponent>(cur_ind).next;
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
+		void drawEntityNode(Enttity& enttity)
 		{
 			const auto& tag = enttity.getComponent<TagComponent>();
 

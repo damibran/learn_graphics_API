@@ -8,6 +8,9 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
+
+		Enttity(const Enttity&)=delete;
+
 		Enttity(entt::registry& registry):
 			registry_(&registry)
 		{
@@ -16,9 +19,31 @@ namespace dmbrn
 		Enttity(entt::registry& registry, const std::string& name):
 			registry_(&registry)
 		{
-			entityID_ = registry_->create();
 			registry_->emplace<TagComponent>(entityID_, name);
 			registry_->emplace<TransformComponent>(entityID_);
+		}
+
+		Enttity(entt::registry& registry, const std::string& name, Enttity& parent):
+			registry_(&registry),
+			entityID_(registry_->create())
+		{
+			registry_->emplace<TagComponent>(entityID_, name);
+			registry_->emplace<TransformComponent>(entityID_);
+
+			addComponent<RelationshipComponent>();
+			auto& cur_comp = getComponent<RelationshipComponent>();
+
+			auto& parent_comp = parent.getComponent<RelationshipComponent>();
+
+			auto old_first = parent_comp.first;
+
+			if (old_first != entt::null)
+			{
+				registry.get<RelationshipComponent>(old_first).prev = *this;
+			}
+
+			parent_comp.first = *this;
+			cur_comp.next = old_first;
 		}
 
 		Enttity(entt::registry& registry, entt::entity entityID):
@@ -73,5 +98,19 @@ namespace dmbrn
 	private:
 		entt::registry* registry_;
 		entt::entity entityID_{entt::null};
+
+		void updateFirstPtr(Enttity& node, const Enttity& new_first)
+		{
+			auto& curr_comp = node.getComponent<RelationshipComponent>();
+			entt::entity curr_ind = curr_comp.first;
+
+			while (curr_ind != entt::null)
+			{
+				curr_comp.first = new_first;
+
+				curr_ind = curr_comp.next;
+				curr_comp = registry_->get<RelationshipComponent>(curr_ind);
+			}
+		}
 	};
 }

@@ -58,6 +58,8 @@ namespace dmbrn
 			// process ASSIMP's root node recursively
 			processNode(res, scene->mRootNode, scene, directory, model_name, aiMatrix4x4{});
 
+			res.name = model_name;
+
 			return res;
 		}
 

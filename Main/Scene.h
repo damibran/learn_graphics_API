@@ -7,12 +7,16 @@
 
 namespace dmbrn
 {
+	// need interface implementation for scene tree
 	class Scene
 	{
 		friend class SceneTree;
 	public:
-		Scene(ImVec2 size)
+		Scene(ImVec2 size):
+			scene_root_(registry_, "SceneRoot")
 		{
+			scene_root_.addComponent<RelationshipComponent>();
+
 			addModel("Models\\Double_Barrel\\Double_Barrel.fbx");
 		}
 
@@ -21,7 +25,7 @@ namespace dmbrn
 			Enttity enttity{registry_, name};
 		}
 
-		void deleteEntity(Enttity enttity)
+		void deleteEntity(Enttity& enttity)
 		{
 			registry_.destroy(enttity);
 		}
@@ -30,24 +34,24 @@ namespace dmbrn
 		{
 			SceneNode root = ModelImporter::Import(path);
 
-			recursivelyAdd(root);			
+			recursivelyAddTo(root, scene_root_);
 		}
 
-		void recursivelyAdd(const SceneNode& node)
+		void recursivelyAddTo(const SceneNode& node, Enttity& parent)
 		{
-			Enttity ent{registry_, node.name};
+			Enttity child_ent{registry_, node.name, parent};
 
-			if(node.mesh)
-				ent.addComponent<ModelComponent>(node.mesh,&Renderer::un_lit_textured );
+			if (node.mesh)
+				child_ent.addComponent<ModelComponent>(node.mesh, &Renderer::un_lit_textured);
 
-			TransformComponent& t = ent.getComponent<TransformComponent>();
+			TransformComponent& t = child_ent.getComponent<TransformComponent>();
 			t.position = node.transform.position;
 			t.rotation = node.transform.rotation;
 			t.scale = node.transform.scale;
 
-			for (const auto & child : node.children)
+			for (const auto& child : node.children)
 			{
-				recursivelyAdd(child);
+				recursivelyAddTo(child, child_ent);
 			}
 		}
 
@@ -78,5 +82,6 @@ namespace dmbrn
 
 	private:
 		entt::registry registry_;
+		Enttity scene_root_;
 	};
 }

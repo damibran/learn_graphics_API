@@ -43,7 +43,7 @@ namespace dmbrn
 	private:
 		SceneTree& scene_tree_;
 
-		void drawComponents(Enttity entity)
+		void drawComponents(Enttity& entity)
 		{
 			if (auto* comp = entity.tryGetComponent<TagComponent>())
 			{
