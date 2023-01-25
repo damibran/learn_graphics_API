@@ -24,6 +24,8 @@
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader_push_const.vert" />
     <None Include="vcpkg.json" />
+    <None Include="Shaders\outline_shader.frag" />
+    <None Include="Shaders\outline_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Wrappers\GLFWwindowWrapper.h">
@@ -185,9 +187,6 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlinedMaterial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EditorUI\Viewport\CameraRenderData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -201,6 +200,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedGraphicsPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedPipelineStatics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

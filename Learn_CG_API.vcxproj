@@ -167,6 +167,8 @@
     <ClCompile Include="MainHpp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\outline_shader.frag" />
+    <None Include="Shaders\outline_shader.vert" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shader_push_const.vert" />
@@ -190,8 +192,11 @@
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h" />
     <ClInclude Include="MaterialSystem\Materials\Material.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedGraphicsPipeline.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedPipelineStatics.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h" />
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlinedMaterial.h" />
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
     <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />

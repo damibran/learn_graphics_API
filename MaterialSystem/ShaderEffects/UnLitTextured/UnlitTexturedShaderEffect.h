@@ -28,12 +28,12 @@ namespace dmbrn
 				auto& [mesh, material, offset] = render_queue.front();
 				render_queue.pop();
 
-				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
+				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.stencil_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *un_lit_graphics_pipeline_statics_.pipeline_layout_,
+				                                   *un_lit_graphics_pipeline_statics_.stencil_pipeline_layout_,
 				                                   offset);
 
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);

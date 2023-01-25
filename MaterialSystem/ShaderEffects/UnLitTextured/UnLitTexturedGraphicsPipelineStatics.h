@@ -14,21 +14,21 @@ namespace dmbrn
 	public:
 
 		UnLitTexturedGraphicsPipelineStatics():
-			pipeline_layout_(createPipelineLayout(Singletons::device))
+			stencil_pipeline_layout_(createStencilPipelineLayout(Singletons::device))
 		{
 		}
 
 		void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
-			graphics_pipeline_.setRenderPass(Singletons::device, render_pass, pipeline_layout_);
+			graphics_pipeline_.setRenderPass(Singletons::device, render_pass, stencil_pipeline_layout_);
 		}
 		
-		vk::raii::PipelineLayout pipeline_layout_;
+		vk::raii::PipelineLayout stencil_pipeline_layout_;
 		UnLitTexturedGraphicsPipeline graphics_pipeline_;
 
 	private:
 
-		vk::raii::PipelineLayout createPipelineLayout(const LogicalDevice& device)
+		vk::raii::PipelineLayout createStencilPipelineLayout(const LogicalDevice& device)
 		{
 			std::array<vk::DescriptorSetLayout,3> descriptor_set_layouts{*CameraRenderData::getDescriptorSetLayout(), *DiffusionDescriptorSets::descriptor_layout_, *PerObjectDataBuffer::descriptor_layout_};
 

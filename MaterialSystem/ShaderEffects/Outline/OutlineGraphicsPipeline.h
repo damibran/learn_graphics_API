@@ -9,18 +9,18 @@
 
 namespace dmbrn
 {
-	class UnLitTexturedGraphicsPipeline
+	class OutlineGraphicsPipeline
 	{
 	public:
-		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
+		OutlineGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
 		{
 		}
 
 		void setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
 		                   const vk::raii::PipelineLayout& pipeline_layout)
 		{
-			const auto vertShaderCode = readFile("shaders/vert.spv");
-			const auto fragShaderCode = readFile("shaders/frag.spv");
+			const auto vertShaderCode = readFile("shaders/outline_vert.spv");
+			const auto fragShaderCode = readFile("shaders/outline_frag.spv");
 
 			const vk::raii::ShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
 			const vk::raii::ShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
@@ -99,9 +99,17 @@ namespace dmbrn
 				dynamicStates.data()
 			};
 
-			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info {
-				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
-				VK_FALSE, VK_FALSE
+			const vk::StencilOpState stencil_op
+			{
+				vk::StencilOp::eKeep, vk::StencilOp::eReplace, vk::StencilOp::eKeep, vk::CompareOp::eNotEqual, 0xff,
+				0xff, 1
+
+			};
+
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info
+			{
+				{}, VK_FALSE, VK_FALSE, vk::CompareOp::eLessOrEqual,
+				VK_FALSE, VK_TRUE, stencil_op, stencil_op
 			};
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo

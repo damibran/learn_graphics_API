@@ -42,7 +42,7 @@ namespace dmbrn
 			Enttity child_ent{registry_, node.name, parent};
 
 			if (node.mesh)
-				child_ent.addComponent<ModelComponent>(node.mesh, &Renderer::un_lit_textured);
+				child_ent.addComponent<ModelComponent>(node.mesh, &Renderer::outlined_);
 
 			TransformComponent& t = child_ent.getComponent<TransformComponent>();
 			t.position = node.transform.position;

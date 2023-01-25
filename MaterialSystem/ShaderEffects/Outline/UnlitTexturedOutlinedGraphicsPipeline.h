@@ -9,10 +9,10 @@
 
 namespace dmbrn
 {
-	class UnLitTexturedGraphicsPipeline
+	class UnLitTexturedOutlinedGraphicsPipeline
 	{
 	public:
-		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
+		UnLitTexturedOutlinedGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
 		{
 		}
 
@@ -99,9 +99,17 @@ namespace dmbrn
 				dynamicStates.data()
 			};
 
-			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info {
-				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
-				VK_FALSE, VK_FALSE
+			const vk::StencilOpState stencil_op
+			{
+				vk::StencilOp::eReplace, vk::StencilOp::eReplace, vk::StencilOp::eReplace, vk::CompareOp::eAlways, 0xff,
+				0xff, 1
+
+			};
+
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info
+			{
+				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLessOrEqual,
+				VK_FALSE, VK_TRUE, stencil_op, stencil_op
 			};
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo

@@ -104,6 +104,7 @@ namespace dmbrn
 			}
 
 			Renderer::un_lit_textured.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);
+			Renderer::outlined_.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);
 
 			command_buffer.endRenderPass();
 		}
