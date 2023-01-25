@@ -1,7 +1,8 @@
 #pragma once
-#include <assimp/material.h>
+
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 #include"MaterialSystem/ShaderEffects/Outline/UnlitTexturedOutlinedPipelineStatics.h"
+#include "OutlineShaderEffectRenderData.h"
 
 namespace dmbrn
 {
@@ -27,7 +28,8 @@ namespace dmbrn
 
 				auto& [mesh, material, offset] = render_queue.front();
 
-				material->bindMaterialData(frame, command_buffer, *outline_graphics_pipeline_statics_.stencil_pipeline_layout_);
+				material->bindMaterialData(frame, command_buffer,
+				                           *outline_graphics_pipeline_statics_.stencil_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
@@ -35,10 +37,17 @@ namespace dmbrn
 				                                   *outline_graphics_pipeline_statics_.stencil_pipeline_layout_,
 				                                   offset);
 
+				command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+				                                  *outline_graphics_pipeline_statics_.stencil_pipeline_layout_, 2, {},
+				                                  {});
+
+
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
 
 				command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
 				                            **outline_graphics_pipeline_statics_.outline_graphics_pipeline_);
+
+				render_data.bind(frame, command_buffer, outline_graphics_pipeline_statics_.outline_pipeline_layout_);
 
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
 
@@ -52,5 +61,6 @@ namespace dmbrn
 		}
 
 		static inline UnLitTexturedOutlinedGraphicsPipelineStatics outline_graphics_pipeline_statics_{};
+		static inline OutlineShaderEffectRenderData render_data{{255, 255, 0}, 1.05};
 	};
 }

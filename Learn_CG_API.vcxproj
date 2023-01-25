@@ -193,6 +193,8 @@
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h" />
     <ClInclude Include="MaterialSystem\Materials\Material.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectUniformBuffer.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedGraphicsPipeline.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedPipelineStatics.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h" />

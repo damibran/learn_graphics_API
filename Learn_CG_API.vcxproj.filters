@@ -214,5 +214,11 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectUniformBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

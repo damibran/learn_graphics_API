@@ -5,7 +5,6 @@
 
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Vertex.h"
-#include "EditorUI/Viewport/ViewportRenderPass.h"
 
 namespace dmbrn
 {

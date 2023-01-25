@@ -65,7 +65,7 @@ namespace dmbrn
 		                 uint32_t offset) const
 		{
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-			                                  layout, 2,
+			                                  layout, 3,
 			                                  *descriptor_sets_[frame], offset);
 		}
 
