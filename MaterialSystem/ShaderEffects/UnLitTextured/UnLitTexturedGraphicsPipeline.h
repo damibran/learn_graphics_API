@@ -12,11 +12,109 @@ namespace dmbrn
 	class UnLitTexturedGraphicsPipeline
 	{
 	public:
-		UnLitTexturedGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
+
+		static vk::raii::Pipeline setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
+		                   const vk::raii::PipelineLayout& pipeline_layout,vk::StencilOpState stencil_op)
 		{
+			const auto vertShaderCode = readFile("shaders/vert.spv");
+			const auto fragShaderCode = readFile("shaders/frag.spv");
+
+			const vk::raii::ShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
+			const vk::raii::ShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+
+			const vk::PipelineShaderStageCreateInfo vertShaderStageInfo
+			{
+				{}, vk::ShaderStageFlagBits::eVertex,
+				*vertShaderModule, "main"
+			};
+
+			const vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+			{
+				{}, vk::ShaderStageFlagBits::eFragment,
+				*fragShaderModule, "main"
+			};
+
+			const vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+
+			const auto bindingDescription = Vertex::getBindingDescription();
+			const auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+			const vk::PipelineVertexInputStateCreateInfo vertexInputInfo
+			{
+				{},
+				bindingDescription, attributeDescriptions
+			};
+
+			const vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+			{
+				{}, vk::PrimitiveTopology::eTriangleList,VK_FALSE
+			};
+
+			const vk::PipelineViewportStateCreateInfo viewportState
+			{
+				{}, 1, {}, 1, {}
+			};
+
+			const vk::PipelineRasterizationStateCreateInfo rasterizer
+			{
+				{}, VK_FALSE,
+				VK_FALSE, vk::PolygonMode::eFill,
+				vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise,
+				VK_FALSE, {}, {}, {}, 1.0f
+			};
+
+			const vk::PipelineMultisampleStateCreateInfo multisampling
+			{
+				{}, vk::SampleCountFlagBits::e1,VK_FALSE
+			};
+
+			const vk::PipelineColorBlendAttachmentState colorBlendAttachment
+			{
+				VK_FALSE, {}, {}, {}, {}, {}, {}, // not like dis
+				vk::ColorComponentFlagBits::eR |
+				vk::ColorComponentFlagBits::eG |
+				vk::ColorComponentFlagBits::eB |
+				vk::ColorComponentFlagBits::eA
+			};
+
+			const vk::PipelineColorBlendStateCreateInfo colorBlending
+			{
+				{},VK_FALSE, vk::LogicOp::eCopy,
+				1, &colorBlendAttachment, {0.0f, 0.0f, 0.0f, 0.0f}
+			};
+
+			const std::vector dynamicStates
+			{
+				vk::DynamicState::eViewport,
+				vk::DynamicState::eScissor,
+			};
+
+			const vk::PipelineDynamicStateCreateInfo dynamicState
+			{
+				{}, static_cast<uint32_t>(dynamicStates.size()),
+				dynamicStates.data()
+			};
+
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info
+			{
+				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLessOrEqual,
+				VK_FALSE, VK_TRUE, stencil_op, stencil_op
+			};
+
+			const vk::GraphicsPipelineCreateInfo pipelineInfo
+			{
+				{}, 2, shaderStages,
+				&vertexInputInfo, &inputAssembly, {},
+				&viewportState, &rasterizer, &multisampling,
+				&depth_stencil_info, &colorBlending, &dynamicState,
+				*pipeline_layout, *render_pass
+			};
+
+			return vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
 		}
 
-		void setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
+		static vk::raii::Pipeline setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
 		                   const vk::raii::PipelineLayout& pipeline_layout)
 		{
 			const auto vertShaderCode = readFile("shaders/vert.spv");
@@ -99,7 +197,7 @@ namespace dmbrn
 				dynamicStates.data()
 			};
 
-			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info {
+			const vk::PipelineDepthStencilStateCreateInfo depth_stencil_info{
 				{}, VK_TRUE, VK_TRUE, vk::CompareOp::eLess,
 				VK_FALSE, VK_FALSE
 			};
@@ -113,16 +211,10 @@ namespace dmbrn
 				*pipeline_layout, *render_pass
 			};
 
-			graphics_pipeline_ = vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
-		}
-
-		const vk::raii::Pipeline& operator*() const
-		{
-			return graphics_pipeline_;
+			return vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
 		}
 
 	private:
-		vk::raii::Pipeline graphics_pipeline_;
 
 		static std::vector<char> readFile(const std::string& filename)
 		{

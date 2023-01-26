@@ -12,11 +12,8 @@ namespace dmbrn
 	class OutlineGraphicsPipeline
 	{
 	public:
-		OutlineGraphicsPipeline(): graphics_pipeline_(nullptr) // RAII violation !!
-		{
-		}
 
-		void setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
+		static vk::raii::Pipeline setRenderPass(const LogicalDevice& device, const vk::raii::RenderPass& render_pass,
 		                   const vk::raii::PipelineLayout& pipeline_layout)
 		{
 			const auto vertShaderCode = readFile("shaders/outline_vert.spv");
@@ -121,16 +118,9 @@ namespace dmbrn
 				*pipeline_layout, *render_pass
 			};
 
-			graphics_pipeline_ = vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
+			return vk::raii::Pipeline{device->createGraphicsPipeline(nullptr, pipelineInfo)};
 		}
-
-		const vk::raii::Pipeline& operator*() const
-		{
-			return graphics_pipeline_;
-		}
-
 	private:
-		vk::raii::Pipeline graphics_pipeline_;
 
 		static std::vector<char> readFile(const std::string& filename)
 		{

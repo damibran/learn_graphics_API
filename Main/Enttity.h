@@ -8,6 +8,10 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
+		Enttity(Enttity&& other): registry_(other.registry_), entityID_(other.entityID_)
+		{
+		}
+
 		Enttity(entt::registry& registry):
 			registry_(&registry)
 		{

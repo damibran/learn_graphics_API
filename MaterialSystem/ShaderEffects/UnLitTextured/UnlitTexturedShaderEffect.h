@@ -20,20 +20,20 @@ namespace dmbrn
 		void draw(int frame, const vk::raii::CommandBuffer& command_buffer,
 		          const PerObjectDataBuffer& per_object_data_buffer) override
 		{
-			command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-			                            **un_lit_graphics_pipeline_statics_.graphics_pipeline_);
+			un_lit_graphics_pipeline_statics_.bindPipeline(command_buffer);
+			un_lit_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
 
 			while (!render_queue.empty())
 			{
 				auto& [mesh, material, offset] = render_queue.front();
 				render_queue.pop();
 
-				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.stencil_pipeline_layout_);
+				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *un_lit_graphics_pipeline_statics_.stencil_pipeline_layout_,
+				                                   *un_lit_graphics_pipeline_statics_.pipeline_layout_,
 				                                   offset);
 
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);

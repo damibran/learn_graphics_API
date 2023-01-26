@@ -5,7 +5,7 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 proj;
 } ubo;
 
-layout(set = 2, binding=0) uniform DynamicUBO
+layout(set = 3, binding=0) uniform DynamicUBO
 {
     mat4 model;
 }dubo;

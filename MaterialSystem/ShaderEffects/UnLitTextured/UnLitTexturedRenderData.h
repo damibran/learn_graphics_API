@@ -1,30 +1,29 @@
 #pragma once
 #include <Wrappers/Singletons/Singletons.h>
-#include <MaterialSystem/ShaderEffects/Outline/OutlineShaderEffectUniformBuffer.h>
+#include "UnLitTexturedUniformBuffer.h"
 
 namespace dmbrn
 {
-	class OutlineShaderEffectRenderData
+	class UnLitTexturedRenderData
 	{
 	public:
-		OutlineShaderEffectRenderData(const glm::vec3& color, const float& scale):
+		UnLitTexturedRenderData(const float& gamma):
 			uniform_buffers_{Singletons::physical_device, Singletons::device}
 		{
 			createDescriptorSets(Singletons::device);
 
 			for (uint32_t i = 0; i < Singletons::device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				setValues(i, color, scale);
+				setValues(i, gamma);
 			}
 		}
 
-		void setValues(int frame, const glm::vec3& color, const float& scale)
+		void setValues(int frame, const float& gamma)
 		{
-			auto data = static_cast<OutlineShaderEffectUniformBuffer::UniformBufferObject*>(uniform_buffers_.
+			auto data = static_cast<UnLitTexturedUniformBuffer::UniformBufferObject*>(uniform_buffers_.
 				getUBMemory(frame).
-				mapMemory(0, sizeof(OutlineShaderEffectUniformBuffer::UniformBufferObject)));
-			data->color = color;
-			data->scale_factor = scale;
+				mapMemory(0, sizeof(UnLitTexturedUniformBuffer::UniformBufferObject)));
+			data->gamma_corr = gamma;
 			uniform_buffers_.getUBMemory(frame).unmapMemory();
 		}
 
@@ -47,7 +46,7 @@ namespace dmbrn
 		}
 
 	private:
-		OutlineShaderEffectUniformBuffer uniform_buffers_;
+		UnLitTexturedUniformBuffer uniform_buffers_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorSets(const LogicalDevice& device)
@@ -67,7 +66,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers_[i], 0, sizeof(OutlineShaderEffectUniformBuffer::UniformBufferObject)
+					*uniform_buffers_[i], 0, sizeof(UnLitTexturedUniformBuffer::UniformBufferObject)
 				};
 
 				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
@@ -87,7 +86,7 @@ namespace dmbrn
 			const vk::DescriptorSetLayoutBinding uboLayoutBinding
 			{
 				0, vk::DescriptorType::eUniformBuffer,
-				1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+				1, vk::ShaderStageFlagBits::eFragment
 			};
 
 			std::array<vk::DescriptorSetLayoutBinding, 1> bindings = {uboLayoutBinding};

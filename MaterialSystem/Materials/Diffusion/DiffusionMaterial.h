@@ -13,7 +13,7 @@ namespace dmbrn
 		void bindMaterialData(int frame, const vk::raii::CommandBuffer& command_buffer, vk::PipelineLayout layout)const
 		{
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-				layout, 1,
+				layout, 2,
 				*descriptor_sets_[frame], nullptr);
 
 		}

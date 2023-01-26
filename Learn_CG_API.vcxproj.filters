@@ -205,10 +205,7 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedGraphicsPipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedPipelineStatics.h">
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipelineStatics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h">
@@ -218,6 +215,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedRenderData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedUniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

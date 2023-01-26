@@ -1,7 +1,7 @@
 #pragma once
 
+#include "OutlineGraphicsPipelineStatics.h"
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
-#include"MaterialSystem/ShaderEffects/Outline/UnlitTexturedOutlinedPipelineStatics.h"
 #include "OutlineShaderEffectRenderData.h"
 
 namespace dmbrn
@@ -23,31 +23,28 @@ namespace dmbrn
 		{
 			while (!render_queue.empty())
 			{
-				command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-				                            **outline_graphics_pipeline_statics_.stencil_graphics_pipeline_);
+				stencil_graphics_pipeline_.bindPipeline(command_buffer);
+				stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
 
 				auto& [mesh, material, offset] = render_queue.front();
 
 				material->bindMaterialData(frame, command_buffer,
-				                           *outline_graphics_pipeline_statics_.stencil_pipeline_layout_);
+				                           *stencil_graphics_pipeline_.pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *outline_graphics_pipeline_statics_.stencil_pipeline_layout_,
+				                                   *stencil_graphics_pipeline_.pipeline_layout_,
 				                                   offset);
-
-				command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-				                                  *outline_graphics_pipeline_statics_.stencil_pipeline_layout_, 2, {},
-				                                  {});
-
 
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
 
-				command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-				                            **outline_graphics_pipeline_statics_.outline_graphics_pipeline_);
+				outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
+				outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
 
-				render_data.bind(frame, command_buffer, outline_graphics_pipeline_statics_.outline_pipeline_layout_);
+				per_object_data_buffer.bindDataFor(frame, command_buffer,
+				                                   *outline_graphics_pipeline_statics_.pipeline_layout_,
+				                                   offset);
 
 				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
 
@@ -57,10 +54,18 @@ namespace dmbrn
 
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
+			const vk::StencilOpState stencil_op
+			{
+				vk::StencilOp::eReplace, vk::StencilOp::eReplace, vk::StencilOp::eReplace, vk::CompareOp::eAlways, 0xff,
+				0xff, 1
+
+			};
+			stencil_graphics_pipeline_.setRenderPass(render_pass, stencil_op);
+
 			outline_graphics_pipeline_statics_.setRenderPass(render_pass);
 		}
 
-		static inline UnLitTexturedOutlinedGraphicsPipelineStatics outline_graphics_pipeline_statics_{};
-		static inline OutlineShaderEffectRenderData render_data{{255, 255, 0}, 1.05};
+		static inline UnLitTexturedGraphicsPipelineStatics stencil_graphics_pipeline_;
+		static inline OutlineGraphicsPipelineStatics outline_graphics_pipeline_statics_{};
 	};
 }

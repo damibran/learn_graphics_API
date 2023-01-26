@@ -49,14 +49,14 @@ namespace dmbrn
 		Scene& scene_;
 		Enttity selected_;
 
-		void recursivelyDraw(const Enttity& enttity)
+		void recursivelyDraw(Enttity enttity)
 		{
 			const auto& tag = enttity.getComponent<TagComponent>();
 			auto relation_comp = enttity.getComponent<RelationshipComponent>();
 
-			ImGuiTreeNodeFlags flags = 
+			ImGuiTreeNodeFlags flags =
 				(selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
-				(relation_comp.first == entt::null ? ImGuiTreeNodeFlags_Leaf : 0) | 
+				(relation_comp.first == entt::null ? ImGuiTreeNodeFlags_Leaf : 0) |
 				ImGuiTreeNodeFlags_OpenOnArrow;
 
 			bool opened = ImGui::TreeNodeEx(
@@ -65,7 +65,20 @@ namespace dmbrn
 
 			if (ImGui::IsItemClicked())
 			{
+				if (selected_)
+				{
+					if (ModelComponent* model_comp = selected_.tryGetComponent<ModelComponent>())
+					{
+						model_comp->shader_ = &Renderer::un_lit_textured;
+					}
+				}
+
 				selected_ = enttity;
+
+				if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+				{
+					model_comp->shader_ = &Renderer::outlined_;
+				}
 			}
 
 			if (opened)
@@ -94,7 +107,19 @@ namespace dmbrn
 
 			if (ImGui::IsItemClicked())
 			{
+				if (selected_)
+				{
+					if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+					{
+						model_comp->shader_ = &Renderer::un_lit_textured;
+					}
+				}
 				selected_ = enttity;
+			}
+
+			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+			{
+				model_comp->shader_ = &Renderer::outlined_;
 			}
 
 			bool deletedEntity = false;

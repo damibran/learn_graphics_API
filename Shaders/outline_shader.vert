@@ -7,7 +7,7 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 proj;
 } ubo;
 
-layout(set = 2, binding=0) uniform OutlineData{
+layout(set = 1, binding=0) uniform OutlineData{
     vec3 color;
     float scale;
 } outline;

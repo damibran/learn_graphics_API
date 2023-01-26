@@ -5,18 +5,19 @@
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Singletons/Singletons.h"
 #include "EditorUI/Viewport/CameraRenderData.h"
-#include "UnLitTexturedGraphicsPipeline.h"
-#include "UnLitTexturedRenderData.h"
+#include "OutlineGraphicsPipeline.h"
+#include "MaterialSystem/ShaderEffects/UnLitTextured/UnLitTexturedGraphicsPipelineStatics.h"
+#include "MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
+#include "Wrappers/Singletons/PerObjectDataBuffer.h"
+#include "OutlineShaderEffectRenderData.h"
 
 namespace dmbrn
 {
-	class UnLitTexturedGraphicsPipelineStatics
+	class OutlineGraphicsPipelineStatics
 	{
 	public:
-		UnLitTexturedGraphicsPipelineStatics():
-			pipeline_layout_(createStencilPipelineLayout(Singletons::device)),
-			graphics_pipeline_(nullptr), // RAII violation !!!
-			render_data_(1)
+		OutlineGraphicsPipelineStatics():
+			pipeline_layout_(createOutlinePipelineLayout(Singletons::device))
 		{
 		}
 
@@ -34,29 +35,21 @@ namespace dmbrn
 
 		void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
-			graphics_pipeline_ = UnLitTexturedGraphicsPipeline::setRenderPass(
+			graphics_pipeline_ = OutlineGraphicsPipeline::setRenderPass(
 				Singletons::device, render_pass, pipeline_layout_);
-		}
-
-		void setRenderPass(const vk::raii::RenderPass& render_pass, vk::StencilOpState stencil_op)
-		{
-			graphics_pipeline_ = UnLitTexturedGraphicsPipeline::setRenderPass(
-				Singletons::device, render_pass, pipeline_layout_,
-				stencil_op);
 		}
 
 		vk::raii::PipelineLayout pipeline_layout_;
 
-
 	private:
-		vk::raii::Pipeline graphics_pipeline_;
-		UnLitTexturedRenderData render_data_;
+		vk::raii::Pipeline graphics_pipeline_{nullptr}; // RAII violation
+		OutlineShaderEffectRenderData render_data_{{255, 255, 0}, 1.05};
 
-		vk::raii::PipelineLayout createStencilPipelineLayout(const LogicalDevice& device)
+		vk::raii::PipelineLayout createOutlinePipelineLayout(const LogicalDevice& device)
 		{
 			std::array<vk::DescriptorSetLayout, 4> descriptor_set_layouts{
 				*CameraRenderData::getDescriptorSetLayout(),
-				*UnLitTexturedRenderData::getDescriptorSetLayout(),
+				*OutlineShaderEffectRenderData::getDescriptorSetLayout(),
 				*DiffusionDescriptorSets::descriptor_layout_,
 				*PerObjectDataBuffer::descriptor_layout_
 			};

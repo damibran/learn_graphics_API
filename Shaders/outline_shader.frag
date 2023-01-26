@@ -2,7 +2,7 @@
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 2, binding=0) uniform OutlineData{
+layout(set = 1, binding=0) uniform OutlineData{
     vec3 color;
     float scale;
 } outline;

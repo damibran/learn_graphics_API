@@ -195,10 +195,11 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectUniformBuffer.h" />
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedGraphicsPipeline.h" />
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedPipelineStatics.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipelineStatics.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedRenderData.h" />
+    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedUniformBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
     <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />

@@ -7,22 +7,21 @@
 
 namespace dmbrn
 {
-	class OutlineShaderEffectUniformBuffer
+	class UnLitTexturedUniformBuffer
 	{
 	public:
-		~OutlineShaderEffectUniformBuffer()=default;
-		OutlineShaderEffectUniformBuffer(const OutlineShaderEffectUniformBuffer& )=delete;
+		~UnLitTexturedUniformBuffer()=default;
+		UnLitTexturedUniformBuffer(const UnLitTexturedUniformBuffer& )=delete;
 
-		OutlineShaderEffectUniformBuffer(OutlineShaderEffectUniformBuffer&& )=default;
-		OutlineShaderEffectUniformBuffer& operator=(OutlineShaderEffectUniformBuffer&&)=default;
+		UnLitTexturedUniformBuffer(UnLitTexturedUniformBuffer&& )=default;
+		UnLitTexturedUniformBuffer& operator=(UnLitTexturedUniformBuffer&&)=default;
 
 		struct UniformBufferObject
 		{
-			alignas(16) glm::vec3 color;
-			alignas(4) float scale_factor;
+			alignas(4) float gamma_corr;
 		};
 
-		OutlineShaderEffectUniformBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device)
+		UnLitTexturedUniformBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
 			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
