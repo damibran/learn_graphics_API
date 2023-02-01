@@ -44,7 +44,8 @@ namespace dmbrn
 
 				moveCamera(cam_move_dir, delta_t);
 
-				if (ImGui::IsWindowHovered()&&ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !window->TitleBarRect().Contains(g.IO.MousePos))
+				if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !window->TitleBarRect()
+					.Contains(g.IO.MousePos))
 				{
 					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
 					ImVec2 mouse_rot = new_mouse_delt - last_mouse_delt;
@@ -73,10 +74,10 @@ namespace dmbrn
 
 		void updateRenderData(int frame)
 		{
-			renderer_data_.update(frame,glm::inverse(transform_.getMatrix()),camera_comp.getMatrix());
+			renderer_data_.update(frame, getViewMat(), camera_comp.getMatrix());
 		}
 
-		void bindData(int frame,const vk::raii::CommandBuffer& command_buffer)const
+		void bindData(int frame, const vk::raii::CommandBuffer& command_buffer) const
 		{
 			renderer_data_.bind(frame, command_buffer);
 		}
@@ -88,7 +89,7 @@ namespace dmbrn
 		TransformComponent transform_;
 		CameraComponent camera_comp;
 		CameraRenderData renderer_data_;
-				
+
 		void moveCamera(const glm::vec3 dir, const float dt)
 		{
 			const float tspeed = dt * speed_;

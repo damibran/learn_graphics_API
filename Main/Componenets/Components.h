@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#define GLM_FORCE_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -57,7 +56,9 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			return orientate4(glm::vec3{glm::radians(rotation.x), glm::radians(rotation.z), glm::radians(rotation.y)});
+			return glm::rotate(glm::mat4{1}, glm::radians(rotation.z), {0, 0, 1}) *
+				glm::rotate(glm::mat4{1}, glm::radians(rotation.y), {0, 1, 0}) *
+				glm::rotate(glm::mat4{1}, glm::radians(rotation.x), {1, 0, 0});
 		}
 
 		glm::mat4 getMatrix() const
@@ -122,7 +123,9 @@ namespace dmbrn
 
 		glm::mat4 getMatrix() const
 		{
-			return proj_;
+			glm::mat4 res = proj_;
+			res[1][1] *= -1;
+			return res;
 		}
 
 	private:

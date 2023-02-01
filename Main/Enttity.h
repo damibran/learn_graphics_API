@@ -138,13 +138,13 @@ namespace dmbrn
 
 		glm::mat4 getWorldTransform() const
 		{
-			glm::mat4 this_trans{1.0};
+			const TransformComponent& transform = getComponent<TransformComponent>();
+			glm::mat4 this_trans = transform.getMatrix();
 			const RelationshipComponent& this_relation = getComponent<RelationshipComponent>();
 
 			if (this_relation.parent != entt::null)
 			{
-				const TransformComponent& transform = getComponent<TransformComponent>();
-				this_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform() * transform.getMatrix();
+				this_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform() * this_trans;
 			}
 
 			return this_trans;

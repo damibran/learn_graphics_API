@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "Wrappers/Singletons/Renderer.h"
 #include "ViewportRenderPass.h"
@@ -14,7 +15,7 @@ namespace dmbrn
 	public:
 		const static inline ViewportRenderPass render_pass_;
 
-		Viewport(Scene& scene, const Enttity* selected, const std::string& name = "Viewport"):
+		Viewport(Scene& scene, Enttity* selected, const std::string& name = "Viewport"):
 			window_name_(name),
 			size_(1280, 720),
 			camera_(size_),
@@ -43,6 +44,13 @@ namespace dmbrn
 				return;
 			}
 
+			if (!ImGuizmo::IsOver())
+			{
+				camera_.update(delta_t);
+			}
+
+			ImGui::Image(images_[imageIndex], size_);
+
 			if (ImGui::IsWindowFocused())
 			{
 				if (*selected_)
@@ -56,17 +64,22 @@ namespace dmbrn
 					glm::mat4 cameraProj = camera_.camera_comp.getMatrix();
 					glm::mat4 cameraView = camera_.getViewMat();
 
-					auto [parent_trans, this_trans] = selected_->getParentAndThisWorldTransform();
+					cameraProj[1][1] *= -1;
 
-					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj),
-					                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL,
-					                     glm::value_ptr(this_trans));
+					auto [parent_trans, _] = selected_->getParentAndThisWorldTransform();
+					TransformComponent& t_c = selected_->getComponent<TransformComponent>();
+
+					glm::mat4 local_trans = t_c.getMatrix();
+
+					ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
+					                     ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL,
+					                     glm::value_ptr(local_trans));
+
+					if (ImGuizmo::IsUsing())
+						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans), glm::value_ptr(t_c.position),
+						                                      glm::value_ptr(t_c.rotation), glm::value_ptr(t_c.scale));
 				}
 			}
-
-			camera_.update(delta_t);
-
-			ImGui::Image(images_[imageIndex], size_);
 
 			ImGui::End();
 			ImGui::PopStyleVar();
@@ -138,7 +151,7 @@ namespace dmbrn
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
-		const Enttity* selected_;
+		Enttity* selected_;
 
 		bool HandleWindowResize()
 		{
