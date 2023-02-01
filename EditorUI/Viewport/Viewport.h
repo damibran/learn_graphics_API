@@ -1,11 +1,11 @@
 #pragma once
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Wrappers/Singletons/Renderer.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
 #include "EditorUI/Viewport/ViewportCamera.h"
+#include "Main/Enttity.h"
 
 namespace dmbrn
 {
@@ -14,13 +14,14 @@ namespace dmbrn
 	public:
 		const static inline ViewportRenderPass render_pass_;
 
-		Viewport(Scene& scene, const std::string& name = "Viewport") :
+		Viewport(Scene& scene, const Enttity* selected, const std::string& name = "Viewport"):
 			window_name_(name),
 			size_(1280, 720),
 			camera_(size_),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
-			scene_(scene)
+			scene_(scene),
+			selected_(selected)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
@@ -40,6 +41,27 @@ namespace dmbrn
 			{
 				ImGui::End();
 				return;
+			}
+
+			if (ImGui::IsWindowFocused())
+			{
+				if (*selected_)
+				{
+					ImGuizmo::SetOrthographic(false);
+					ImGuizmo::SetDrawlist();
+					float windowWidth = (float)ImGui::GetWindowWidth();
+					float windowHeight = (float)ImGui::GetWindowHeight();
+					ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+					glm::mat4 cameraProj = camera_.camera_comp.getMatrix();
+					glm::mat4 cameraView = camera_.getViewMat();
+
+					auto [parent_trans, this_trans] = selected_->getParentAndThisWorldTransform();
+
+					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj),
+					                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL,
+					                     glm::value_ptr(this_trans));
+				}
 			}
 
 			camera_.update(delta_t);
@@ -116,6 +138,7 @@ namespace dmbrn
 		ViewportSwapChain swap_chain_;
 		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
+		const Enttity* selected_;
 
 		bool HandleWindowResize()
 		{

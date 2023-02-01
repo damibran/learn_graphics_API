@@ -37,6 +37,7 @@ namespace dmbrn
 		entt::entity first{entt::null};
 		entt::entity prev{entt::null};
 		entt::entity next{entt::null};
+		entt::entity parent{entt::null};
 	};
 
 	struct TransformComponent

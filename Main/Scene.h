@@ -68,10 +68,33 @@ namespace dmbrn
 		}
 
 		// actually can combine transforms in form of TRS
+		//void recursivelyUpdateMatrix(const Enttity& ent, const glm::mat4& parent_matrix, char* data_map)
+		//{
+		//	const TransformComponent& this_trans = ent.getComponent<TransformComponent>();
+		//	glm::mat4 this_matrix = parent_matrix * this_trans.getMatrix();
+		//
+		//	if (const ModelComponent* model = ent.tryGetComponent<ModelComponent>())
+		//	{
+		//		auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data_map + model->
+		//			inGPU_transform_offset);
+		//		ubo_data->model = this_matrix;
+		//	}
+		//
+		//	auto& cur_comp = ent.getComponent<RelationshipComponent>();
+		//	auto cur_id = cur_comp.first;
+		//
+		//	while(cur_id!=entt::null)
+		//	{
+		//		recursivelyUpdateMatrix(Enttity{registry_, cur_id}, this_matrix, data_map);
+		//
+		//		cur_id = registry_.get<RelationshipComponent>(cur_id).next;
+		//	}
+		//}
+
+		// actually can combine transforms in form of TRS
 		void recursivelyUpdateMatrix(const Enttity& ent, const glm::mat4& parent_matrix, char* data_map)
 		{
-			const TransformComponent& this_trans = ent.getComponent<TransformComponent>();
-			glm::mat4 this_matrix = parent_matrix * this_trans.getMatrix();
+			auto [_, this_matrix] = ent.getParentAndThisWorldTransform();
 
 			if (const ModelComponent* model = ent.tryGetComponent<ModelComponent>())
 			{

@@ -33,6 +33,7 @@ namespace dmbrn
 
 			addComponent<RelationshipComponent>();
 			auto& cur_comp = getComponent<RelationshipComponent>();
+			cur_comp.parent = parent;
 
 			auto& parent_comp = parent.getComponent<RelationshipComponent>();
 
@@ -100,6 +101,15 @@ namespace dmbrn
 			return registry_->try_get<T>(entityID_);
 		}
 
+		std::pair<glm::mat4, glm::mat4> getParentAndThisWorldTransform() const
+		{
+			const RelationshipComponent& this_relation = getComponent<RelationshipComponent>();
+			glm::mat4 parent_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform();
+			glm::mat4 this_trans = parent_trans * getComponent<TransformComponent>().getMatrix();
+
+			return {parent_trans, this_trans};
+		}
+
 		operator bool() const
 		{
 			return entityID_ != entt::null;
@@ -124,6 +134,20 @@ namespace dmbrn
 				curr_ind = curr_comp.next;
 				curr_comp = registry_->get<RelationshipComponent>(curr_ind);
 			}
+		}
+
+		glm::mat4 getWorldTransform() const
+		{
+			glm::mat4 this_trans{1.0};
+			const RelationshipComponent& this_relation = getComponent<RelationshipComponent>();
+
+			if (this_relation.parent != entt::null)
+			{
+				const TransformComponent& transform = getComponent<TransformComponent>();
+				this_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform() * transform.getMatrix();
+			}
+
+			return this_trans;
 		}
 	};
 }

@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include <ImGuizmo.h>
 
 #include "Wrappers/Singletons/Singletons.h"
 #include "Helpers/ImGuiRaii.h"
@@ -25,10 +26,11 @@ namespace dmbrn
 			swap_chain_(render_pass_),
 			im_gui_(render_pass_),
 			scene_(scene),
-			viewport_(scene_),
-		viewport2_(scene_,"Viewport 2"),
 			scene_tree_(scene_),
-			inspector_(scene_tree_)
+			inspector_(scene_tree_),
+			viewport_(scene_, &scene_tree_.getSelected()),
+			viewport2_(scene_, &scene_tree_.getSelected()
+			           , "Viewport 2")
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
@@ -48,7 +50,7 @@ namespace dmbrn
 			scene_.updatePerObjectData(current_frame_);
 
 			viewport_.newImGuiFrame(delta_time, imageIndex);
-			viewport2_.newImGuiFrame(delta_time,imageIndex);
+			viewport2_.newImGuiFrame(delta_time, imageIndex);
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame();
 
@@ -67,10 +69,10 @@ namespace dmbrn
 		ImGUISwapChain swap_chain_;
 		ImGuiRaii im_gui_;
 		Scene& scene_;
-		Viewport viewport_;
-		Viewport viewport2_;
 		SceneTree scene_tree_;
 		Inspector inspector_;
+		Viewport viewport_;
+		Viewport viewport2_;
 
 		uint32_t current_frame_ = 0;
 
@@ -159,7 +161,7 @@ namespace dmbrn
 				ImGui::EndMainMenuBar();
 			}
 		}
-		
+
 		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)
 		{
 			device->waitForFences(*frame.in_flight_fence, true, UINT64_MAX);
@@ -173,6 +175,7 @@ namespace dmbrn
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
+			ImGuizmo::BeginFrame();
 
 			return result.second;
 		}
