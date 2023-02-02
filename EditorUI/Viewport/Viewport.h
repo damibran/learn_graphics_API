@@ -30,6 +30,7 @@ namespace dmbrn
 				images_.push_back(ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
 				                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 			}
+			last_used = this;
 		}
 
 		void newImGuiFrame(float delta_t, uint32_t imageIndex)
@@ -51,7 +52,7 @@ namespace dmbrn
 
 			ImGui::Image(images_[imageIndex], size_);
 
-			if (ImGui::IsWindowFocused())
+			if (this == last_used)
 			{
 				if (*selected_)
 				{
@@ -72,12 +73,15 @@ namespace dmbrn
 					glm::mat4 local_trans = t_c.getMatrix();
 
 					ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL,
+					                     ImGuizmo::OPERATION::SCALE, ImGuizmo::MODE::LOCAL,
 					                     glm::value_ptr(local_trans));
 
 					if (ImGuizmo::IsUsing())
+					{
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans), glm::value_ptr(t_c.position),
 						                                      glm::value_ptr(t_c.rotation), glm::value_ptr(t_c.scale));
+						last_used = this;
+					}
 				}
 			}
 
@@ -152,6 +156,7 @@ namespace dmbrn
 		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
 		Enttity* selected_;
+		static inline Viewport* last_used = nullptr;
 
 		bool HandleWindowResize()
 		{
