@@ -17,6 +17,7 @@ namespace dmbrn
 		{
 			scene_root_.addComponent<RelationshipComponent>();
 
+			addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
 			addModel("Models\\Double_Barrel\\Double_Barrel.fbx");
 		}
 

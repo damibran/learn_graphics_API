@@ -14,7 +14,7 @@ namespace dmbrn
 		friend class Viewport;
 	public:
 		ViewportCamera(ImVec2 size)
-			: transform_({0, 0, -7}),
+			: transform_({0, 7,0},{90,0,-180}),
 			  camera_comp(size)
 		{
 		}
@@ -33,14 +33,14 @@ namespace dmbrn
 					cam_move_dir.x += 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_S))
-					cam_move_dir.z -= 1;
-				else if (ImGui::IsKeyDown(ImGuiKey_W))
 					cam_move_dir.z += 1;
+				else if (ImGui::IsKeyDown(ImGuiKey_W))
+					cam_move_dir.z -= 1;
 
 				if (ImGui::IsKeyDown(ImGuiKey_E))
-					cam_move_dir.y -= 1;
-				else if (ImGui::IsKeyDown(ImGuiKey_Q))
 					cam_move_dir.y += 1;
+				else if (ImGui::IsKeyDown(ImGuiKey_Q))
+					cam_move_dir.y -= 1;
 
 				moveCamera(cam_move_dir, delta_t);
 
@@ -52,7 +52,7 @@ namespace dmbrn
 
 					last_mouse_delt = new_mouse_delt;
 
-					rotateCamera({mouse_rot.x, -mouse_rot.y});
+					rotateCamera({-mouse_rot.x, -mouse_rot.y});
 				}
 
 				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
@@ -104,7 +104,7 @@ namespace dmbrn
 
 			glm::vec3 t(transform_.getRotationDegrees());
 
-			t += glm::vec3(offset, 0.);
+			t += glm::vec3(offset.x, 0,offset.y);
 
 			transform_.rotation = t;
 
@@ -115,10 +115,10 @@ namespace dmbrn
 			// make sure that when pitch is out of bounds, screen doesn't get flipped
 			if (constrainPitch)
 			{
-				if (pitch > 89.0f)
-					transform_.rotation.x = 89.0f;
-				if (pitch < -89.0f)
-					transform_.rotation.x = -89.0f;
+				if (pitch > 179)
+					transform_.rotation.x = 179;
+				if (pitch < 1)
+					transform_.rotation.x = 1;
 			}
 		}
 	};

@@ -43,7 +43,7 @@ namespace dmbrn
 			SceneNode res;
 			// read file via ASSIMP
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);
+			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 			//| aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace
 			// check for errors
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
@@ -76,7 +76,7 @@ namespace dmbrn
 			{
 				// the node object only contains indices to index the actual objects in the scene. 
 				// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-				
+
 				aiMesh* mesh = scene->mMeshes[ai_node->mMeshes[i]];
 				std::string mesh_name = name_this + + "." + std::string(mesh->mName.C_Str());
 				aiMaterial* ai_material = scene->mMaterials[mesh->mMaterialIndex];

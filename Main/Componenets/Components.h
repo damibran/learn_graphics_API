@@ -113,19 +113,19 @@ namespace dmbrn
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
+			proj_[1][1] *=-1;
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
+			proj_[1][1] *=-1;
 		}
 
 		glm::mat4 getMatrix() const
 		{
-			glm::mat4 res = proj_;
-			res[1][1] *= -1;
-			return res;
+			return proj_;
 		}
 
 	private:

@@ -72,7 +72,7 @@ namespace dmbrn
 					glm::mat4 local_trans = t_c.getMatrix();
 
 					ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                     ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL,
+					                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL,
 					                     glm::value_ptr(local_trans));
 
 					if (ImGuizmo::IsUsing())
