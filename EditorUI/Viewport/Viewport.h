@@ -53,7 +53,22 @@ namespace dmbrn
 			if (ImGui::IsWindowFocused())
 				last_used_focused = this;
 
+			auto pos = ImGui::GetCursorPos();
+
 			ImGui::Image(images_[imageIndex], size_);
+
+			ImGui::SetItemAllowOverlap();
+
+			ImGui::SetCursorPos(ImVec2(pos.x+5, pos.y));
+
+			if (ImGui::Selectable("T", current_operation == ImGuizmo::OPERATION::TRANSLATE, 0, {10, 0}))
+				current_operation = ImGuizmo::OPERATION::TRANSLATE;
+			ImGui::SameLine();
+			if (ImGui::Selectable("R", current_operation == ImGuizmo::OPERATION::ROTATE, 0, {10, 0}))
+				current_operation = ImGuizmo::OPERATION::ROTATE;
+			ImGui::SameLine();
+			if (ImGui::Selectable("S", current_operation == ImGuizmo::OPERATION::SCALE, 0, {10, 0}))
+				current_operation = ImGuizmo::OPERATION::SCALE;
 
 			if (this == last_used_focused)
 			{
@@ -76,7 +91,7 @@ namespace dmbrn
 					glm::mat4 local_trans = t_c.getMatrix();
 
 					ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                     ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL,
+					                     current_operation, ImGuizmo::MODE::LOCAL,
 					                     glm::value_ptr(local_trans));
 
 					if (ImGuizmo::IsUsing())
@@ -160,6 +175,7 @@ namespace dmbrn
 		Scene& scene_;
 		Enttity* selected_;
 		static inline Viewport* last_used_focused = nullptr;
+		static inline ImGuizmo::OPERATION current_operation = ImGuizmo::OPERATION::TRANSLATE;
 
 		bool HandleWindowResize()
 		{
