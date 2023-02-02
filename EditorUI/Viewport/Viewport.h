@@ -44,7 +44,7 @@ namespace dmbrn
 				return;
 			}
 
-			if (!ImGuizmo::IsOver())
+			if (!ImGuizmo::IsUsing())
 			{
 				camera_.update(delta_t);
 			}
