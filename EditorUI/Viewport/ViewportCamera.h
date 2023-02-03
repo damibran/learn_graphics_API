@@ -13,8 +13,10 @@ namespace dmbrn
 	{
 		friend class Viewport;
 	public:
+		const ImGuiMouseButton pan_button = ImGuiMouseButton_Right;
+
 		ViewportCamera(ImVec2 size)
-			: transform_({0, 7,0},{90,0,-180}),
+			: transform_({0, 7, 0}, {90, 0, -180}),
 			  camera_comp(size)
 		{
 		}
@@ -23,7 +25,13 @@ namespace dmbrn
 		{
 			ImGuiContext& g = *GImGui;
 			auto window = ImGui::GetCurrentWindow();
-			if (ImGui::IsWindowFocused())
+
+			if (!ImGui::IsWindowFocused() && ImGui::IsMouseClicked(pan_button) && window->ContentRegionRect.Contains(
+				g.IO.MousePos))
+				ImGui::SetWindowFocus();
+
+			if (ImGui::IsWindowFocused() && ImGui::IsMouseDown(pan_button) && window->ContentRegionRect.Contains(
+				g.IO.MouseClickedPos[pan_button]))
 			{
 				glm::vec3 cam_move_dir{0};
 
@@ -44,21 +52,20 @@ namespace dmbrn
 
 				moveCamera(cam_move_dir, delta_t);
 
-				if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !window->TitleBarRect()
-					.Contains(g.IO.MousePos))
+				if (ImGui::IsMouseDragging(pan_button))
 				{
-					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta();
+					ImVec2 new_mouse_delt = ImGui::GetMouseDragDelta(pan_button);
 					ImVec2 mouse_rot = new_mouse_delt - last_mouse_delt;
 
 					last_mouse_delt = new_mouse_delt;
 
 					rotateCamera({-mouse_rot.x, -mouse_rot.y});
 				}
+			}
 
-				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-				{
-					last_mouse_delt = {0, 0};
-				}
+			if (ImGui::IsMouseReleased(pan_button))
+			{
+				last_mouse_delt = {0, 0};
 			}
 		}
 
@@ -104,7 +111,7 @@ namespace dmbrn
 
 			glm::vec3 t(transform_.getRotationDegrees());
 
-			t += glm::vec3(offset.x, 0,offset.y);
+			t += glm::vec3(offset.x, 0, offset.y);
 
 			transform_.rotation = t;
 

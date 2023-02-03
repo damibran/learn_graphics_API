@@ -29,7 +29,7 @@ namespace dmbrn
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
 				selected_ = {scene_.registry_};
 
-			if (ImGui::BeginPopupContextWindow(nullptr, 1))
+			if (ImGui::BeginPopupContextWindow())
 			{
 				if (ImGui::MenuItem("Create Empty Entity"))
 					scene_.addNewEntity("Empty Entity");
