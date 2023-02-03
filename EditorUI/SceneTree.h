@@ -67,18 +67,12 @@ namespace dmbrn
 			{
 				if (selected_)
 				{
-					if (ModelComponent* model_comp = selected_.tryGetComponent<ModelComponent>())
-					{
-						model_comp->shader_ = &Renderer::un_lit_textured;
-					}
+					deselect(selected_);
 				}
 
 				selected_ = enttity;
 
-				if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
-				{
-					model_comp->shader_ = &Renderer::outlined_;
-				}
+				select(selected_);
 			}
 
 			if (opened)
@@ -92,6 +86,42 @@ namespace dmbrn
 				}
 
 				ImGui::TreePop();
+			}
+		}
+
+		void deselect(Enttity enttity)
+		{
+			RelationshipComponent& relationship = enttity.getComponent<RelationshipComponent>();
+			auto cur_id = relationship.first;
+
+			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+			{
+				model_comp->shader_ = &Renderer::un_lit_textured;
+			}
+
+			while (cur_id != entt::null)
+			{
+				deselect(Enttity{scene_.registry_, cur_id});
+
+				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
+			}
+		}
+
+		void select(Enttity enttity)
+		{
+			RelationshipComponent& relationship = enttity.getComponent<RelationshipComponent>();
+			auto cur_id = relationship.first;
+
+			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+			{
+				model_comp->shader_ = &Renderer::outlined_;
+			}
+
+			while (cur_id != entt::null)
+			{
+				select(Enttity{scene_.registry_, cur_id});
+
+				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
 			}
 		}
 
