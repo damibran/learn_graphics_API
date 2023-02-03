@@ -62,15 +62,15 @@ namespace dmbrn
 			ImGui::SetCursorPos(ImVec2(pos.x + 5, pos.y));
 
 			if (ImGui::Selectable("T", current_operation == ImGuizmo::OPERATION::TRANSLATE, 0, {10, 0}) ||
-				ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_W))
+				ImGui::IsWindowFocused() && !ImGui::IsMouseDown(camera_.pan_button) && ImGui::IsKeyPressed(ImGuiKey_W))
 				current_operation = ImGuizmo::OPERATION::TRANSLATE;
 			ImGui::SameLine();
 			if (ImGui::Selectable("R", current_operation == ImGuizmo::OPERATION::ROTATE, 0, {10, 0}) ||
-				ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_E))
+				ImGui::IsWindowFocused() && !ImGui::IsMouseDown(camera_.pan_button) && ImGui::IsKeyPressed(ImGuiKey_E))
 				current_operation = ImGuizmo::OPERATION::ROTATE;
 			ImGui::SameLine();
 			if (ImGui::Selectable("S", current_operation == ImGuizmo::OPERATION::SCALE, 0, {10, 0}) ||
-				ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_R))
+				ImGui::IsWindowFocused() && !ImGui::IsMouseDown(camera_.pan_button) && ImGui::IsKeyPressed(ImGuiKey_R))
 				current_operation = ImGuizmo::OPERATION::SCALE;
 
 			if (this == last_used_focused)

@@ -26,7 +26,7 @@ namespace dmbrn
 			ImGuiContext& g = *GImGui;
 			auto window = ImGui::GetCurrentWindow();
 
-			if (!ImGui::IsWindowFocused() && ImGui::IsMouseClicked(pan_button) && window->ContentRegionRect.Contains(
+			if (!ImGui::IsWindowFocused()&& ImGui::IsWindowHovered() && ImGui::IsMouseClicked(pan_button) && window->ContentRegionRect.Contains(
 				g.IO.MousePos))
 				ImGui::SetWindowFocus();
 

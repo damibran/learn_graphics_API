@@ -38,7 +38,7 @@ namespace dmbrn
 
 
 			const auto bindingDescription = Vertex::getBindingDescription();
-			const auto attributeDescriptions = Vertex::getAttributeDescriptions();
+			const auto attributeDescriptions = Vertex::getAttributeDescriptions()[0];
 
 			const vk::PipelineVertexInputStateCreateInfo vertexInputInfo
 			{

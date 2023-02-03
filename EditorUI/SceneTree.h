@@ -27,7 +27,11 @@ namespace dmbrn
 			}
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
+			{
+				if(selected_)
+					deselect(selected_);
 				selected_ = {scene_.registry_};
+			}
 
 			if (ImGui::BeginPopupContextWindow())
 			{
