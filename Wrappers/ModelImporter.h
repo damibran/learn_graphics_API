@@ -80,7 +80,7 @@ namespace dmbrn
 				aiMesh* mesh = scene->mMeshes[ai_node->mMeshes[i]];
 				std::string mesh_name = name_this + + "." + std::string(mesh->mName.C_Str());
 				aiMaterial* ai_material = scene->mMaterials[mesh->mMaterialIndex];
-				Material* material = DiffusionMaterial::GetMaterialPtr(directory, mesh_name, ai_material);
+				Material* material = DiffusionMaterial::GetMaterialPtr(directory, scene, ai_material);
 
 				aiVector3D translation;
 				aiVector3D orientation;

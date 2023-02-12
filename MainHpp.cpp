@@ -18,7 +18,7 @@ namespace dmbrn
 	{
 	public:
 		HelloTriangleApplication():
-			scene_({1280, 720}),
+			scene_(),
 			editor_ui_(scene_)
 		{
 		}

@@ -13,6 +13,19 @@
 
 namespace dmbrn
 {
+	struct image_data
+	{
+	private:
+		struct Deleter
+		{
+			void operator()(unsigned char* data) const noexcept(noexcept(stbi_image_free)) { stbi_image_free(data); }
+		};
+
+	public:
+		std::unique_ptr<stbi_uc[], Deleter> data;
+		int width, height, comp_per_pix;
+	};
+
 	class Texture // need to cache current layout it makes transitioning clearer 
 	{
 	public:
@@ -30,26 +43,27 @@ namespace dmbrn
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageWithSize(extent, Singletons::physical_device, Singletons::device, Singletons::command_pool, Singletons::graphics_queue);
+			createTextureImageWithSize(extent, Singletons::physical_device, Singletons::device,
+			                           Singletons::command_pool, Singletons::graphics_queue);
 			createTextureImageView(Singletons::device);
 			createTextureSampler(Singletons::device, Singletons::physical_device);
 		}
 
-		Texture(const std::string& texPath) :
-			path(texPath),
+		Texture(const image_data& image_data) :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
 			image_view_(nullptr),
 			sampler_(nullptr)
 		{
-			createTextureImageFromFile(texPath, Singletons::physical_device, Singletons::device, Singletons::command_pool, Singletons::graphics_queue);
+			createTextureImage(image_data, Singletons::physical_device, Singletons::device,
+			                   Singletons::command_pool, Singletons::graphics_queue);
 			createTextureImageView(Singletons::device);
 			createTextureSampler(Singletons::device, Singletons::physical_device);
 		}
 
 		void transitionImageLayoutWithCommandBuffer(const vk::raii::CommandBuffer& command_buffer,
-			vk::ImageLayout oldLayout,
-			vk::ImageLayout newLayout) const
+		                                            vk::ImageLayout oldLayout,
+		                                            vk::ImageLayout newLayout) const
 		{
 			vk::ImageMemoryBarrier barrier
 			{
@@ -64,7 +78,7 @@ namespace dmbrn
 			checkTransitions(barrier, sourceStage, destinationStage, oldLayout, newLayout);
 
 			command_buffer.pipelineBarrier(sourceStage, destinationStage, {}
-			, nullptr, nullptr, barrier);
+			                               , nullptr, nullptr, barrier);
 		}
 
 		const vk::raii::ImageView& getImageView() const
@@ -78,39 +92,31 @@ namespace dmbrn
 		}
 
 	private:
-		std::string path;
 		vk::raii::Image texture_image;
 		vk::raii::DeviceMemory texture_image_memory_;
 		vk::raii::ImageView image_view_;
 		vk::raii::Sampler sampler_;
 
 		void createTextureImageWithSize(vk::Extent2D extent, const PhysicalDevice& physical_device,
-			const LogicalDevice& device, const CommandPool& command_pool,
-			const vk::raii::Queue& graphics_queue)
+		                                const LogicalDevice& device, const CommandPool& command_pool,
+		                                const vk::raii::Queue& graphics_queue)
 		{
 			createImage(device, physical_device, extent, vk::Format::eR8G8B8A8Srgb,
-				vk::ImageTiling::eOptimal,
-				vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment,
-				vk::MemoryPropertyFlagBits::eDeviceLocal,
-				texture_image, texture_image_memory_);
+			            vk::ImageTiling::eOptimal,
+			            vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment,
+			            vk::MemoryPropertyFlagBits::eDeviceLocal,
+			            texture_image, texture_image_memory_);
 
 			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
-				vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eShaderReadOnlyOptimal);
+			                                vk::ImageLayout::eUndefined,
+			                                vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 
-		void createTextureImageFromFile(const std::string& texPath, const PhysicalDevice& physical_device,
-			const LogicalDevice& device, const CommandPool& command_pool,
-			vk::raii::Queue graphics_queue)
+		void createTextureImage(const image_data& image_data, const PhysicalDevice& physical_device,
+		                        const LogicalDevice& device, const CommandPool& command_pool,
+		                        vk::raii::Queue graphics_queue)
 		{
-			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = stbi_load(texPath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-			const vk::DeviceSize imageSize = texWidth * texHeight * 4;
-
-			if (!pixels)
-			{
-				throw std::runtime_error("failed to load texture image!");
-			}
+			const vk::DeviceSize imageSize = image_data.width * image_data.height * image_data.comp_per_pix;
 
 			const vk::BufferCreateInfo bufferInfo
 			{
@@ -126,8 +132,8 @@ namespace dmbrn
 			{
 				memRequirements.size,
 				physical_device.findMemoryType(memRequirements.memoryTypeBits,
-											   vk::MemoryPropertyFlagBits::eHostVisible |
-											   vk::MemoryPropertyFlagBits::eHostCoherent)
+				                               vk::MemoryPropertyFlagBits::eHostVisible |
+				                               vk::MemoryPropertyFlagBits::eHostCoherent)
 			};
 
 			const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(allocInfo);
@@ -135,32 +141,30 @@ namespace dmbrn
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data = stagingBufferMemory.mapMemory(0, imageSize);
-			memcpy(data, pixels, imageSize);
+			memcpy(data, image_data.data.get(), imageSize);
 			stagingBufferMemory.unmapMemory();
 
-			stbi_image_free(pixels);
-
-			createImage(device, physical_device, { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight) },
-				vk::Format::eR8G8B8A8Srgb,
-				vk::ImageTiling::eOptimal,
-				vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
-				vk::MemoryPropertyFlagBits::eDeviceLocal,
-				texture_image, texture_image_memory_);
+			createImage(device, physical_device, {static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height)},
+			            vk::Format::eR8G8B8A8Srgb,  
+			            vk::ImageTiling::eOptimal,
+			            vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+			            vk::MemoryPropertyFlagBits::eDeviceLocal,
+			            texture_image, texture_image_memory_);
 
 			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
-				vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferDstOptimal);
+			                                vk::ImageLayout::eUndefined,
+			                                vk::ImageLayout::eTransferDstOptimal);
 			copyBufferToImage(device, command_pool, graphics_queue, stagingBuffer, texture_image,
-				static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+			                  static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height ));
 			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
-				vk::ImageLayout::eTransferDstOptimal,
-				vk::ImageLayout::eShaderReadOnlyOptimal);
+			                                vk::ImageLayout::eTransferDstOptimal,
+			                                vk::ImageLayout::eShaderReadOnlyOptimal);
 		}
 
 		void createImage(const LogicalDevice& device, const PhysicalDevice& physical_device, vk::Extent2D extent,
-			vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage,
-			vk::MemoryPropertyFlags properties, vk::raii::Image& image,
-			vk::raii::DeviceMemory& imageMemory) const
+		                 vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage,
+		                 vk::MemoryPropertyFlags properties, vk::raii::Image& image,
+		                 vk::raii::DeviceMemory& imageMemory) const
 		{
 			const vk::ImageCreateInfo imageInfo
 			{
@@ -172,7 +176,7 @@ namespace dmbrn
 				{}, vk::ImageLayout::eUndefined
 			};
 
-			image = vk::raii::Image{ device->createImage(imageInfo) };
+			image = vk::raii::Image{device->createImage(imageInfo)};
 
 			const vk::MemoryRequirements memRequirements = image.getMemoryRequirements();
 
@@ -182,15 +186,15 @@ namespace dmbrn
 				physical_device.findMemoryType(memRequirements.memoryTypeBits, properties)
 			};
 
-			imageMemory = vk::raii::DeviceMemory{ device->allocateMemory(allocInfo) };
+			imageMemory = vk::raii::DeviceMemory{device->allocateMemory(allocInfo)};
 
 			image.bindMemory(*imageMemory, 0);
 		}
 
 		void singleTimeTransitionImageLayout(const LogicalDevice& device, const CommandPool& command_pool,
-			const vk::raii::Queue& gragraphics_queue,
-			vk::raii::Image& image, vk::ImageLayout oldLayout,
-			vk::ImageLayout newLayout)
+		                                     const vk::raii::Queue& gragraphics_queue,
+		                                     vk::raii::Image& image, vk::ImageLayout oldLayout,
+		                                     vk::ImageLayout newLayout)
 		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
@@ -207,14 +211,14 @@ namespace dmbrn
 			checkTransitions(barrier, sourceStage, destinationStage, oldLayout, newLayout);
 
 			commandBuffer.pipelineBarrier(sourceStage, destinationStage, {}
-			, nullptr, nullptr, barrier);
+			                              , nullptr, nullptr, barrier);
 
 			command_pool.endSingleTimeCommands(gragraphics_queue, commandBuffer);
 		}
 
 		void checkTransitions(vk::ImageMemoryBarrier& barrier, vk::PipelineStageFlags& sourceStage,
-			vk::PipelineStageFlags& destinationStage, vk::ImageLayout oldLayout,
-			vk::ImageLayout newLayout) const
+		                      vk::PipelineStageFlags& destinationStage, vk::ImageLayout oldLayout,
+		                      vk::ImageLayout newLayout) const
 		{
 			if (oldLayout == vk::ImageLayout::eUndefined)
 			{
@@ -266,8 +270,8 @@ namespace dmbrn
 		}
 
 		void copyBufferToImage(const LogicalDevice& device, const CommandPool& command_pool,
-			vk::raii::Queue graphics_queue,
-			vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
+		                       vk::raii::Queue graphics_queue,
+		                       vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
 		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
@@ -295,7 +299,7 @@ namespace dmbrn
 				vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}
 			};
 
-			image_view_ = vk::raii::ImageView{ device->createImageView(viewInfo) };
+			image_view_ = vk::raii::ImageView{device->createImageView(viewInfo)};
 		}
 
 		void createTextureSampler(const LogicalDevice& device, const PhysicalDevice& physical_device)
@@ -311,7 +315,7 @@ namespace dmbrn
 				VK_FALSE, vk::CompareOp::eAlways, {}, {}, vk::BorderColor::eIntOpaqueBlack,
 				VK_FALSE
 			};
-			sampler_ = vk::raii::Sampler{ device->createSampler(samplerInfo) };
+			sampler_ = vk::raii::Sampler{device->createSampler(samplerInfo)};
 		}
 	};
 }

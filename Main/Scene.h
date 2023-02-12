@@ -12,13 +12,13 @@ namespace dmbrn
 	{
 		friend class SceneTree;
 	public:
-		Scene(ImVec2 size):
+		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
 			scene_root_.addComponent<RelationshipComponent>();
 
-			addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
-			addModel("Models\\Double_Barrel\\Double_Barrel.fbx");
+			addModel("Models\\Char\\Warrok W Kurniawan.fbx");
+			//addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
 		}
 
 		void addNewEntity(const std::string& name = std::string{})
@@ -60,11 +60,11 @@ namespace dmbrn
 		void updatePerObjectData(uint32_t frame)
 		{
 			auto group = registry_.group<ModelComponent>(entt::get<TransformComponent>);
-		
+
 			char* data = ModelComponent::per_object_data_buffer_.map(frame);
-		
+
 			recursivelyUpdateMatrix(scene_root_, glm::mat4{1.0f}, data);
-		
+
 			ModelComponent::per_object_data_buffer_.unMap(frame);
 		}
 
@@ -72,21 +72,21 @@ namespace dmbrn
 		{
 			const TransformComponent& this_trans = ent.getComponent<TransformComponent>();
 			glm::mat4 this_matrix = parent_matrix * this_trans.getMatrix();
-		
+
 			if (const ModelComponent* model = ent.tryGetComponent<ModelComponent>())
 			{
 				auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data_map + model->
 					inGPU_transform_offset);
 				ubo_data->model = this_matrix;
 			}
-		
+
 			auto& cur_comp = ent.getComponent<RelationshipComponent>();
 			auto cur_id = cur_comp.first;
-		
-			while(cur_id!=entt::null)
+
+			while (cur_id != entt::null)
 			{
 				recursivelyUpdateMatrix(Enttity{registry_, cur_id}, this_matrix, data_map);
-		
+
 				cur_id = registry_.get<RelationshipComponent>(cur_id).next;
 			}
 		}

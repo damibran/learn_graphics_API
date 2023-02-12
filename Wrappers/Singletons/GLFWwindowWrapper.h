@@ -12,6 +12,7 @@ namespace dmbrn
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
+
 			window_ = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
 			glfwSetWindowUserPointer(window_, this);
 			glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);

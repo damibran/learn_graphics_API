@@ -17,9 +17,9 @@ namespace dmbrn
 		}
 
 	private:
-		static const int MAX_SETS = 20;
-		static const int MAX_UB = 10;
-		static const int MAX_IMG_SAMPLR = 10;
+		static const int MAX_SETS = 100;
+		static const int MAX_UB = 100;
+		static const int MAX_IMG_SAMPLR = 30;
 
 		static vk::raii::DescriptorPool createDescriptorPool(const LogicalDevice& device)
 		{
