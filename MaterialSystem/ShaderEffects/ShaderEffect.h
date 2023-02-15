@@ -12,11 +12,11 @@ namespace dmbrn
 	{
 		virtual ~ShaderEffect() = default;
 		virtual void draw(int frame, const vk::raii::CommandBuffer& command_buffer,const PerObjectDataBuffer& per_object_data_buffer)=0;
-		void addToRenderQueue(std::tuple<const Mesh*,const Material*, size_t> pair)
+		void addToRenderQueue(std::pair<const Mesh*, size_t> pair)
 		{
 			render_queue.push(pair);
 		}
 	protected:
-		std::queue<std::tuple<const Mesh*, const Material*, size_t>> render_queue;
+		std::queue<std::pair<const Mesh*, size_t>> render_queue;
 	};
 }

@@ -26,9 +26,9 @@ namespace dmbrn
 				stencil_graphics_pipeline_.bindPipeline(command_buffer);
 				stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
 
-				auto& [mesh, material, offset] = render_queue.front();
+				auto& [mesh, offset] = render_queue.front();
 
-				material->bindMaterialData(frame, command_buffer,
+				mesh->material_->bindMaterialData(frame, command_buffer,
 				                           *stencil_graphics_pipeline_.pipeline_layout_);
 
 				mesh->bind(command_buffer);

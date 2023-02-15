@@ -73,7 +73,7 @@ namespace dmbrn
 		Mesh(Mesh&& other) = default;
 		Mesh& operator=(Mesh&& other) = default;
 
-		const Material* material_;
+		const Material* material_=nullptr;
 
 		Mesh(const Material* material, const std::string& full_mesh_name, const aiMesh* mesh)
 		{
@@ -309,7 +309,6 @@ namespace dmbrn
 
 				command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
 			}
-		}* render_data_;
-		;
+		}* render_data_=nullptr;
 	};
 }

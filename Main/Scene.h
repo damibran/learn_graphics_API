@@ -18,7 +18,7 @@ namespace dmbrn
 			scene_root_.addComponent<RelationshipComponent>();
 
 			addModel("Models\\Char\\Warrok W Kurniawan.fbx");
-			//addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
+			addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
 		}
 
 		void addNewEntity(const std::string& name = std::string{})

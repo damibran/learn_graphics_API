@@ -25,10 +25,10 @@ namespace dmbrn
 
 			while (!render_queue.empty())
 			{
-				auto& [mesh, material, offset] = render_queue.front();
+				auto& [mesh, offset] = render_queue.front();
 				render_queue.pop();
 
-				material->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
