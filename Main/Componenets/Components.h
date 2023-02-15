@@ -89,8 +89,8 @@ namespace dmbrn
 
 		ModelComponent() = default;
 
-		ModelComponent(Mesh* mesh, ShaderEffect* shader = nullptr) :
-			mesh(mesh),
+		ModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr) :
+			mesh(std::move(mesh)),
 			shader_(shader),
 			inGPU_transform_offset(per_object_data_buffer_.registerObject())
 		{
@@ -101,7 +101,7 @@ namespace dmbrn
 			return shader_;
 		}
 
-		Mesh* mesh = nullptr;
+		Mesh mesh;
 		ShaderEffect* shader_ = nullptr;
 		size_t inGPU_transform_offset;
 	};

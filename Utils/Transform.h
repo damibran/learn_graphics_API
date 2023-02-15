@@ -15,7 +15,7 @@ namespace dmbrn
 	{
 		std::string name = "";
 		Transform transform{};
-		Mesh* mesh = nullptr;
+		Mesh mesh;
 		std::vector<SceneNode> children;
 	};
 } // namespace dmbrn

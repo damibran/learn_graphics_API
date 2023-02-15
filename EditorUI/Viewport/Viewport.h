@@ -160,7 +160,7 @@ namespace dmbrn
 			{
 				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
 
-				model.getShader()->addToRenderQueue({model.mesh, model.mesh->material_, model.inGPU_transform_offset});
+				model.getShader()->addToRenderQueue({&model.mesh, model.mesh.material_, model.inGPU_transform_offset});
 			}
 
 			Renderer::un_lit_textured.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);

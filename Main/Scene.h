@@ -38,19 +38,19 @@ namespace dmbrn
 			recursivelyAddTo(root, scene_root_);
 		}
 
-		void recursivelyAddTo(const SceneNode& node, Enttity& parent)
+		void recursivelyAddTo(SceneNode& node, Enttity& parent)
 		{
 			Enttity child_ent{registry_, node.name, parent};
 
-			if (node.mesh)
-				child_ent.addComponent<ModelComponent>(node.mesh, &Renderer::un_lit_textured);
+			if (node.mesh.render_data_)
+				child_ent.addComponent<ModelComponent>(std::move(node.mesh), &Renderer::un_lit_textured);
 
 			TransformComponent& t = child_ent.getComponent<TransformComponent>();
 			t.position = node.transform.position;
 			t.rotation = node.transform.rotation;
 			t.scale = node.transform.scale;
 
-			for (const auto& child : node.children)
+			for (auto& child : node.children)
 			{
 				recursivelyAddTo(child, child_ent);
 			}

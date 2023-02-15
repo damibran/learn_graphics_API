@@ -37,7 +37,7 @@ namespace dmbrn
 				                                   *stencil_graphics_pipeline_.pipeline_layout_,
 				                                   offset);
 
-				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
+				mesh->drawIndexed(command_buffer);
 
 				outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
 				outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
@@ -46,7 +46,7 @@ namespace dmbrn
 				                                   *outline_graphics_pipeline_statics_.pipeline_layout_,
 				                                   offset);
 
-				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
+				mesh->drawIndexed(command_buffer);
 
 				render_queue.pop();
 			}

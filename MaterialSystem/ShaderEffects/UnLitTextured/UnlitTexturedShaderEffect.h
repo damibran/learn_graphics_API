@@ -36,7 +36,7 @@ namespace dmbrn
 				                                   *un_lit_graphics_pipeline_statics_.pipeline_layout_,
 				                                   offset);
 
-				command_buffer.drawIndexed(mesh->indices_count, 1, 0, 0, 0);
+				mesh->drawIndexed(command_buffer);
 			}
 		}
 

@@ -91,7 +91,7 @@ namespace dmbrn
 				node.children.push_back(SceneNode{
 					mesh->mName.C_Str(),
 					Transform{toGlm(translation) / 100, toGlm(orientation), toGlm(scale) / 100},
-					Mesh::GetMeshPtr(material, mesh_name, mesh)
+					Mesh(material, mesh_name, mesh)
 				});
 			}
 			// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
