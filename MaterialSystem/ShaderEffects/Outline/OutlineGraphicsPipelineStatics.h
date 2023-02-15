@@ -42,7 +42,7 @@ namespace dmbrn
 
 	private:
 		vk::raii::Pipeline graphics_pipeline_{nullptr}; // RAII violation
-		OutlineShaderEffectRenderData render_data_{{255, 255, 0}, 1.02};
+		OutlineShaderEffectRenderData render_data_{{255, 255, 0}, 1.01};
 
 		vk::raii::PipelineLayout createOutlinePipelineLayout(const LogicalDevice& device)
 		{

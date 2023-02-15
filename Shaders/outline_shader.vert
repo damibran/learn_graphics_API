@@ -20,5 +20,5 @@ layout(set = 3, binding=0) uniform DynamicUBO
 layout(location = 0) in vec3 inPosition;
 
 void main() {
-    gl_Position = scaleMat(outline.scale) *  ubo.proj * ubo.view  * dubo.model * vec4(inPosition, 1.0);
+    gl_Position =  ubo.proj * ubo.view  * dubo.model * scaleMat(outline.scale) * vec4(inPosition, 1.0);
 }
