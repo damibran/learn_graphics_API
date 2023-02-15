@@ -16,8 +16,7 @@ namespace dmbrn
 	class OutlineGraphicsPipelineStatics
 	{
 	public:
-		OutlineGraphicsPipelineStatics():
-			pipeline_layout_(createOutlinePipelineLayout(Singletons::device))
+		OutlineGraphicsPipelineStatics()
 		{
 		}
 
@@ -39,7 +38,7 @@ namespace dmbrn
 				Singletons::device, render_pass, pipeline_layout_);
 		}
 
-		vk::raii::PipelineLayout pipeline_layout_;
+		vk::raii::PipelineLayout pipeline_layout_ = createOutlinePipelineLayout(Singletons::device);
 
 	private:
 		vk::raii::Pipeline graphics_pipeline_{nullptr}; // RAII violation

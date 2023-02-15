@@ -6,11 +6,11 @@
 
 namespace dmbrn
 {
-#ifdef NDEBUG
-	const bool enableValidationLayers = false;
-#else
+//#ifdef NDEBUG
+//	const bool enableValidationLayers = false;
+//#else
 	const bool enableValidationLayers = true;
-#endif
+//#endif
 
 	const std::vector<const char*> validationLayers =
 	{

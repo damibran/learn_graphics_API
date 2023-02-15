@@ -14,7 +14,6 @@ namespace dmbrn
 	{
 	public:
 		UnLitTexturedGraphicsPipelineStatics():
-			pipeline_layout_(createStencilPipelineLayout(Singletons::device)),
 			graphics_pipeline_(nullptr), // RAII violation !!!
 			render_data_(1)
 		{
@@ -45,7 +44,7 @@ namespace dmbrn
 				stencil_op);
 		}
 
-		vk::raii::PipelineLayout pipeline_layout_;
+		vk::raii::PipelineLayout pipeline_layout_ = createStencilPipelineLayout(Singletons::device);
 
 
 	private:
