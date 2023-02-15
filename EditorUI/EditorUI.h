@@ -53,6 +53,7 @@ namespace dmbrn
 			viewport2_.newImGuiFrame(delta_time, imageIndex);
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame();
+			drawStatsWindow();
 
 			endDockSpace();
 
@@ -75,6 +76,19 @@ namespace dmbrn
 		Viewport viewport2_;
 
 		uint32_t current_frame_ = 0;
+
+		void drawStatsWindow()
+		{
+			ImGui::Begin("Stats");
+
+			ImGui::Text(("Number of entities created so far: " + std::to_string(scene_.getCountOfEntities())).c_str());
+
+			ImGui::Text(("Count of unique meshes: " + std::to_string(Mesh::MeshRenderData::getRegistrySize())).c_str());
+
+			ImGui::Text(("Count of unique materials: " + std::to_string(DiffusionMaterial::getRegistrySize())).c_str());
+
+			ImGui::End();
+		}
 
 		void beginDockSpace()
 		{

@@ -57,6 +57,11 @@ namespace dmbrn
 			return &it->second;
 		}
 
+		static size_t getRegistrySize()
+		{
+			return material_registry.size();
+		}
+
 	private:
 		DiffusionMaterial(const std::string& directory, const aiScene* scene,
 		                  const aiMaterial* ai_material) :
@@ -96,9 +101,10 @@ namespace dmbrn
 			}
 
 			if (!res.data.get())
-				throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
+				//throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
+				abort();
 
-			res.comp_per_pix=4; // because req_comp = STBI_rgb_alpha
+			res.comp_per_pix = 4; // because req_comp = STBI_rgb_alpha
 
 			return res;
 		}

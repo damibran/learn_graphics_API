@@ -110,6 +110,11 @@ namespace dmbrn
 				return &it->second;
 			}
 
+			static size_t getRegistrySize()
+			{
+				return registry_.size();
+			}
+
 		private:
 			static inline std::unordered_map<std::vector<aiVector3D>, MeshRenderData> registry_;
 			uint32_t indices_count;
