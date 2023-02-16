@@ -1,4 +1,5 @@
 #version 450
+#extension GL_KHR_glsl : enable
 
 layout(set=1,binding=0) uniform UnLitTexturedUBO
 {

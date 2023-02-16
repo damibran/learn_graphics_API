@@ -8,7 +8,7 @@ namespace dmbrn
 	public:
 		size_t dynamic_aligned_size_ = 256;
 
-		const size_t MAX_OBJECT_COUNT = 20;
+		const size_t MAX_OBJECT_COUNT = 512;
 
 		struct UBODynamicData
 		{

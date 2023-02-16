@@ -15,11 +15,11 @@ namespace std
 	{
 		size_t operator()(const dmbrn::image_data& image_data) const noexcept
 		{
-			std::hash<stbi_uc> hasher;
+			std::hash<unsigned char> hasher;
 			size_t res = 0;
 			for (int i = 0; i < image_data.getLength(); ++i)
 			{
-				res ^= hasher(image_data.data.get()[i]);
+				res ^= hasher(image_data.data[i]);
 			}
 			return res;
 		}
@@ -138,43 +138,69 @@ namespace dmbrn
 
 			if (s.length == 0)
 			{
-				std::array<unsigned char, 3> white = {255, 255, 255};
+				std::array<unsigned char, 4> white = {255, 255, 255, 255};
+
+				res.width = 1;
+				res.height = 1;
+				res.comp_per_pix = 4;
+
+				res.copyData(white.data(), res.getLength());
 
 				stbi_info_from_memory(white.data(), 3, &res.width, &res.height,
-				                                     &res.comp_per_pix);
-
-				res.data.reset(stbi_load_from_memory(white.data(), 3, &res.width, &res.height,
-				                                     &res.comp_per_pix,
-				                                     STBI_rgb_alpha));
+				                      &res.comp_per_pix);
 			}
 			else if (auto dif_texture = scene->GetEmbeddedTexture(s.C_Str()))
 			{
 				if (dif_texture->mHeight == 0)
 				{
-					res.data.reset(stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
-					                                     dif_texture->mWidth, &res.width, &res.height,
-					                                     &res.comp_per_pix,
-					                                     STBI_rgb_alpha));
+					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
+					                                      dif_texture->mWidth, &res.width, &res.height,
+					                                      &res.comp_per_pix,
+					                                      STBI_rgb_alpha);
+					res.comp_per_pix = 4; // because req_comp = STBI_rgb_alpha
+
+					if (!temp)
+						//throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
+						abort();
+
+					res.copyData(temp, res.getLength());
+
+					stbi_image_free(temp);
 				}
 				else
 				{
-					res.data.reset(stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
-					                                     dif_texture->mWidth * dif_texture->mHeight, &res.width,
-					                                     &res.height,
-					                                     &res.comp_per_pix, STBI_rgb_alpha));
+					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
+					                                      dif_texture->mWidth * dif_texture->mHeight, &res.width,
+					                                      &res.height,
+					                                      &res.comp_per_pix, STBI_rgb_alpha);
+
+					res.comp_per_pix = 4; // because req_comp = STBI_rgb_alpha
+
+					if (!temp)
+						//throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
+						abort();
+
+					res.copyData(temp, res.getLength());
+
+					stbi_image_free(temp);
 				}
 			}
 			else
 			{
 				std::string path = directory + "\\" + std::string(s.C_Str());
-				res.data.reset(stbi_load(path.c_str(), &res.width, &res.height, &res.comp_per_pix, STBI_rgb_alpha));
+
+				stbi_uc* temp = stbi_load(path.c_str(), &res.width, &res.height, &res.comp_per_pix, STBI_rgb_alpha);
+				res.comp_per_pix = 4; // because req_comp = STBI_rgb_alpha
+
+				if (!temp)
+					//throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
+					abort();
+
+				res.copyData(temp, res.getLength());
+
+				stbi_image_free(temp);
 			}
 
-			if (!res.data.get())
-				//throw std::runtime_error("failed to load texture image! " + std::string(s.C_Str()));
-				abort();
-
-			res.comp_per_pix = 4; // because req_comp = STBI_rgb_alpha
 
 			return res;
 		}

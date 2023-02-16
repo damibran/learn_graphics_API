@@ -17,8 +17,10 @@ namespace dmbrn
 		{
 			scene_root_.addComponent<RelationshipComponent>();
 
-			addModel("F:\\3D_Scenes\\Sponza\\NewSponza_Main_glTF_002.gltf");
+			//addModel("Models\\Char\\Warrok W Kurniawan.fbx");
+			//addModel("F:\\3D_Scenes\\Sponza\\NewSponza_Main_glTF_002.gltf");
 			//addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
+			addModel("F:\\3D_Scenes\\Bistro\\BistroExterior.fbx");
 		}
 
 		size_t getCountOfEntities()

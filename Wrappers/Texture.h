@@ -24,7 +24,7 @@ namespace dmbrn
 				bool same = true;
 				for (size_t i = 0; i < getLength() && same; ++i)
 				{
-					if (data.get()[i] != other.data.get()[i])
+					if (data[i] != other.data[i])
 						same = false;
 				}
 				return same;
@@ -36,13 +36,14 @@ namespace dmbrn
 			return width * height * comp_per_pix;
 		}
 
-	private:
-		struct Deleter
+		void copyData(const stbi_uc* src, size_t len)
 		{
-			void operator()(unsigned char* data) const noexcept(noexcept(stbi_image_free)) { stbi_image_free(data); }
-		};
+			data.clear();
+			data.insert(data.begin(),src,src+len);
+		}
+
 	public:
-		std::unique_ptr<stbi_uc[], Deleter> data;
+		std::vector<unsigned char> data;
 		int width, height, comp_per_pix;
 	};
 
@@ -136,7 +137,7 @@ namespace dmbrn
 		                        const LogicalDevice& device, const CommandPool& command_pool,
 		                        vk::raii::Queue graphics_queue)
 		{
-			const vk::DeviceSize imageSize = image_data.width * image_data.height * image_data.comp_per_pix;
+			const vk::DeviceSize imageSize = image_data.getLength();
 
 			const vk::BufferCreateInfo bufferInfo
 			{
@@ -161,7 +162,7 @@ namespace dmbrn
 			stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
 			void* data = stagingBufferMemory.mapMemory(0, imageSize);
-			memcpy(data, image_data.data.get(), imageSize);
+			memcpy(data, image_data.data.data(), imageSize);
 			stagingBufferMemory.unmapMemory();
 
 			createImage(device, physical_device, {

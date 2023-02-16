@@ -55,8 +55,14 @@ namespace dmbrn
 			std::string model_name = path.substr(path.find_last_of('\\') + 1,
 			                                     path.find_last_of('.') - path.find_last_of('\\') - 1);
 
+			std::string extension = path.substr(path.find_last_of('.') + 1, path.size() - path.find_last_of('.'));
+
+			float scale_factor = 1.0f;
+			if (extension == "fbx")
+				scale_factor = 1. / 100.;
+
 			// process ASSIMP's root node recursively
-			processNode(res, scene->mRootNode, scene, directory, model_name);
+			processNode(res, scene->mRootNode, scene, directory, model_name, scale_factor);
 
 			res.name = model_name;
 
@@ -67,7 +73,7 @@ namespace dmbrn
 		// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 		static void processNode(SceneNode& node, aiNode* ai_node, const aiScene* scene,
 		                        const std::string& directory,
-		                        const std::string& parentName)
+		                        const std::string& parentName, float scale_factor)
 		{
 			node.name = ai_node->mName.C_Str();
 			std::string name_this = parentName + "." + ai_node->mName.C_Str();
@@ -85,12 +91,12 @@ namespace dmbrn
 				aiVector3D translation;
 				aiVector3D orientation;
 				aiVector3D scale;
-
+				
 				ai_node->mTransformation.Decompose(scale, orientation, translation);
 
 				node.children.push_back(SceneNode{
 					mesh->mName.C_Str(),
-					Transform{toGlm(translation) / 100, toGlm(orientation), toGlm(scale) / 100},
+					Transform{toGlm(translation) * scale_factor, toGlm(orientation), toGlm(scale) * scale_factor},
 					Mesh(material, mesh_name, mesh)
 				});
 			}
@@ -98,7 +104,7 @@ namespace dmbrn
 			for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 			{
 				node.children.push_back(SceneNode{});
-				processNode(node.children.back(), ai_node->mChildren[i], scene, directory, name_this);
+				processNode(node.children.back(), ai_node->mChildren[i], scene, directory, name_this, scale_factor);
 			}
 		}
 	};
