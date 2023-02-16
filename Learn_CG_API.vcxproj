@@ -190,6 +190,7 @@
     <ClInclude Include="Main\Componenets\Components.h" />
     <ClInclude Include="Main\Enttity.h" />
     <ClInclude Include="Main\Scene.h" />
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h" />
     <ClInclude Include="MaterialSystem\Materials\Material.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />

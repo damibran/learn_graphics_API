@@ -1,7 +1,9 @@
 #pragma once
+#include <iomanip>
 #include <assimp/scene.h>
 #include <assimp/texture.h>
 
+#include "DiffusionUniformBuffer.h"
 #include"MaterialSystem/Materials/Material.h"
 #include"MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
 #include"Wrappers/Texture.h"
@@ -9,16 +11,27 @@
 namespace std
 {
 	template <>
-	struct hash<std::vector<stbi_uc>>
+	struct hash<dmbrn::image_data>
 	{
-		size_t operator()(const std::vector<stbi_uc>& vertices) const noexcept
+		size_t operator()(const dmbrn::image_data& image_data) const noexcept
 		{
 			std::hash<stbi_uc> hasher;
 			size_t res = 0;
-			for (const auto& vec : vertices)
+			for (int i = 0; i < image_data.getLength(); ++i)
 			{
-				res ^= hasher(vec);
+				res ^= hasher(image_data.data.get()[i]);
 			}
+			return res;
+		}
+	};
+
+	template <>
+	struct hash<glm::vec4>
+	{
+		size_t operator()(const glm::vec4& vec) const noexcept
+		{
+			std::hash<float> hasher;
+			size_t res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.z) ^ hasher(vec.w);
 			return res;
 		}
 	};
@@ -28,6 +41,29 @@ namespace dmbrn
 {
 	class DiffusionMaterial : public Material
 	{
+		struct MaterialRegistryHandle
+		{
+			image_data diffuse_texture;
+			glm::vec4 base_color;
+
+			struct hash
+			{
+				size_t operator()(const MaterialRegistryHandle& handle) const noexcept
+				{
+					std::hash<image_data> img_hasher;
+					std::hash<glm::vec4> vec_hasher;
+					size_t res = img_hasher(handle.diffuse_texture) ^ vec_hasher(handle.base_color);
+					std::cout << "Hash: " << res << std::endl;
+					return res;
+				}
+			};
+
+			bool operator==(const MaterialRegistryHandle& other) const
+			{
+				return base_color == other.base_color && diffuse_texture == other.diffuse_texture;
+			}
+		};
+
 	public:
 		DiffusionMaterial() = delete;
 
@@ -42,17 +78,20 @@ namespace dmbrn
 		static Material* GetMaterialPtr(const std::string& directory, const aiScene* scene,
 		                                const aiMaterial* ai_material)
 		{
-			image_data image_data = getTexture(aiTextureType_DIFFUSE, 0, directory, scene, ai_material);
+			std::cout << "\nNew mat\n";
+			MaterialRegistryHandle handle = getHandle(directory, scene, ai_material);
 
-			std::vector<unsigned char> temp_vec;
-			std::insert_iterator insrt_it{temp_vec, temp_vec.begin()};
-
-			std::copy_n(image_data.data.get(), image_data.height * image_data.width * image_data.comp_per_pix,
-			            insrt_it);
-
-			auto it = material_registry.find(temp_vec);
+			auto it = material_registry.find(handle);
 			if (it == material_registry.end())
-				it = material_registry.emplace(temp_vec, DiffusionMaterial{directory, scene, ai_material}).first;
+			{
+				std::cout << "didn't found\n";
+				it = material_registry.emplace(std::move(handle), DiffusionMaterial{directory, scene, ai_material}).
+				                       first;
+			}
+			else
+			{
+				std::cout << "found\n";
+			}
 
 			return &it->second;
 		}
@@ -66,8 +105,27 @@ namespace dmbrn
 		DiffusionMaterial(const std::string& directory, const aiScene* scene,
 		                  const aiMaterial* ai_material) :
 			diffuse(getTexture(aiTextureType_DIFFUSE, 0, directory, scene, ai_material)),
-			descriptor_sets_(Singletons::device, diffuse)
+			base_color(Singletons::physical_device, Singletons::device, getBaseColor(ai_material)),
+			descriptor_sets_(Singletons::device, diffuse, base_color)
 		{
+		}
+
+		static MaterialRegistryHandle getHandle(const std::string& directory, const aiScene* scene,
+		                                        const aiMaterial* ai_material)
+		{
+			MaterialRegistryHandle h;
+
+			h.diffuse_texture = getTexture(aiTextureType_DIFFUSE, 0, directory, scene, ai_material);
+			h.base_color = getBaseColor(ai_material);
+
+			return h;
+		}
+
+		static glm::vec4 getBaseColor(const aiMaterial* ai_material)
+		{
+			aiColor4D c;
+			ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, c); // or AI_MATKEY_BASE_COLOR on first glance are same
+			return {c.r, c.g, c.b, c.a};
 		}
 
 		[[nodiscard]] static image_data getTexture(aiTextureType type, int index, const std::string directory,
@@ -77,7 +135,19 @@ namespace dmbrn
 			image_data res;
 			aiString s;
 			ai_material->Get(AI_MATKEY_TEXTURE(type, index), s);
-			if (auto dif_texture = scene->GetEmbeddedTexture(s.C_Str()))
+
+			if (s.length == 0)
+			{
+				std::array<unsigned char, 3> white = {255, 255, 255};
+
+				stbi_info_from_memory(white.data(), 3, &res.width, &res.height,
+				                                     &res.comp_per_pix);
+
+				res.data.reset(stbi_load_from_memory(white.data(), 3, &res.width, &res.height,
+				                                     &res.comp_per_pix,
+				                                     STBI_rgb_alpha));
+			}
+			else if (auto dif_texture = scene->GetEmbeddedTexture(s.C_Str()))
 			{
 				if (dif_texture->mHeight == 0)
 				{
@@ -110,7 +180,9 @@ namespace dmbrn
 		}
 
 		Texture diffuse;
+		DiffusionUniformBuffer base_color;
 		DiffusionDescriptorSets descriptor_sets_;
-		static inline std::unordered_map<std::vector<stbi_uc>, DiffusionMaterial> material_registry;
+		static inline std::unordered_map<MaterialRegistryHandle, DiffusionMaterial, MaterialRegistryHandle::hash>
+		material_registry;
 	};
 }

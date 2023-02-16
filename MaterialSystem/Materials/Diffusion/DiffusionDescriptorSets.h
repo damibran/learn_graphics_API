@@ -14,9 +14,9 @@ namespace dmbrn
 		DiffusionDescriptorSets(DiffusionDescriptorSets&&) = default;
 		DiffusionDescriptorSets& operator=(DiffusionDescriptorSets&&) = default;
 
-		DiffusionDescriptorSets(const LogicalDevice& device, const Texture& texture)
+		DiffusionDescriptorSets(const LogicalDevice& device, const Texture& texture, const DiffusionUniformBuffer& uniform_buffer)
 		{
-			createDescriptorSets(device, texture);
+			createDescriptorSets(device, texture, uniform_buffer);
 		}
 
 		const vk::raii::DescriptorSet& operator[](uint32_t index) const
@@ -32,7 +32,13 @@ namespace dmbrn
 				1, vk::ShaderStageFlagBits::eFragment
 			};
 
-			std::array<vk::DescriptorSetLayoutBinding, 1> bindings = {samplerLayoutBinding};
+			const vk::DescriptorSetLayoutBinding baseColorLayoutBinding
+			{
+				1, vk::DescriptorType::eUniformBuffer,
+				1, vk::ShaderStageFlagBits::eFragment
+			};
+
+			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {samplerLayoutBinding, baseColorLayoutBinding};
 
 			const vk::DescriptorSetLayoutCreateInfo layoutInfo
 			{
@@ -43,14 +49,12 @@ namespace dmbrn
 			return vk::raii::DescriptorSetLayout{device->createDescriptorSetLayout(layoutInfo)};
 		}
 
-		static inline vk::raii::DescriptorSetLayout descriptor_layout_{
-			createDescriptorLayout(Singletons::device)
-		};
+		static inline vk::raii::DescriptorSetLayout descriptor_layout_ = createDescriptorLayout(Singletons::device);
 
 	private:
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
-		void createDescriptorSets(const LogicalDevice& device, const Texture& texture)
+		void createDescriptorSets(const LogicalDevice& device, const Texture& texture, const DiffusionUniformBuffer& uniform_buffer)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *descriptor_layout_);
 
@@ -70,12 +74,21 @@ namespace dmbrn
 					*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
 				};
 
-				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
+				vk::DescriptorBufferInfo buffer_info
+				{
+					*uniform_buffer[i],0,sizeof(DiffusionUniformBuffer::UniformBufferObject)
+				};
+
+				std::array<vk::WriteDescriptorSet, 2> descriptorWrites{};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{
 					*descriptor_sets_[i], 0, 0, vk::DescriptorType::eCombinedImageSampler,
 					imageInfo
+				};
+
+				descriptorWrites[1] = vk::WriteDescriptorSet{
+					*descriptor_sets_[i], 1, 0, vk::DescriptorType::eUniformBuffer,{}, buffer_info
 				};
 
 				device->updateDescriptorSets(descriptorWrites, nullptr);

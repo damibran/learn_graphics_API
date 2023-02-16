@@ -223,5 +223,8 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedUniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

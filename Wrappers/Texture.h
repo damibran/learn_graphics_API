@@ -15,12 +15,32 @@ namespace dmbrn
 {
 	struct image_data
 	{
+		bool operator==(const image_data& other)const
+		{
+			if (width != other.width || height != other.height || comp_per_pix != other.comp_per_pix)
+				return false;
+			else
+			{
+				bool same = true;
+				for (size_t i = 0; i < getLength() && same; ++i)
+				{
+					if (data.get()[i] != other.data.get()[i])
+						same = false;
+				}
+				return same;
+			}
+		}
+
+		size_t getLength() const
+		{
+			return width * height * comp_per_pix;
+		}
+
 	private:
 		struct Deleter
 		{
 			void operator()(unsigned char* data) const noexcept(noexcept(stbi_image_free)) { stbi_image_free(data); }
 		};
-
 	public:
 		std::unique_ptr<stbi_uc[], Deleter> data;
 		int width, height, comp_per_pix;
@@ -144,8 +164,10 @@ namespace dmbrn
 			memcpy(data, image_data.data.get(), imageSize);
 			stagingBufferMemory.unmapMemory();
 
-			createImage(device, physical_device, {static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height)},
-			            vk::Format::eR8G8B8A8Srgb,  
+			createImage(device, physical_device, {
+				            static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height)
+			            },
+			            vk::Format::eR8G8B8A8Srgb,
 			            vk::ImageTiling::eOptimal,
 			            vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
 			            vk::MemoryPropertyFlagBits::eDeviceLocal,
@@ -155,7 +177,7 @@ namespace dmbrn
 			                                vk::ImageLayout::eUndefined,
 			                                vk::ImageLayout::eTransferDstOptimal);
 			copyBufferToImage(device, command_pool, graphics_queue, stagingBuffer, texture_image,
-			                  static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height ));
+			                  static_cast<uint32_t>(image_data.width), static_cast<uint32_t>(image_data.height));
 			singleTimeTransitionImageLayout(device, command_pool, graphics_queue, texture_image,
 			                                vk::ImageLayout::eTransferDstOptimal,
 			                                vk::ImageLayout::eShaderReadOnlyOptimal);
