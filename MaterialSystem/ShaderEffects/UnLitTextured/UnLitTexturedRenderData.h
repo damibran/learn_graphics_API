@@ -1,6 +1,6 @@
 #pragma once
 #include <Wrappers/Singletons/Singletons.h>
-#include "UnLitTexturedUniformBuffer.h"
+#include <Wrappers/UniformBuffer.h>
 
 namespace dmbrn
 {
@@ -20,11 +20,9 @@ namespace dmbrn
 
 		void setValues(int frame, const float& gamma)
 		{
-			auto data = static_cast<UnLitTexturedUniformBuffer::UniformBufferObject*>(uniform_buffers_.
-				getUBMemory(frame).
-				mapMemory(0, sizeof(UnLitTexturedUniformBuffer::UniformBufferObject)));
+			auto data = uniform_buffers_.mapMemory(frame);
 			data->gamma_corr = gamma;
-			uniform_buffers_.getUBMemory(frame).unmapMemory();
+			uniform_buffers_.unmapMemory(frame);
 		}
 
 		void bind(int frame, const vk::raii::CommandBuffer& command_buffer,
@@ -46,7 +44,11 @@ namespace dmbrn
 		}
 
 	private:
-		UnLitTexturedUniformBuffer uniform_buffers_;
+		struct UniformBufferObject
+		{
+			alignas(4) float gamma_corr;
+		};
+		UniformBuffer<UniformBufferObject> uniform_buffers_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorSets(const LogicalDevice& device)
@@ -66,7 +68,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers_[i], 0, sizeof(UnLitTexturedUniformBuffer::UniformBufferObject)
+					*uniform_buffers_[i], 0, sizeof(UniformBufferObject)
 				};
 
 				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};

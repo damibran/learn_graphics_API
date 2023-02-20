@@ -1,6 +1,6 @@
 #pragma once
 #include <Wrappers/Singletons/Singletons.h>
-#include "CameraUniformBuffer.h"
+#include "Wrappers/UniformBuffer.h"
 
 namespace dmbrn
 {
@@ -15,11 +15,10 @@ namespace dmbrn
 
 		void update(int frame, const glm::mat4& view, const glm::mat4& proj)
 		{
-			auto data = static_cast<CameraUniformBuffer::UniformBufferObject*>(uniform_buffers_.getUBMemory(frame).
-				mapMemory(0, sizeof(CameraUniformBuffer::UniformBufferObject)));
+			auto data = uniform_buffers_.mapMemory(frame);
 			data->view = view;
 			data->proj = proj;
-			uniform_buffers_.getUBMemory(frame).unmapMemory();
+			uniform_buffers_.unmapMemory(frame);
 		}
 
 		void bind(int frame, const vk::raii::CommandBuffer& command_buffer)const
@@ -36,7 +35,12 @@ namespace dmbrn
 		}
 
 	private:
-		CameraUniformBuffer uniform_buffers_;
+		struct UniformBufferObject
+		{
+			alignas(16) glm::mat4 view;
+			alignas(16) glm::mat4 proj;
+		};
+		UniformBuffer<UniformBufferObject> uniform_buffers_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorSets(const LogicalDevice& device)
@@ -56,7 +60,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers_[i], 0, sizeof(CameraUniformBuffer::UniformBufferObject)
+					*uniform_buffers_[i], 0, sizeof(UniformBufferObject)
 				};
 
 

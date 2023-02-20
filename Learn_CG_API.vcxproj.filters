@@ -61,9 +61,6 @@
     <ClInclude Include="Wrappers\VertexIndexBuffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Viewport\CameraUniformBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\UtilsFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -211,19 +208,16 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectUniformBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedRenderData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedUniformBuffer.h">
+    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h">
+    <ClInclude Include="Wrappers\UniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
