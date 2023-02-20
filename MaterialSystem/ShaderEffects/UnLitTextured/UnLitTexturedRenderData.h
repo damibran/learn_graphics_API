@@ -8,7 +8,7 @@ namespace dmbrn
 	{
 	public:
 		UnLitTexturedRenderData(const float& gamma):
-			uniform_buffers_{Singletons::physical_device, Singletons::device}
+			uniform_buffers_(Singletons::device.MAX_FRAMES_IN_FLIGHT)
 		{
 			createDescriptorSets(Singletons::device);
 
@@ -20,9 +20,9 @@ namespace dmbrn
 
 		void setValues(int frame, const float& gamma)
 		{
-			auto data = uniform_buffers_.mapMemory(frame);
+			auto data = uniform_buffers_[frame].mapMemory();
 			data->gamma_corr = gamma;
-			uniform_buffers_.unmapMemory(frame);
+			uniform_buffers_[frame].unmapMemory();
 		}
 
 		void bind(int frame, const vk::raii::CommandBuffer& command_buffer,
@@ -48,7 +48,7 @@ namespace dmbrn
 		{
 			alignas(4) float gamma_corr;
 		};
-		UniformBuffer<UniformBufferObject> uniform_buffers_;
+		std::vector<UniformBuffer<UniformBufferObject>> uniform_buffers_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorSets(const LogicalDevice& device)
@@ -68,7 +68,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers_[i], 0, sizeof(UniformBufferObject)
+					**uniform_buffers_[i], 0, sizeof(UniformBufferObject)
 				};
 
 				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};

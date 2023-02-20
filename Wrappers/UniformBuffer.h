@@ -1,6 +1,5 @@
 #pragma once
-#include "Singletons/PhysicalDevice.h"
-#include "Singletons/LogicalDevice.h"
+#include "Wrappers/Singletons/Singletons.h"
 
 
 namespace dmbrn
@@ -15,52 +14,43 @@ namespace dmbrn
 		UniformBuffer(UniformBuffer&&) = default;
 		UniformBuffer& operator=(UniformBuffer&&) = default;
 
-		UniformBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device)
+		UniformBuffer():
+			uniform_buffer_(Singletons::device->createBuffer(
+				vk::BufferCreateInfo{
+					{}, sizeof(UniformBufferObject), vk::BufferUsageFlagBits::eUniformBuffer
+				}
+			)),
+			uniform_buffer_memory(Singletons::device->allocateMemory(
+				vk::MemoryAllocateInfo{
+					uniform_buffer_.getMemoryRequirements().size,
+					Singletons::physical_device.findMemoryType(
+						uniform_buffer_.getMemoryRequirements().memoryTypeBits,
+						vk::MemoryPropertyFlagBits::eHostVisible |
+						vk::MemoryPropertyFlagBits::eHostCoherent)
+				}
+			))
 		{
-			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
-
-			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
-			{
-				uniform_buffers_.push_back(
-					device->createBuffer(
-						vk::BufferCreateInfo{
-							{}, bufferSize, vk::BufferUsageFlagBits::eUniformBuffer
-						}
-					));
-
-				uniform_buffers_memory.push_back(
-					device->allocateMemory(
-						vk::MemoryAllocateInfo{
-							uniform_buffers_[i].getMemoryRequirements().size,
-							physical_device.findMemoryType(
-								uniform_buffers_[i].getMemoryRequirements().memoryTypeBits,
-								vk::MemoryPropertyFlagBits::eHostVisible |
-								vk::MemoryPropertyFlagBits::eHostCoherent)
-						}
-					));
-
-				uniform_buffers_[i].bindMemory(*uniform_buffers_memory[i], 0);
-			}
+			uniform_buffer_.bindMemory(*uniform_buffer_memory, 0);
 		}
 
-		UniformBufferObject* mapMemory(int index)
+		UniformBufferObject* mapMemory()
 		{
-			return static_cast<UniformBufferObject*>(uniform_buffers_memory[index].mapMemory(
+			return static_cast<UniformBufferObject*>(uniform_buffer_memory.mapMemory(
 				0, sizeof(UniformBufferObject)));
 		}
 
-		void unmapMemory(int index)
+		void unmapMemory()
 		{
-			uniform_buffers_memory[index].unmapMemory();
+			uniform_buffer_memory.unmapMemory();
 		}
 
-		const vk::raii::Buffer& operator[](int index) const
+		vk::raii::Buffer& operator*()
 		{
-			return uniform_buffers_[index];
+			return uniform_buffer_;
 		}
 
 	private:
-		std::vector<vk::raii::Buffer> uniform_buffers_;
-		std::vector<vk::raii::DeviceMemory> uniform_buffers_memory;
+		vk::raii::Buffer uniform_buffer_;
+		vk::raii::DeviceMemory uniform_buffer_memory;
 	};
 };

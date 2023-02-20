@@ -8,17 +8,17 @@ namespace dmbrn
 	{
 	public:
 		CameraRenderData():
-			uniform_buffers_{Singletons::physical_device, Singletons::device}
+			uniform_buffers_(Singletons::device.MAX_FRAMES_IN_FLIGHT)
 		{
 			createDescriptorSets(Singletons::device);
 		}
 
 		void update(int frame, const glm::mat4& view, const glm::mat4& proj)
 		{
-			auto data = uniform_buffers_.mapMemory(frame);
+			auto data = uniform_buffers_[frame].mapMemory();
 			data->view = view;
 			data->proj = proj;
-			uniform_buffers_.unmapMemory(frame);
+			uniform_buffers_[frame].unmapMemory();
 		}
 
 		void bind(int frame, const vk::raii::CommandBuffer& command_buffer)const
@@ -40,7 +40,7 @@ namespace dmbrn
 			alignas(16) glm::mat4 view;
 			alignas(16) glm::mat4 proj;
 		};
-		UniformBuffer<UniformBufferObject> uniform_buffers_;
+		std::vector<UniformBuffer<UniformBufferObject>> uniform_buffers_;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
 		void createDescriptorSets(const LogicalDevice& device)
@@ -60,7 +60,7 @@ namespace dmbrn
 			{
 				vk::DescriptorBufferInfo bufferInfo
 				{
-					*uniform_buffers_[i], 0, sizeof(UniformBufferObject)
+					**uniform_buffers_[i], 0, sizeof(UniformBufferObject)
 				};
 
 
