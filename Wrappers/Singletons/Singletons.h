@@ -14,7 +14,7 @@ namespace dmbrn
 	{
 		Singletons() = delete;
 
-		static inline GLFWwindowWrapper window{1280, 720};
+		static inline GLFWwindowWrapper window;
 		static inline vk::raii::Context context;
 		static inline Instance instance{context};
 		static inline Surface surface{instance, window};

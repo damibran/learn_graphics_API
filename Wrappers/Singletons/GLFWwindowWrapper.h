@@ -6,14 +6,15 @@ namespace dmbrn
 	class GLFWwindowWrapper
 	{
 	public:
-		GLFWwindowWrapper(uint32_t width, uint32_t height)
+		GLFWwindowWrapper()
 		{
 			glfwInit();
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_MAXIMIZED,GLFW_TRUE);
 
-
-			window_ = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+			window_ = glfwCreateWindow(1280, 720, "Vulkan", nullptr, nullptr);
+			
 			glfwSetWindowUserPointer(window_, this);
 			glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);
 		}
