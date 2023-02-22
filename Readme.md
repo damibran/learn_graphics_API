@@ -2,6 +2,8 @@ This is a repository of my project for bachelor final qualifying work at univers
 
 Written in C++ with Vulkan-Hpp. With Entty, Assimp, ImGui and ImGuizmo.
 
+Showcase video:
+
 [![Showcase video](http://img.youtube.com/vi/cPJQotAaOJQ/0.jpg)](http://www.youtube.com/watch?v=cPJQotAaOJQ "Showcase")
 
 Features:
