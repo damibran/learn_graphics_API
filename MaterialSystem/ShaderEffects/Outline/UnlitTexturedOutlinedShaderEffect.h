@@ -21,15 +21,11 @@ namespace dmbrn
 		void draw(int frame, const vk::raii::CommandBuffer& command_buffer,
 		          const PerObjectDataBuffer& per_object_data_buffer) override
 		{
-			while (!render_queue.empty())
+			stencil_graphics_pipeline_.bindPipeline(command_buffer);
+			stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
+			for (auto& [mesh, offset] : render_queue)
 			{
-				stencil_graphics_pipeline_.bindPipeline(command_buffer);
-				stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
-
-				auto& [mesh, offset] = render_queue.front();
-
-				mesh->material_->bindMaterialData(frame, command_buffer,
-				                           *stencil_graphics_pipeline_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *stencil_graphics_pipeline_.pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
@@ -38,18 +34,19 @@ namespace dmbrn
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
+			}
 
-				outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
-				outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
-
+			outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
+			outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
+			for (auto& [mesh, offset] : render_queue)
+			{
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
 				                                   *outline_graphics_pipeline_statics_.pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
-
-				render_queue.pop();
 			}
+			render_queue.clear();
 		}
 
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)

@@ -23,10 +23,7 @@ namespace dmbrn
 			un_lit_graphics_pipeline_statics_.bindPipeline(command_buffer);
 			un_lit_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
 
-			while (!render_queue.empty())
-			{
-				auto& [mesh, offset] = render_queue.front();
-				render_queue.pop();
+			for(auto& [mesh, offset]: render_queue){
 
 				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
 
@@ -38,6 +35,8 @@ namespace dmbrn
 
 				mesh->drawIndexed(command_buffer);
 			}
+
+			render_queue.clear();
 		}
 
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)
