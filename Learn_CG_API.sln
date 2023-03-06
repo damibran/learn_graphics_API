@@ -5,6 +5,11 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Learn_CG_API", "Learn_CG_API.vcxproj", "{9BECD208-19A4-40BB-8AD9-FCF2B0621ACE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A0DA46D-A279-46DA-BD9D-1D2C1AFA45CF}"
+	ProjectSection(SolutionItems) = preProject
+		..\imgui\imgui_demo.cpp = ..\imgui\imgui_demo.cpp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

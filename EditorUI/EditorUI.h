@@ -44,7 +44,7 @@ namespace dmbrn
 
 			beginDockSpace();
 
-			//showAppMainMenuBar();
+			showAppMainMenuBar();
 			ImGui::ShowDemoWindow();
 
 			scene_.updatePerObjectData(current_frame_);
@@ -56,6 +56,9 @@ namespace dmbrn
 			drawStatsWindow();
 
 			endDockSpace();
+
+			if(show_model_import)
+				showImportWindow();
 
 			render(Singletons::device, frame, imageIndex);
 
@@ -74,6 +77,8 @@ namespace dmbrn
 		Inspector inspector_;
 		Viewport viewport_;
 		Viewport viewport2_;
+		bool show_model_import = false;
+		std::string model_path;
 
 		uint32_t current_frame_ = 0;
 
@@ -86,6 +91,32 @@ namespace dmbrn
 			ImGui::Text(("Count of unique meshes: " + std::to_string(Mesh::MeshRenderData::getRegistrySize())).c_str());
 
 			ImGui::Text(("Count of unique materials: " + std::to_string(DiffusionMaterial::getRegistrySize())).c_str());
+
+			ImGui::End();
+		}
+
+		void showImportWindow()
+		{
+			if (!ImGui::Begin("Model import", &show_model_import))
+			{
+				ImGui::End();
+				return;
+			}
+
+			char buf[256]={0};
+
+			strcpy_s(buf, sizeof(buf), model_path.c_str());
+
+			if (ImGui::InputText("Model path", buf, sizeof(buf)))
+			{
+				model_path = std::string(buf);
+			}
+
+			if(ImGui::Button("Import"))
+			{
+				scene_.addModel(model_path);
+				show_model_import = false;
+			}
 
 			ImGui::End();
 		}
@@ -154,7 +185,7 @@ namespace dmbrn
 			ImGui::End();
 		}
 
-		static void showAppMainMenuBar()
+		void showAppMainMenuBar()
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
@@ -168,8 +199,10 @@ namespace dmbrn
 					}
 					ImGui::EndMenu();
 				}
-				if (ImGui::BeginMenu("Edit"))
+				if (ImGui::BeginMenu("Scene"))
 				{
+					ImGui::MenuItem("Import model",NULL, &show_model_import);
+
 					ImGui::EndMenu();
 				}
 				ImGui::EndMainMenuBar();
