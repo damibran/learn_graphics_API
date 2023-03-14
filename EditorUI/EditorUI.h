@@ -114,7 +114,7 @@ namespace dmbrn
 
 			if(ImGui::Button("Import"))
 			{
-				scene_.addModel(model_path);
+				//scene_.addModel(model_path);
 				show_model_import = false;
 			}
 

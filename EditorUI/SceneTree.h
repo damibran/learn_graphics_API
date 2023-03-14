@@ -36,7 +36,7 @@ namespace dmbrn
 			if (ImGui::BeginPopupContextWindow())
 			{
 				if (ImGui::MenuItem("Create Empty Entity"))
-					scene_.addNewEntity("Empty Entity");
+					scene_.addNewEntityToRoot("Empty Entity");
 
 				ImGui::EndPopup();
 			}

@@ -230,6 +230,7 @@
     <ClInclude Include="Wrappers\Singletons\PhysicalDevice.h" />
     <ClInclude Include="Wrappers\Singletons\Singletons.h" />
     <ClInclude Include="Wrappers\Singletons\Surface.h" />
+    <ClInclude Include="Wrappers\SkeletalMesh.h" />
     <ClInclude Include="Wrappers\Surface.h" />
     <ClInclude Include="Wrappers\SwapChain.h" />
     <ClInclude Include="Wrappers\Texture.h" />

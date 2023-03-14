@@ -158,7 +158,7 @@ namespace dmbrn
 
 			for (auto entity : group)
 			{
-				auto [model,transform] = group.get<ModelComponent, TransformComponent>(entity);
+				auto [model,_] = group.get<ModelComponent, TransformComponent>(entity);
 
 				model.getShader()->addToRenderQueue({&model.mesh, model.inGPU_transform_offset});
 			}

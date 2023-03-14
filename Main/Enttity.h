@@ -18,20 +18,17 @@ namespace dmbrn
 		}
 
 		Enttity(entt::registry& registry, const std::string& name):
-			registry_(&registry)
-		{
-			registry_->emplace<TagComponent>(entityID_, name);
-			registry_->emplace<TransformComponent>(entityID_);
-		}
-
-		Enttity(entt::registry& registry, const std::string& name, Enttity& parent):
 			registry_(&registry),
 			entityID_(registry_->create())
 		{
 			registry_->emplace<TagComponent>(entityID_, name);
 			registry_->emplace<TransformComponent>(entityID_);
+			registry_->emplace<RelationshipComponent>(entityID_);
+		}
 
-			addComponent<RelationshipComponent>();
+		Enttity(entt::registry& registry, const std::string& name, Enttity& parent):
+			Enttity(registry, name)
+		{
 			auto& cur_comp = getComponent<RelationshipComponent>();
 			cur_comp.parent = parent;
 
