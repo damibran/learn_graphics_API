@@ -144,7 +144,7 @@ namespace dmbrn
 						aiVertexWeight vw = bone->mWeights[j];
 
 						unsigned int cur_vrtx_bone_count = vertex_bone_count[vw.mVertexId]++;
-						// save values for this bone move to next after
+						// save values for this bone move to next after ((++))
 
 						vertices[vw.mVertexId].bone_IDs[cur_vrtx_bone_count] = j;
 						vertices[vw.mVertexId].bone_weights[cur_vrtx_bone_count] = vw.mWeight;

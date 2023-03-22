@@ -17,7 +17,9 @@ namespace dmbrn
 		{
 			ModelImporter::Import(*this, false, "Models\\SkinTest\\RiggedSimple.dae");
 
-			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar.fbx");
+			ModelImporter::Import(*this, false, "Models\\Char\\TwoChar.fbx");
+
+			//ModelImporter::Import(*this, false,"Models\\Char\\Warrok W Kurniawan.fbx");
 
 			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
 			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
@@ -116,7 +118,7 @@ namespace dmbrn
 			{
 				Assimp::Importer importer;
 				const aiScene* ai_scene = importer.ReadFile(
-					path, aiProcess_Triangulate | aiProcess_FlipUVs | with_bones ? aiProcess_PopulateArmatureData : 0);
+					path, aiProcess_Triangulate | aiProcess_FlipUVs | (with_bones ? aiProcess_PopulateArmatureData : 0));
 				//| aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
 
 				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
@@ -133,8 +135,9 @@ namespace dmbrn
 
 				with_bones_ = with_bones;
 
+				scale_factor_ = 1.0f;
 				if (extension == "fbx")
-					scale_factor_ = 1. / 100.;
+					scale_factor_ = 0.01;
 
 
 				// process ASSIMP's root node recursively
@@ -214,9 +217,9 @@ namespace dmbrn
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
-							trans.position = toGlm(translation);
+							trans.position = toGlm(translation) * (scale_factor_);
 							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale);
+							trans.scale = toGlm(scale)*(scale_factor_);
 
 							Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
