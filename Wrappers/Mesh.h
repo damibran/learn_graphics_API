@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "Utils/StdUtils.h"
+
 #include <assimp/material.h>
 #include <assimp/mesh.h>
 #include<glm/glm.hpp>
@@ -11,56 +13,6 @@
 #include "Texture.h"
 #include "Vertex.h"
 #include "Wrappers/HostLocalBuffer.h"
-
-namespace std
-{
-	template <>
-	struct hash<aiVector3D>
-	{
-		size_t operator()(const aiVector3D& vec) const noexcept
-		{
-			std::hash<float> hasher;
-			size_t res = 0;
-			res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.z);
-
-			return res;
-		}
-	};
-
-	template <>
-	struct hash<std::vector<aiVector3D>>
-	{
-		size_t operator()(const std::vector<aiVector3D>& vertices) const noexcept
-		{
-			std::hash<aiVector3D> hasher;
-			size_t res = 0;
-			for (const auto& vec : vertices)
-			{
-				res ^= hasher(vec);
-			}
-			return res;
-		}
-	};
-
-	template <>
-	struct equal_to<std::vector<aiVector3D>>
-	{
-		bool operator()(const std::vector<aiVector3D>& lhs, const std::vector<aiVector3D>& rhs) const
-		{
-			if (lhs.size() != rhs.size())
-				return false;
-
-			bool same = true;
-			for (size_t i = 0; i < lhs.size() && same; ++i)
-			{
-				if (lhs[i] != rhs[i])
-					same = false;
-			}
-
-			return same;
-		}
-	};
-}
 
 namespace dmbrn
 {

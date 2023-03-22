@@ -3,39 +3,12 @@
 #include <assimp/scene.h>
 #include <assimp/texture.h>
 
+#include "Utils/StdUtils.h"
+
 #include "DiffusionUniformBuffer.h"
 #include"MaterialSystem/Materials/Material.h"
 #include"MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
 #include"Wrappers/Texture.h"
-
-namespace std
-{
-	template <>
-	struct hash<dmbrn::image_data>
-	{
-		size_t operator()(const dmbrn::image_data& image_data) const noexcept
-		{
-			std::hash<unsigned char> hasher;
-			size_t res = 0;
-			for (int i = 0; i < image_data.getLength(); ++i)
-			{
-				res ^= hasher(image_data.data[i]);
-			}
-			return res;
-		}
-	};
-
-	template <>
-	struct hash<glm::vec4>
-	{
-		size_t operator()(const glm::vec4& vec) const noexcept
-		{
-			std::hash<float> hasher;
-			size_t res = hasher(vec.x) ^ hasher(vec.y) ^ hasher(vec.z) ^ hasher(vec.w);
-			return res;
-		}
-	};
-}
 
 namespace dmbrn
 {

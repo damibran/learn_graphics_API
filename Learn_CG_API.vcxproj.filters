@@ -229,5 +229,11 @@
     <ClInclude Include="Wrappers\BonedVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\StdUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\image_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
