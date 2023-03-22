@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <assimp/material.h>
 #include <assimp/mesh.h>
