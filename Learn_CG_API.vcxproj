@@ -199,6 +199,7 @@
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\ShaderEffect.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedRenderData.h" />
+    <ClInclude Include="Wrappers\HostLocalBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
     <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />

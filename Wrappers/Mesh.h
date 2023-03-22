@@ -9,6 +9,7 @@
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "Texture.h"
 #include "Vertex.h"
+#include "Wrappers/HostLocalBuffer.h"
 
 namespace std
 {
@@ -119,25 +120,18 @@ namespace dmbrn
 			static inline std::unordered_map<std::vector<aiVector3D>, MeshRenderData> registry_;
 			uint32_t indices_count;
 			std::vector<std::string> use_this_mesh_;
-			vk::raii::Buffer vertex_buffer_;
-			vk::raii::Buffer index_buffer_;
-			vk::raii::DeviceMemory vertex_buffer_memory_;
-			vk::raii::DeviceMemory index_buffer_memory_;
+			HostLocalBuffer<Vertex> vertex_buffer_;
+			HostLocalBuffer<uint16_t> index_buffer_;
 
 			MeshRenderData(const std::string& mesh_name,const aiMesh* mesh):
-				use_this_mesh_({mesh_name}),
-				vertex_buffer_(nullptr),
-				index_buffer_(nullptr),
-				vertex_buffer_memory_(nullptr),
-				index_buffer_memory_(nullptr)
+				use_this_mesh_({mesh_name})
 			{
 				auto [vertices,indices] = getDataFromMesh(mesh);
 				indices_count = indices.size();
 
-				createVertexBuffer(vertices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
-				                   Singletons::graphics_queue);
-				createIndexBuffer(indices, Singletons::physical_device, Singletons::device, Singletons::command_pool,
-				                  Singletons::graphics_queue);
+				vertex_buffer_ = HostLocalBuffer(vertices, vk::BufferUsageFlagBits::eVertexBuffer);
+
+				index_buffer_ = HostLocalBuffer(indices,vk::BufferUsageFlagBits::eIndexBuffer);
 			}
 
 			std::pair<std::vector<Vertex>, std::vector<uint16_t>> getDataFromMesh(const aiMesh* mesh)
@@ -200,119 +194,11 @@ namespace dmbrn
 				return {vertices, indices};
 			}
 
-			// initializes all the buffer objects/arrays
-			void createVertexBuffer(const std::vector<Vertex>& vertices, const PhysicalDevice& physical_device,
-			                        const LogicalDevice& device,
-			                        const CommandPool& command_pool, const vk::raii::Queue& gragraphics_queue)
-			{
-				const vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-				vk::BufferCreateInfo bufferInfo
-				{
-					{}, bufferSize, vk::BufferUsageFlagBits::eTransferSrc,
-					vk::SharingMode::eExclusive
-				};
-				vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
-
-				const vk::MemoryAllocateInfo memory_allocate_info
-				{
-					stagingBuffer.getMemoryRequirements().size,
-					physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits,
-					                               vk::MemoryPropertyFlagBits::eHostVisible |
-					                               vk::MemoryPropertyFlagBits::eHostCoherent)
-				};
-
-				const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
-
-				stagingBuffer.bindMemory(*stagingBufferMemory, 0);
-
-				void* data;
-				data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-				memcpy(data, vertices.data(), bufferSize);
-				stagingBufferMemory.unmapMemory();
-
-				bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
-				vertex_buffer_ = vk::raii::Buffer{device->createBuffer(bufferInfo)};
-
-				const auto allocate_info = vk::MemoryAllocateInfo
-				{
-					vertex_buffer_.getMemoryRequirements().size,
-					physical_device.findMemoryType(vertex_buffer_.getMemoryRequirements().memoryTypeBits,
-					                               vk::MemoryPropertyFlagBits::eDeviceLocal)
-				};
-
-				vertex_buffer_memory_ = vk::raii::DeviceMemory{device->allocateMemory(allocate_info)};
-
-				vertex_buffer_.bindMemory(*vertex_buffer_memory_, 0);
-
-				copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, vertex_buffer_, bufferSize);
-			}
-
-			void createIndexBuffer(const std::vector<uint16_t>& indices, const PhysicalDevice& physical_device,
-			                       const LogicalDevice& device,
-			                       const CommandPool& command_pool, vk::raii::Queue gragraphics_queue)
-			{
-				const vk::DeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-				vk::BufferCreateInfo bufferInfo
-				{
-					{}, bufferSize, vk::BufferUsageFlagBits::eTransferSrc,
-					vk::SharingMode::eExclusive
-				};
-				vk::raii::Buffer stagingBuffer = device->createBuffer(bufferInfo);
-
-				const vk::MemoryAllocateInfo memory_allocate_info
-				{
-					stagingBuffer.getMemoryRequirements().size,
-					physical_device.findMemoryType(stagingBuffer.getMemoryRequirements().memoryTypeBits,
-					                               vk::MemoryPropertyFlagBits::eHostVisible |
-					                               vk::MemoryPropertyFlagBits::eHostCoherent)
-				};
-
-				const vk::raii::DeviceMemory stagingBufferMemory = device->allocateMemory(memory_allocate_info);
-
-				stagingBuffer.bindMemory(*stagingBufferMemory, 0);
-
-				void* data = stagingBufferMemory.mapMemory(0, bufferSize, {});
-				memcpy(data, indices.data(), bufferSize);
-				stagingBufferMemory.unmapMemory();
-
-				bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
-				index_buffer_ = vk::raii::Buffer{device->createBuffer(bufferInfo)};
-
-				const vk::MemoryAllocateInfo allocate_info
-				{
-					index_buffer_.getMemoryRequirements().size,
-					physical_device.findMemoryType(index_buffer_.getMemoryRequirements().memoryTypeBits,
-					                               vk::MemoryPropertyFlagBits::eDeviceLocal)
-				};
-				index_buffer_memory_ = vk::raii::DeviceMemory{device->allocateMemory(allocate_info)};
-
-				index_buffer_.bindMemory(*index_buffer_memory_, 0);
-
-				copyBuffer(device, command_pool, gragraphics_queue, stagingBuffer, index_buffer_, bufferSize);
-			}
-
-			void copyBuffer(const LogicalDevice& device, const CommandPool& command_pool,
-			                vk::raii::Queue gragraphics_queue,
-			                vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size)
-			{
-				vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
-
-				const vk::BufferCopy copyRegion
-				{
-					0, 0, size
-				};
-				commandBuffer.copyBuffer(*srcBuffer, *dstBuffer, copyRegion);
-
-				command_pool.endSingleTimeCommands(gragraphics_queue, commandBuffer);
-			}
-
 			void bind(const vk::raii::CommandBuffer& command_buffer) const
 			{
-				command_buffer.bindVertexBuffers(0, *vertex_buffer_, {0});
+				command_buffer.bindVertexBuffers(0, vertex_buffer_.getBuffer(), {0});
 
-				command_buffer.bindIndexBuffer(*index_buffer_, 0, vk::IndexType::eUint16);
+				command_buffer.bindIndexBuffer(index_buffer_.getBuffer(), 0, vk::IndexType::eUint16);
 			}
 		}* render_data_=nullptr;
 	};
