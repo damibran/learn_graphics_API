@@ -12,7 +12,7 @@ namespace dmbrn
 		{
 		}
 
-		void newImGuiFrame()
+		void newImGuiFrame(uint32_t frame)
 		{
 			ImGui::Begin("Inspector");
 
@@ -20,7 +20,7 @@ namespace dmbrn
 			{
 				Enttity& entity = scene_tree_.getSelected();
 
-				drawComponents(entity);
+				drawComponents(entity,frame);
 
 				if (ImGui::Button("Add Component"))
 					ImGui::OpenPopup("Add Component");
@@ -43,7 +43,7 @@ namespace dmbrn
 	private:
 		SceneTree& scene_tree_;
 
-		void drawComponents(Enttity& entity)
+		void drawComponents(Enttity& entity, uint32_t frame)
 		{
 			if (auto* comp = entity.tryGetComponent<TagComponent>())
 			{
@@ -60,9 +60,17 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					drawVec3Control("Translation", comp->position);
-					drawVec3Control("Rotation", comp->rotation);
-					drawVec3Control("Scale", comp->scale, 1.0f);
+					bool edited=false;
+					if(drawVec3Control("Translation", comp->position))
+						edited = true;
+					if(drawVec3Control("Rotation", comp->rotation))
+						edited = true;
+					if(drawVec3Control("Scale", comp->scale, 1.0f))
+						edited = true;
+
+					if(edited)
+						entity.markTransformAsEdited(frame);
+
 					ImGui::TreePop();
 				}
 			}
@@ -89,11 +97,12 @@ namespace dmbrn
 			}
 		}
 
-		static void drawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,
+		static bool drawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,
 		                            float columnWidth = 100.0f)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
+			bool edited = false;
 
 			ImGui::PushID(label.c_str());
 
@@ -118,7 +127,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+			if(ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited=true;
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
@@ -132,7 +142,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+			if(ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited=true;
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
@@ -146,7 +157,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+			if(ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited=true;
 			ImGui::PopItemWidth();
 
 			ImGui::PopStyleVar();
@@ -154,6 +166,8 @@ namespace dmbrn
 			ImGui::Columns(1);
 
 			ImGui::PopID();
+
+			return edited;
 		}
 	};
 }

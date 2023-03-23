@@ -45,6 +45,11 @@ namespace dmbrn
 		glm::vec3 rotation; // pitch ,yaw, roll in degrees
 		glm::vec3 scale;
 
+		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> dirty;
+		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> edited;
+
+		glm::mat4 globalTransformMatrix = glm::mat4(1.0f);
+
 		TransformComponent(glm::vec3 pos = {0, 0, 0},
 		                   glm::vec3 rot = {0, 0, 0},
 		                   glm::vec3 scale = {1, 1, 1}) :
@@ -52,6 +57,11 @@ namespace dmbrn
 			rotation(rot),
 			scale(scale)
 		{
+			for (size_t i = 0; i < LogicalDevice::MAX_FRAMES_IN_FLIGHT; ++i)
+			{
+				edited[i] = true;
+				dirty[i] = false;
+			}
 		}
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
@@ -81,6 +91,28 @@ namespace dmbrn
 		{
 			return rotation;
 		}
+
+		void markAsEdited()
+		{
+			for (int i = 0; i < LogicalDevice::MAX_FRAMES_IN_FLIGHT; ++i)
+				edited[i] = true;
+		}
+
+		void markAsDirty()
+		{
+			for (int i = 0; i < LogicalDevice::MAX_FRAMES_IN_FLIGHT; ++i)
+				dirty[i] = true;
+		}
+
+		bool isDirtyForFrame(uint32_t frame)const
+		{
+			return dirty[frame];
+		}
+
+		bool isEditedForFrame(uint32_t frame)const
+		{
+			return edited[frame];
+		}
 	};
 
 	struct ModelComponent
@@ -103,6 +135,7 @@ namespace dmbrn
 
 		Mesh mesh;
 		ShaderEffect* shader_ = nullptr;
+		bool need_GPU_state_update = true;
 		size_t inGPU_transform_offset;
 	};
 
@@ -113,14 +146,14 @@ namespace dmbrn
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
-			proj_[1][1] *=-1;
+			proj_[1][1] *= -1;
 		}
 
 		void changeAspect(ImVec2 size)
 		{
 			proj_ = glm::perspective(glm::radians(45.0f),
 			                         size.x / size.y, 0.1f, 500.0f);
-			proj_[1][1] *=-1;
+			proj_[1][1] *= -1;
 		}
 
 		glm::mat4 getMatrix() const

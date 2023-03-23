@@ -47,18 +47,19 @@ namespace dmbrn
 			showAppMainMenuBar();
 			ImGui::ShowDemoWindow();
 
-			scene_.updatePerObjectData(current_frame_);
-
-			viewport_.newImGuiFrame(delta_time, imageIndex);
-			viewport2_.newImGuiFrame(delta_time, imageIndex);
+			viewport_.newImGuiFrame(delta_time, current_frame_, imageIndex);
+			viewport2_.newImGuiFrame(delta_time, current_frame_,imageIndex);
 			scene_tree_.newImGuiFrame();
-			inspector_.newImGuiFrame();
+			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
 
 			endDockSpace();
 
 			if(show_model_import)
 				showImportWindow();
+
+			scene_.updateGlobalTransforms(current_frame_);
+			scene_.updatePerObjectData(current_frame_);
 
 			render(Singletons::device, frame, imageIndex);
 

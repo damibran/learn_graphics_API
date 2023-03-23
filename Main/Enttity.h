@@ -98,13 +98,16 @@ namespace dmbrn
 			return registry_->try_get<T>(entityID_);
 		}
 
-		std::pair<glm::mat4, glm::mat4> getParentAndThisWorldTransform() const
+		void markTransformAsEdited(uint32_t frame) // we make it edited for this node and dirty all the way to the root
 		{
-			const RelationshipComponent& this_relation = getComponent<RelationshipComponent>();
-			glm::mat4 parent_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform();
-			glm::mat4 this_trans = parent_trans * getComponent<TransformComponent>().getMatrix();
-
-			return {parent_trans, this_trans};
+			RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
+			TransformComponent& this_tc = getComponent<TransformComponent>();
+			this_tc.markAsEdited();
+			if (this_rc.parent != entt::null)
+			{
+				Enttity parent{*registry_, this_rc.parent};
+				parent.markTransformAsDirty(frame);
+			}
 		}
 
 		operator bool() const
@@ -133,18 +136,20 @@ namespace dmbrn
 			}
 		}
 
-		glm::mat4 getWorldTransform() const
+		void markTransformAsDirty(uint32_t frame) // we make it dirty all the way to the root
 		{
-			const TransformComponent& transform = getComponent<TransformComponent>();
-			glm::mat4 this_trans = transform.getMatrix();
-			const RelationshipComponent& this_relation = getComponent<RelationshipComponent>();
+			TransformComponent& this_tc = getComponent<TransformComponent>();
 
-			if (this_relation.parent != entt::null)
+			if (!this_tc.isDirtyForFrame(frame))
 			{
-				this_trans = Enttity{*registry_, this_relation.parent}.getWorldTransform() * this_trans;
+				RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
+				this_tc.markAsDirty();
+				if (this_rc.parent != entt::null)
+				{
+					Enttity parent{*registry_, this_rc.parent};
+					parent.markTransformAsDirty(frame);
+				}
 			}
-
-			return this_trans;
 		}
 	};
 }

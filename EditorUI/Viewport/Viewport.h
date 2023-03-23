@@ -33,7 +33,7 @@ namespace dmbrn
 			last_used_focused = this;
 		}
 
-		void newImGuiFrame(float delta_t, uint32_t imageIndex)
+		void newImGuiFrame(float delta_t,uint32_t frame,uint32_t imageIndex)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
@@ -88,14 +88,16 @@ namespace dmbrn
 
 					cameraProj[1][1] *= -1;
 
-					auto [parent_trans, _] = selected_->getParentAndThisWorldTransform();
 					TransformComponent& t_c = selected_->getComponent<TransformComponent>();
 
 					glm::mat4 local_trans = t_c.getMatrix();
 
-					ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
+					// TODO: parent trans
+
+					if(ImGuizmo::Manipulate(glm::value_ptr(cameraView * local_trans), glm::value_ptr(cameraProj),
 					                     current_operation, ImGuizmo::MODE::LOCAL,
-					                     glm::value_ptr(local_trans));
+					                     glm::value_ptr(local_trans)))
+						selected_->markTransformAsEdited(frame);
 
 					if (ImGuizmo::IsUsing())
 					{

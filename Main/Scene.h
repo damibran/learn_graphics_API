@@ -66,39 +66,33 @@ namespace dmbrn
 			}
 		}
 
+		void updateGlobalTransforms(uint32_t frame)
+		{
+			dirtyTraverseTree(scene_root_, frame);
+		}
+
 		// for now updates data for all entities
 		void updatePerObjectData(uint32_t frame)
 		{
-			auto group = registry_.group<ModelComponent>(entt::get<TransformComponent>);
-
 			char* data = ModelComponent::per_object_data_buffer_.map(frame);
 
-			recursivelyUpdateMatrix(scene_root_, glm::mat4{1.0f}, data);
+			// TODO: iterate all renderable, update mtxs
+			auto group = registry_.group<ModelComponent>(entt::get<TransformComponent>);
+
+			for (auto entity : group)
+			{
+				auto [model, transform] = group.get(entity);
+
+				if (model.need_GPU_state_update)
+				{
+					model.need_GPU_state_update = false;
+					auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
+						inGPU_transform_offset);
+					ubo_data->model = transform.globalTransformMatrix;
+				}
+			}
 
 			ModelComponent::per_object_data_buffer_.unMap(frame);
-		}
-
-		void recursivelyUpdateMatrix(const Enttity& ent, const glm::mat4& parent_matrix, char* data_map)
-		{
-			const TransformComponent& this_trans = ent.getComponent<TransformComponent>();
-			glm::mat4 this_matrix = parent_matrix * this_trans.getMatrix();
-
-			if (const ModelComponent* model = ent.tryGetComponent<ModelComponent>())
-			{
-				auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data_map + model->
-					inGPU_transform_offset);
-				ubo_data->model = this_matrix;
-			}
-
-			auto& cur_comp = ent.getComponent<RelationshipComponent>();
-			auto cur_id = cur_comp.first;
-
-			while (cur_id != entt::null)
-			{
-				recursivelyUpdateMatrix(Enttity{registry_, cur_id}, this_matrix, data_map);
-
-				cur_id = registry_.get<RelationshipComponent>(cur_id).next;
-			}
 		}
 
 		// may perform culling
@@ -118,7 +112,9 @@ namespace dmbrn
 			{
 				Assimp::Importer importer;
 				const aiScene* ai_scene = importer.ReadFile(
-					path, aiProcess_Triangulate | aiProcess_FlipUVs | (with_bones ? aiProcess_PopulateArmatureData : 0));
+					path, aiProcess_Triangulate | aiProcess_FlipUVs | (with_bones
+						                                                   ? aiProcess_PopulateArmatureData
+						                                                   : 0));
 				//| aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
 
 				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
@@ -213,17 +209,18 @@ namespace dmbrn
 
 							ai_node->mTransformation.Decompose(scale, orientation, translation);
 
-							Enttity new_entty = scene.addNewEntityAsChild(parent,mesh->mName.C_Str());
+							Enttity new_entty = scene.addNewEntityAsChild(parent, mesh->mName.C_Str());
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
 							trans.position = toGlm(translation) * (scale_factor_);
 							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale)*(scale_factor_);
+							trans.scale = toGlm(scale) * (scale_factor_);
 
 							Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
-							new_entty.addComponent<ModelComponent>(Mesh(material,mesh_name,mesh),&Renderer::un_lit_textured);
+							new_entty.addComponent<ModelComponent>(Mesh(material, mesh_name, mesh),
+							                                       &Renderer::un_lit_textured);
 						}
 						else
 						{
@@ -252,5 +249,69 @@ namespace dmbrn
 				}
 			}
 		};
+
+		void dirtyTraverseTree(Enttity& ent, uint32_t frame)
+		{
+			TransformComponent& this_trans = ent.getComponent<TransformComponent>();
+
+			if (this_trans.isEditedForFrame(frame))
+			// if is edited treaverse tree up until leaves to update global trans mtx's
+			{
+				this_trans.edited[frame] = false;
+				this_trans.dirty[frame] = false;
+
+				const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
+				glm::mat4 parent_trans;
+
+				if (ent_rc.parent != entt::null)
+				{
+					Enttity parent = Enttity{registry_, ent_rc.parent};
+					parent_trans = parent.getComponent<TransformComponent>().getMatrix();
+				}
+				else // this is root
+					parent_trans = glm::mat4(1.0f);
+
+				editedTraverseTree(ent, parent_trans, frame);
+			}
+			else if (this_trans.isDirtyForFrame(frame)) // if is dirty traverse tree while edited not found
+			{
+				this_trans.dirty[frame] = false;
+
+				auto& cur_comp = ent.getComponent<RelationshipComponent>();
+				auto cur_id = cur_comp.first;
+
+				while (cur_id != entt::null)
+				{
+					Enttity child = Enttity{registry_, cur_id};
+					dirtyTraverseTree(child, frame);
+					cur_id = registry_.get<RelationshipComponent>(cur_id).next;
+				}
+			}
+		}
+
+		void editedTraverseTree(Enttity& ent, glm::mat4 parent_trans_mtx, uint32_t frame)
+		{
+			TransformComponent& ent_tc = ent.getComponent<TransformComponent>();
+			glm::mat4 this_matrix = parent_trans_mtx * ent_tc.getMatrix();
+
+			ent_tc.edited[frame] = false;
+			ent_tc.dirty[frame] = false;
+
+			ent_tc.globalTransformMatrix = this_matrix;
+
+			if (ModelComponent* model = ent.tryGetComponent<ModelComponent>())
+			{
+				model->need_GPU_state_update = true;
+			}
+
+			const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
+			auto cur_id = ent_rc.first;
+			while (cur_id != entt::null)
+			{
+				Enttity child = Enttity{registry_, cur_id};
+				editedTraverseTree(child, this_matrix, frame);
+				cur_id = registry_.get<RelationshipComponent>(cur_id).next;
+			}
+		}
 	};
 }

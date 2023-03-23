@@ -11,7 +11,7 @@ namespace dmbrn
 	class LogicalDevice
 	{
 	public:
-		const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+		static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 		LogicalDevice(const PhysicalDevice& physical_device):
 			device_(nullptr)
