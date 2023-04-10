@@ -18,7 +18,7 @@ namespace dmbrn
 
 			if (scene_tree_.getSelected())
 			{
-				Enttity& entity = scene_tree_.getSelected();
+				Enttity entity = *scene_tree_.getSelected();
 
 				drawComponents(entity,frame);
 
@@ -43,7 +43,7 @@ namespace dmbrn
 	private:
 		SceneTree& scene_tree_;
 
-		void drawComponents(Enttity& entity, uint32_t frame)
+		void drawComponents(Enttity entity, uint32_t frame)
 		{
 			if (auto* comp = entity.tryGetComponent<TagComponent>())
 			{
@@ -122,7 +122,10 @@ namespace dmbrn
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
 			ImGui::PushFont(boldFont);
 			if (ImGui::Button("X", buttonSize))
+			{
 				values.x = resetValue;
+				edited = true;
+			}
 			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
@@ -137,7 +140,10 @@ namespace dmbrn
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.2f, 0.7f, 0.2f, 1.0f});
 			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Y", buttonSize))
+			{
 				values.y = resetValue;
+				edited = true;
+			}
 			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
@@ -152,7 +158,10 @@ namespace dmbrn
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.1f, 0.25f, 0.8f, 1.0f});
 			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Z", buttonSize))
+			{
 				values.z = resetValue;
+				edited = true;
+			}
 			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 

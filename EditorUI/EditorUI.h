@@ -28,8 +28,8 @@ namespace dmbrn
 			scene_(scene),
 			scene_tree_(scene_),
 			inspector_(scene_tree_),
-			viewport_(scene_, &scene_tree_.getSelected()),
-			viewport2_(scene_, &scene_tree_.getSelected()
+			viewport_(scene_, scene_tree_.getSelected()),
+			viewport2_(scene_, scene_tree_.getSelected()
 			           , "Viewport 2")
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);

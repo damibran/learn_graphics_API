@@ -8,7 +8,7 @@ namespace dmbrn
 	public:
 		SceneTree(Scene& scene):
 			scene_(scene),
-			selected_(scene_.registry_)
+			selected_(scene_.getNullEntt())
 		{
 		}
 
@@ -16,21 +16,20 @@ namespace dmbrn
 		{
 			ImGui::Begin("Scene Tree");
 
-			auto& root_relation = scene_.scene_root_.getComponent<RelationshipComponent>();
-			auto cur_id = root_relation.first;
+			Enttity cur_child = scene_.getRootRelationshipComponent().first;
 
-			while (cur_id != entt::null)
+			while (cur_child)
 			{
-				recursivelyDraw(Enttity{scene_.registry_, cur_id});
+				recursivelyDraw(cur_child);
 
-				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
+				cur_child = cur_child.getComponent<RelationshipComponent>().next;
 			}
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
 			{
-				if(selected_)
+				if (selected_)
 					deselect(selected_);
-				selected_ = {scene_.registry_};
+				selected_ = scene_.getNullEntt();
 			}
 
 			if (ImGui::BeginPopupContextWindow())
@@ -44,9 +43,9 @@ namespace dmbrn
 			ImGui::End();
 		}
 
-		Enttity& getSelected()
+		Enttity* getSelected()
 		{
-			return selected_;
+			return &selected_;
 		}
 
 	private:
@@ -55,12 +54,12 @@ namespace dmbrn
 
 		void recursivelyDraw(Enttity enttity)
 		{
-			const auto& tag = enttity.getComponent<TagComponent>();
-			auto relation_comp = enttity.getComponent<RelationshipComponent>();
+			const TagComponent& tag = enttity.getComponent<TagComponent>();
+			const RelationshipComponent& relation_comp = enttity.getComponent<RelationshipComponent>();
 
 			ImGuiTreeNodeFlags flags =
 				(selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
-				(relation_comp.first == entt::null ? ImGuiTreeNodeFlags_Leaf : 0) |
+				(!relation_comp.first ? ImGuiTreeNodeFlags_Leaf : 0) |
 				ImGuiTreeNodeFlags_OpenOnArrow;
 
 			bool opened = ImGui::TreeNodeEx(
@@ -81,12 +80,12 @@ namespace dmbrn
 
 			if (opened)
 			{
-				auto cur_ind = relation_comp.first;
-				while (cur_ind != entt::null)
+				Enttity cur_child = relation_comp.first;
+				while (cur_child)
 				{
-					recursivelyDraw(Enttity{scene_.registry_, cur_ind});
+					recursivelyDraw(cur_child);
 
-					cur_ind = scene_.registry_.get<RelationshipComponent>(cur_ind).next;
+					cur_child = cur_child.getComponent<RelationshipComponent>().next;
 				}
 
 				ImGui::TreePop();
@@ -95,86 +94,34 @@ namespace dmbrn
 
 		void deselect(Enttity enttity)
 		{
-			RelationshipComponent& relationship = enttity.getComponent<RelationshipComponent>();
-			auto cur_id = relationship.first;
-
 			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
 			{
 				model_comp->shader_ = &Renderer::un_lit_textured;
 			}
 
-			while (cur_id != entt::null)
+			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;
+			while (cur_child)
 			{
-				deselect(Enttity{scene_.registry_, cur_id});
+				deselect(cur_child);
 
-				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
+				cur_child = cur_child.getComponent<RelationshipComponent>().next;
 			}
 		}
 
 		void select(Enttity enttity)
 		{
-			RelationshipComponent& relationship = enttity.getComponent<RelationshipComponent>();
-			auto cur_id = relationship.first;
-
 			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
 			{
 				model_comp->shader_ = &Renderer::outlined_;
 			}
 
-			while (cur_id != entt::null)
+			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;
+			while (cur_child )
 			{
-				select(Enttity{scene_.registry_, cur_id});
+				select(cur_child);
 
-				cur_id = scene_.registry_.get<RelationshipComponent>(cur_id).next;
+				cur_child = cur_child.getComponent<RelationshipComponent>().next;
 			}
-		}
-
-		void drawEntityNode(Enttity& enttity)
-		{
-			const auto& tag = enttity.getComponent<TagComponent>();
-
-			ImGuiTreeNodeFlags flags = (selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
-				ImGuiTreeNodeFlags_Leaf; //|	ImGuiTreeNodeFlags_OpenOnArrow
-			bool opened = ImGui::TreeNodeEx(
-				reinterpret_cast<const void*>(static_cast<uint64_t>(static_cast<uint32_t>(enttity))),
-				flags, tag.tag.c_str());
-
-			if (ImGui::IsItemClicked())
-			{
-				if (selected_)
-				{
-					if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
-					{
-						model_comp->shader_ = &Renderer::un_lit_textured;
-					}
-				}
-				selected_ = enttity;
-			}
-
-			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
-			{
-				model_comp->shader_ = &Renderer::outlined_;
-			}
-
-			bool deletedEntity = false;
-			if (ImGui::BeginPopupContextItem())
-			{
-				if (ImGui::MenuItem("Delete Entity"))
-				{
-					deletedEntity = true;
-					if (selected_ == enttity)
-						selected_ = {scene_.registry_};
-				}
-				ImGui::EndPopup();
-			}
-
-			if (opened)
-			{
-				ImGui::TreePop();
-			}
-
-			if (deletedEntity)
-				scene_.deleteEntity(enttity);
 		}
 	};
 }

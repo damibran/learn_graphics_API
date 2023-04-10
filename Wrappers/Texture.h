@@ -1,17 +1,11 @@
 #pragma once
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include <stdexcept>
 #include <cstring>
 #include <cstdint>
-#include <limits>
 
 #include "Utils/image_data.h"
 
-#include "Wrappers/Singletons/PhysicalDevice.h"
-#include "Wrappers/Singletons/LogicalDevice.h"
-#include "Wrappers/Singletons/CommandPool.h"
+#include "Singletons/Singletons.h"
 
 namespace dmbrn
 {

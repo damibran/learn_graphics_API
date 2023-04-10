@@ -11,16 +11,10 @@
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 #include "Wrappers/Singletons/PerObjectDataBuffer.h"
 #include "Wrappers/Mesh.h"
-
+#include "Main/Enttity.h"
 
 namespace dmbrn
 {
-	class Component
-	{
-		virtual ~Component() = default;
-		virtual void drawToInspector() = 0;
-	};
-
 	struct TagComponent
 	{
 		std::string tag;
@@ -33,10 +27,12 @@ namespace dmbrn
 
 	struct RelationshipComponent
 	{
-		entt::entity first{entt::null};
-		entt::entity prev{entt::null};
-		entt::entity next{entt::null};
-		entt::entity parent{entt::null};
+		Enttity first;
+		Enttity prev;
+		Enttity next;
+		Enttity parent;
+
+		RelationshipComponent(entt::registry& registry):first(registry),prev(registry),next(registry),parent(registry){}
 	};
 
 	struct TransformComponent
@@ -48,7 +44,7 @@ namespace dmbrn
 		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> dirty;
 		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> edited;
 
-		glm::mat4 globalTransformMatrix = glm::mat4(1.0f);
+		glm::mat4 globalTransformMatrix = glm::mat4(1.0f); // hierarchy transform without self trans matrix
 
 		TransformComponent(glm::vec3 pos = {0, 0, 0},
 		                   glm::vec3 rot = {0, 0, 0},
@@ -104,12 +100,12 @@ namespace dmbrn
 				dirty[i] = true;
 		}
 
-		bool isDirtyForFrame(uint32_t frame)const
+		bool isDirtyForFrame(uint32_t frame) const
 		{
 			return dirty[frame];
 		}
 
-		bool isEditedForFrame(uint32_t frame)const
+		bool isEditedForFrame(uint32_t frame) const
 		{
 			return edited[frame];
 		}

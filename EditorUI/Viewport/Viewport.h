@@ -90,19 +90,21 @@ namespace dmbrn
 
 					TransformComponent& t_c = selected_->getComponent<TransformComponent>();
 
+					const glm::mat4& parent_trans = selected_->getComponent<RelationshipComponent>().parent.getComponent<TransformComponent>().globalTransformMatrix;
+
 					glm::mat4 local_trans = t_c.getMatrix();
 
-					// TODO: parent trans
-
-					if(ImGuizmo::Manipulate(glm::value_ptr(cameraView * local_trans), glm::value_ptr(cameraProj),
+					if(ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
 					                     current_operation, ImGuizmo::MODE::LOCAL,
 					                     glm::value_ptr(local_trans)))
-						selected_->markTransformAsEdited(frame);
 
 					if (ImGuizmo::IsUsing())
 					{
 						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans), glm::value_ptr(t_c.position),
 						                                      glm::value_ptr(t_c.rotation), glm::value_ptr(t_c.scale));
+
+						selected_->markTransformAsEdited(frame);
+
 						last_used_focused = this;
 					}
 				}

@@ -10,14 +10,18 @@ namespace dmbrn
 	// need interface implementation for scene tree
 	class Scene
 	{
-		friend class SceneTree;
 	public:
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
 			ModelImporter::Import(*this, false, "Models\\SkinTest\\RiggedSimple.dae");
+			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.fbx");
 
-			ModelImporter::Import(*this, false, "Models\\Char\\TwoChar.fbx");
+			//ModelImporter::Import(*this, false, "Models\\Char\\TwoChar.fbx");
+
+			RelationshipComponent root_rc = scene_root_.getComponent<RelationshipComponent>();
+
+			printSceneRecursively(scene_root_,"");
 
 			//ModelImporter::Import(*this, false,"Models\\Char\\Warrok W Kurniawan.fbx");
 
@@ -26,6 +30,22 @@ namespace dmbrn
 			//addModel("Models\\SkinTest\\RiggedSimple.dae");
 			//addModel("F:\\3D_Scenes\\Sponza\\NewSponza_Main_glTF_002.gltf");
 			//addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
+		}
+
+		void printSceneRecursively(Enttity node, std::string tab)
+		{
+			const TagComponent& tag = node.getComponent<TagComponent>();
+			const RelationshipComponent& node_rc = node.getComponent<RelationshipComponent>();
+
+			std::cout<<tab+tag.tag<<std::endl;
+
+			Enttity cur_child = node_rc.first;
+
+			while(cur_child)
+			{
+				printSceneRecursively(cur_child, tab+" ");
+				cur_child = cur_child.getComponent<RelationshipComponent>().next;
+			}
 		}
 
 		size_t getCountOfEntities()
@@ -38,17 +58,17 @@ namespace dmbrn
 			return Enttity{registry_, name, scene_root_};
 		}
 
-		Enttity addNewEntityAsChild(Enttity& parent, const std::string& name = std::string{})
+		Enttity addNewEntityAsChild(Enttity parent, const std::string& name = std::string{})
 		{
 			return Enttity{registry_, name, parent};
 		}
 
-		void deleteEntity(Enttity& enttity)
+		void deleteEntity(Enttity enttity)
 		{
-			registry_.destroy(enttity);
+			enttity.destroy();
 		}
 
-		void recursivelyAddTo(SceneNode& node, Enttity& parent)
+		void recursivelyAddTo(SceneNode& node, Enttity parent)
 		{
 			Enttity child_ent{registry_, node.name, parent};
 
@@ -99,6 +119,16 @@ namespace dmbrn
 		auto getModelsToDraw()
 		{
 			return registry_.group<ModelComponent>(entt::get<TransformComponent>);
+		}
+
+		Enttity getNullEntt()
+		{
+			return Enttity{registry_};
+		}
+
+		RelationshipComponent& getRootRelationshipComponent()
+		{
+			return scene_root_.getComponent<RelationshipComponent>();	
 		}
 
 	private:
@@ -250,7 +280,7 @@ namespace dmbrn
 			}
 		};
 
-		void dirtyTraverseTree(Enttity& ent, uint32_t frame)
+		void dirtyTraverseTree(Enttity ent, uint32_t frame)
 		{
 			TransformComponent& this_trans = ent.getComponent<TransformComponent>();
 
@@ -263,10 +293,9 @@ namespace dmbrn
 				const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
 				glm::mat4 parent_trans;
 
-				if (ent_rc.parent != entt::null)
+				if (ent_rc.parent)
 				{
-					Enttity parent = Enttity{registry_, ent_rc.parent};
-					parent_trans = parent.getComponent<TransformComponent>().getMatrix();
+					parent_trans = ent_rc.parent.getComponent<TransformComponent>().globalTransformMatrix;//ent_rc.parent.getComponent<TransformComponent>().getMatrix();
 				}
 				else // this is root
 					parent_trans = glm::mat4(1.0f);
@@ -277,19 +306,18 @@ namespace dmbrn
 			{
 				this_trans.dirty[frame] = false;
 
-				auto& cur_comp = ent.getComponent<RelationshipComponent>();
-				auto cur_id = cur_comp.first;
+				const RelationshipComponent& cur_comp = ent.getComponent<RelationshipComponent>();
+				Enttity cur_child = cur_comp.first;
 
-				while (cur_id != entt::null)
+				while (cur_child)
 				{
-					Enttity child = Enttity{registry_, cur_id};
-					dirtyTraverseTree(child, frame);
-					cur_id = registry_.get<RelationshipComponent>(cur_id).next;
+					dirtyTraverseTree(cur_child, frame);
+					cur_child = cur_child.getComponent<RelationshipComponent>().next;
 				}
 			}
 		}
 
-		void editedTraverseTree(Enttity& ent, glm::mat4 parent_trans_mtx, uint32_t frame)
+		void editedTraverseTree(Enttity ent, glm::mat4 parent_trans_mtx, uint32_t frame)
 		{
 			TransformComponent& ent_tc = ent.getComponent<TransformComponent>();
 			glm::mat4 this_matrix = parent_trans_mtx * ent_tc.getMatrix();
@@ -305,12 +333,11 @@ namespace dmbrn
 			}
 
 			const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
-			auto cur_id = ent_rc.first;
-			while (cur_id != entt::null)
+			Enttity cur_child = ent_rc.first;
+			while (cur_child )
 			{
-				Enttity child = Enttity{registry_, cur_id};
-				editedTraverseTree(child, this_matrix, frame);
-				cur_id = registry_.get<RelationshipComponent>(cur_id).next;
+				editedTraverseTree(cur_child, this_matrix, frame);
+				cur_child = cur_child.getComponent<RelationshipComponent>().next;
 			}
 		}
 	};
