@@ -29,7 +29,7 @@ namespace dmbrn
 				{
 					if (ImGui::MenuItem("Model Component"))
 					{
-						entity.addComponent<ModelComponent>();
+						entity.addModelComponent(Mesh());
 						ImGui::CloseCurrentPopup();
 					}
 

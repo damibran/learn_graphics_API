@@ -1,8 +1,15 @@
 #pragma once
 #include<entt/entt.hpp>
 
+#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
+
+#include "Wrappers/SkeletalMesh.h"
+
 namespace dmbrn
 {
+	struct SkeletalModelComponent;
+	struct ModelComponent;
+
 	class Enttity
 	{
 	public:
@@ -62,8 +69,15 @@ namespace dmbrn
 		template <typename Type, typename... Args>
 		void addComponent(Args&&...args)
 		{
+			static_assert(!std::is_same_v<Type, ModelComponent>);
+			static_assert(!std::is_same_v<Type, SkeletalModelComponent>);
+
 			registry_->emplace<Type>(entityID_, std::forward<Args>(args)...);
 		}
+
+		void addModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr);
+
+		void addSkeletalModelComponent(SkeletalMesh&& mesh, ShaderEffect* shader = nullptr);
 
 		template <typename T>
 		T* tryGetComponent()

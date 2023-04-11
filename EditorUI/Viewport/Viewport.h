@@ -162,13 +162,13 @@ namespace dmbrn
 
 			for (auto entity : group)
 			{
-				auto [model,_] = group.get<ModelComponent, TransformComponent>(entity);
+				auto [model,renderable] = group.get<ModelComponent,RenderableComponent>(entity);
 
-				model.getShader()->addToRenderQueue({&model.mesh, model.inGPU_transform_offset});
+				model.getShader()->addToRenderQueue({&model.mesh, renderable.inGPU_transform_offset});
 			}
 
-			Renderer::un_lit_textured.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);
-			Renderer::outlined_.draw(current_frame, command_buffer, ModelComponent::per_object_data_buffer_);
+			Renderer::un_lit_textured.draw(current_frame, command_buffer, RenderableComponent::per_object_data_buffer_);
+			Renderer::outlined_.draw(current_frame, command_buffer, RenderableComponent::per_object_data_buffer_);
 
 			command_buffer.endRenderPass();
 		}

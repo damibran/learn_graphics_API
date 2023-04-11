@@ -4,6 +4,7 @@
 #include "Enttity.h"
 #include "Wrappers/Singletons/Renderer.h"
 #include "Wrappers/ModelImporter.h"
+#include "Wrappers/SkeletalMesh.h"
 
 namespace dmbrn
 {
@@ -73,7 +74,7 @@ namespace dmbrn
 			Enttity child_ent{registry_, node.name, parent};
 
 			if (node.mesh.render_data_)
-				child_ent.addComponent<ModelComponent>(std::move(node.mesh), &Renderer::un_lit_textured);
+				child_ent.addModelComponent(std::move(node.mesh), &Renderer::un_lit_textured);
 
 			TransformComponent& t = child_ent.getComponent<TransformComponent>();
 			t.position = node.transform.position;
@@ -94,10 +95,10 @@ namespace dmbrn
 		// for now updates data for all entities
 		void updatePerObjectData(uint32_t frame)
 		{
-			char* data = ModelComponent::per_object_data_buffer_.map(frame);
+			char* data = RenderableComponent::per_object_data_buffer_.map(frame);
 
 			// TODO: iterate all renderable, update mtxs
-			auto group = registry_.group<ModelComponent>(entt::get<TransformComponent>);
+			auto group = registry_.group<RenderableComponent>(entt::get<TransformComponent>);
 
 			for (auto entity : group)
 			{
@@ -112,13 +113,19 @@ namespace dmbrn
 				}
 			}
 
-			ModelComponent::per_object_data_buffer_.unMap(frame);
+			RenderableComponent::per_object_data_buffer_.unMap(frame);
 		}
 
 		// may perform culling
 		auto getModelsToDraw()
 		{
-			return registry_.group<ModelComponent>(entt::get<TransformComponent>);
+			return registry_.group<ModelComponent>(entt::get<RenderableComponent>);
+		}
+
+		// may perform culling
+		auto getSkeletalModelsToDraw()
+		{
+			
 		}
 
 		Enttity getNullEntt()
@@ -161,14 +168,17 @@ namespace dmbrn
 
 				with_bones_ = with_bones;
 
+
 				scale_factor_ = 1.0f;
 				if (extension == "fbx")
 					scale_factor_ = 0.01;
 
-
 				// process ASSIMP's root node recursively
 				processNode(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
 				            scene.addNewEntityToRoot(model_name));
+
+				if(with_bones)
+					armature_to_bones_to_id_.clear();
 			}
 
 		private:
@@ -249,7 +259,7 @@ namespace dmbrn
 
 							Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
-							new_entty.addComponent<ModelComponent>(Mesh(material, mesh_name, mesh),
+							new_entty.addModelComponent(Mesh(material, mesh_name, mesh),
 							                                       &Renderer::un_lit_textured);
 						}
 						else
@@ -327,9 +337,9 @@ namespace dmbrn
 
 			ent_tc.globalTransformMatrix = this_matrix;
 
-			if (ModelComponent* model = ent.tryGetComponent<ModelComponent>())
+			if (RenderableComponent* renderable = ent.tryGetComponent<RenderableComponent>())
 			{
-				model->need_GPU_state_update = true;
+				renderable->need_GPU_state_update = true;
 			}
 
 			const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();

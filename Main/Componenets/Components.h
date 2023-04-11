@@ -11,6 +11,7 @@
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 #include "Wrappers/Singletons/PerObjectDataBuffer.h"
 #include "Wrappers/Mesh.h"
+#include "Wrappers/SkeletalMesh.h"
 #include "Main/Enttity.h"
 
 namespace dmbrn
@@ -32,7 +33,10 @@ namespace dmbrn
 		Enttity next;
 		Enttity parent;
 
-		RelationshipComponent(entt::registry& registry):first(registry),prev(registry),next(registry),parent(registry){}
+		RelationshipComponent(entt::registry& registry): first(registry), prev(registry), next(registry),
+		                                                 parent(registry)
+		{
+		}
 	};
 
 	struct TransformComponent
@@ -111,16 +115,28 @@ namespace dmbrn
 		}
 	};
 
-	struct ModelComponent
+	// TODO proper destructor with unregister
+	struct RenderableComponent
 	{
 		static inline PerObjectDataBuffer per_object_data_buffer_{Singletons::device, Singletons::physical_device};
+		size_t inGPU_transform_offset;
+		bool need_GPU_state_update = true;
 
-		ModelComponent() = default;
+		RenderableComponent():
+			inGPU_transform_offset(per_object_data_buffer_.registerObject())
+		{
+		}
+
+		~RenderableComponent()=default;
+	};
+
+	struct ModelComponent
+	{
+		ModelComponent()=default;
 
 		ModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr) :
 			mesh(std::move(mesh)),
-			shader_(shader),
-			inGPU_transform_offset(per_object_data_buffer_.registerObject())
+			shader_(shader)
 		{
 		}
 
@@ -131,8 +147,25 @@ namespace dmbrn
 
 		Mesh mesh;
 		ShaderEffect* shader_ = nullptr;
-		bool need_GPU_state_update = true;
-		size_t inGPU_transform_offset;
+	};
+
+	struct SkeletalModelComponent
+	{
+		SkeletalModelComponent()=default;
+
+		SkeletalModelComponent(SkeletalMesh&& mesh, ShaderEffect* shader = nullptr) :
+			mesh(std::move(mesh)),
+			shader_(shader)
+		{
+		}
+
+		ShaderEffect* getShader()
+		{
+			return shader_;
+		}
+
+		SkeletalMesh mesh;
+		ShaderEffect* shader_ = nullptr;
 	};
 
 	class CameraComponent
