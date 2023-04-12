@@ -9,7 +9,8 @@
 #include "imgui_internal.h"
 
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
-#include "Wrappers/Singletons/PerObjectDataBuffer.h"
+#include "Wrappers/Singletons/PerRenderableData.h"
+#include "Wrappers/Singletons/PerSkeletonData.h"
 #include "Wrappers/Mesh.h"
 #include "Wrappers/SkeletalMesh.h"
 #include "Main/Enttity.h"
@@ -118,7 +119,7 @@ namespace dmbrn
 	// TODO proper destructor with unregister
 	struct RenderableComponent
 	{
-		static inline PerObjectDataBuffer per_object_data_buffer_{Singletons::device, Singletons::physical_device};
+		static inline PerRenderableData per_object_data_buffer_{Singletons::device, Singletons::physical_device};
 		size_t inGPU_transform_offset;
 		bool need_GPU_state_update = true;
 
@@ -149,11 +150,14 @@ namespace dmbrn
 		ShaderEffect* shader_ = nullptr;
 	};
 
+	// TODO proper unregister
 	struct SkeletalModelComponent
 	{
+		static inline PerSkeletonData per_skeleton_data_{Singletons::device, Singletons::physical_device,RenderableComponent::per_object_data_buffer_};
 		SkeletalModelComponent()=default;
 
 		SkeletalModelComponent(SkeletalMesh&& mesh, ShaderEffect* shader = nullptr) :
+			in_GPU_mtxs_offset(per_skeleton_data_.registerObject()),
 			mesh(std::move(mesh)),
 			shader_(shader)
 		{
@@ -164,6 +168,7 @@ namespace dmbrn
 			return shader_;
 		}
 
+		size_t in_GPU_mtxs_offset;
 		SkeletalMesh mesh;
 		ShaderEffect* shader_ = nullptr;
 	};

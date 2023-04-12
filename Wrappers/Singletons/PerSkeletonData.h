@@ -1,21 +1,25 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "Wrappers/Singletons/Singletons.h"
+#include "Wrappers/Singletons/PerRenderableData.h"
+#include "Wrappers/BonedVertex.h"
 
 namespace dmbrn
 {
-	class PerObjectDataBuffer
+	class PerSkeletonData
 	{
 	public:
+		
 		size_t dynamic_aligned_size_ = 256;
 
-		const size_t MAX_OBJECT_COUNT = 512;
+		static inline constexpr size_t MAX_OBJECT_COUNT = 512;
 
 		struct UBODynamicData
 		{
-			glm::mat4 model;
+			glm::mat4 model[BonedVertex::max_count_of_bones];
 		};
 
-		PerObjectDataBuffer(const LogicalDevice& device, const PhysicalDevice& physical_device)
+		PerSkeletonData(const LogicalDevice& device, const PhysicalDevice& physical_device, const PerRenderableData& per_renderable_data)
 		{
 			size_t minUboAlignment = physical_device->getProperties().limits.minUniformBufferOffsetAlignment;
 			if (minUboAlignment > 0)
@@ -47,7 +51,7 @@ namespace dmbrn
 				uniform_buffers_[i].bindMemory(*uniform_buffers_memory[i], 0);
 			}
 
-			createDescriptorSets(device);
+			createDescriptorSets(device,per_renderable_data);
 		}
 
 		char* map(uint32_t frame)
@@ -79,13 +83,19 @@ namespace dmbrn
 
 		static vk::raii::DescriptorSetLayout createDescriptorLayout(const LogicalDevice& device)
 		{
-			const vk::DescriptorSetLayoutBinding samplerLayoutBinding
+			const vk::DescriptorSetLayoutBinding modelMtx
 			{
 				0, vk::DescriptorType::eUniformBufferDynamic,
 				1, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex
 			};
 
-			std::array<vk::DescriptorSetLayoutBinding, 1> bindings = {samplerLayoutBinding};
+			const vk::DescriptorSetLayoutBinding FinalBoneMtxs
+			{
+				1, vk::DescriptorType::eUniformBufferDynamic,
+				1, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex
+			};
+
+			std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {modelMtx,FinalBoneMtxs};
 
 			const vk::DescriptorSetLayoutCreateInfo layoutInfo
 			{
@@ -107,7 +117,7 @@ namespace dmbrn
 		std::vector<vk::raii::DeviceMemory> uniform_buffers_memory;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
 
-		void createDescriptorSets(const LogicalDevice& device)
+		void createDescriptorSets(const LogicalDevice& device, const PerRenderableData& per_renderable_data)
 		{
 			std::vector<vk::DescriptorSetLayout> layouts(device.MAX_FRAMES_IN_FLIGHT, *descriptor_layout_);
 
@@ -122,17 +132,28 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				vk::DescriptorBufferInfo buffer
+				vk::DescriptorBufferInfo modelMtx
+				{
+					*per_renderable_data.uniform_buffers_[i], 0,sizeof(PerRenderableData::UBODynamicData)
+				};
+
+				vk::DescriptorBufferInfo FinalBoneMtxs
 				{
 					*uniform_buffers_[i], 0,sizeof(UBODynamicData)
 				};
 
-				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
+				std::array<vk::WriteDescriptorSet, 2> descriptorWrites{};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet
 				{
 					*descriptor_sets_[i], 0, 0, vk::DescriptorType::eUniformBufferDynamic,
-					{}, buffer
+					{}, modelMtx
+				};
+
+				descriptorWrites[1] = vk::WriteDescriptorSet
+				{
+					*descriptor_sets_[i], 1, 0, vk::DescriptorType::eUniformBufferDynamic,
+					{}, FinalBoneMtxs
 				};
 
 				device->updateDescriptorSets(descriptorWrites, nullptr);

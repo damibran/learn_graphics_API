@@ -107,7 +107,7 @@ namespace dmbrn
 				if (model.need_GPU_state_update)
 				{
 					model.need_GPU_state_update = false;
-					auto ubo_data = reinterpret_cast<PerObjectDataBuffer::UBODynamicData*>(data + model.
+					auto ubo_data = reinterpret_cast<PerRenderableData::UBODynamicData*>(data + model.
 						inGPU_transform_offset);
 					ubo_data->model = transform.globalTransformMatrix;
 				}
@@ -125,7 +125,7 @@ namespace dmbrn
 		// may perform culling
 		auto getSkeletalModelsToDraw()
 		{
-			
+			return registry_.group<SkeletalModelComponent>(entt::get<RenderableComponent>);
 		}
 
 		Enttity getNullEntt()

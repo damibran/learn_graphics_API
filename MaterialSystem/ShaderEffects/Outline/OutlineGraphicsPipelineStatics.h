@@ -8,7 +8,7 @@
 #include "OutlineGraphicsPipeline.h"
 #include "MaterialSystem/ShaderEffects/UnLitTextured/UnLitTexturedGraphicsPipelineStatics.h"
 #include "MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
-#include "Wrappers/Singletons/PerObjectDataBuffer.h"
+#include "Wrappers/Singletons/PerRenderableData.h"
 #include "OutlineShaderEffectRenderData.h"
 
 namespace dmbrn
@@ -50,7 +50,7 @@ namespace dmbrn
 				*CameraRenderData::getDescriptorSetLayout(),
 				*OutlineShaderEffectRenderData::getDescriptorSetLayout(),
 				*DiffusionDescriptorSets::descriptor_layout_,
-				*PerObjectDataBuffer::descriptor_layout_
+				*PerRenderableData::descriptor_layout_
 			};
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo

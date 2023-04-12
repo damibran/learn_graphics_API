@@ -137,7 +137,7 @@ namespace dmbrn
 				{
 					aiBone* bone = mesh->mBones[i];
 
-					assert(max_count_of_bones_per_vrtx == bone->mNumWeights);
+					assert(BonedVertex::max_count_of_bones_per_vrtx == bone->mNumWeights);
 
 					for (unsigned int j = 0; j < bone->mNumWeights; ++j)
 					{

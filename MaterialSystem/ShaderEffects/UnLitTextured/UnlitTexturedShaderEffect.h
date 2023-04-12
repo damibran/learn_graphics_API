@@ -18,12 +18,12 @@ namespace dmbrn
 		UnlitTexturedShaderEffect& operator=(const UnlitTexturedShaderEffect& other) = delete;
 
 		void draw(int frame, const vk::raii::CommandBuffer& command_buffer,
-		          const PerObjectDataBuffer& per_object_data_buffer) override
+		          const PerRenderableData& per_object_data_buffer) override
 		{
 			un_lit_graphics_pipeline_statics_.bindPipeline(command_buffer);
 			un_lit_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
 
-			for(auto& [mesh, offset]: render_queue){
+			for(auto& [mesh, offset]: static_render_queue){
 
 				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
 
@@ -36,7 +36,7 @@ namespace dmbrn
 				mesh->drawIndexed(command_buffer);
 			}
 
-			render_queue.clear();
+			static_render_queue.clear();
 		}
 
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)

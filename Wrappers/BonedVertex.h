@@ -5,11 +5,11 @@
 
 namespace dmbrn
 {
-	constexpr uint8_t max_count_of_bones_per_vrtx = 4;
-	constexpr uint16_t max_count_of_bones = 256; // 8-bit bone id
-
 	struct BonedVertex
 	{
+		static inline constexpr uint8_t max_count_of_bones_per_vrtx = 4;
+		static inline constexpr uint16_t max_count_of_bones = 256; // 8-bit bone id
+
 		glm::vec3 pos;
 		glm::vec3 normal;
 		glm::vec2 texCoord;

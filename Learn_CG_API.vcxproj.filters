@@ -61,9 +61,6 @@
     <ClInclude Include="Wrappers\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\VertexIndexBuffers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\UtilsFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -199,7 +196,7 @@
     <ClInclude Include="MaterialSystem\Materials\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\Singletons\PerObjectDataBuffer.h">
+    <ClInclude Include="Wrappers\Singletons\PerRenderableData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h">
@@ -236,6 +233,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\image_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Singletons\PerSkeletonData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
