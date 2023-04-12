@@ -1,17 +1,15 @@
 #pragma once
-#include <glm/glm.hpp>
 
 #include <set>
 #include <Wrappers/Mesh.h>
 #include <Wrappers/SkeletalMesh.h>
-#include <Wrappers/Singletons/PerRenderableData.h>
 
 namespace dmbrn
 {
 	struct ShaderEffect
 	{
 		virtual ~ShaderEffect() = default;
-		virtual void draw(int frame, const vk::raii::CommandBuffer& command_buffer,const PerRenderableData& per_object_data_buffer)=0;
+		virtual void draw(int frame, const vk::raii::CommandBuffer& command_buffer)=0;
 		void addToRenderQueue(std::pair<const Mesh*, size_t> pair)
 		{
 			static_render_queue.insert(pair);

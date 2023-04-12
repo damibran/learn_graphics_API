@@ -21,6 +21,9 @@
     <ClCompile Include="Main\Enttity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\UtilsFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader_push_const.vert" />
@@ -154,7 +157,7 @@
     <ClInclude Include="Main\Enttity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\Components.h">
+    <ClInclude Include="Main\Componenets\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
@@ -236,6 +239,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Singletons\PerSkeletonData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\TransformComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\RenderableComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\TagComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\RelationshipComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\ModelComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\SkeletalModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,6 @@
 #include "Wrappers/Singletons/Singletons.h"
 #include "EditorUI/Viewport/CameraRenderData.h"
 #include "OutlineGraphicsPipeline.h"
-#include "MaterialSystem/ShaderEffects/UnLitTextured/UnLitTexturedGraphicsPipelineStatics.h"
 #include "MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
 #include "Wrappers/Singletons/PerRenderableData.h"
 #include "OutlineShaderEffectRenderData.h"

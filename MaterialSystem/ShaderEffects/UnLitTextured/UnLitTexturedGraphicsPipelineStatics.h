@@ -2,11 +2,11 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "Wrappers/Singletons/LogicalDevice.h"
 #include "Wrappers/Singletons/Singletons.h"
 #include "EditorUI/Viewport/CameraRenderData.h"
 #include "UnLitTexturedGraphicsPipeline.h"
 #include "UnLitTexturedRenderData.h"
+#include "Wrappers/Singletons/PerRenderableData.h"
 
 namespace dmbrn
 {

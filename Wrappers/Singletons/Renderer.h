@@ -3,6 +3,7 @@
 #include "MaterialSystem/ShaderEffects/UnLitTextured/UnlitTexturedShaderEffect.h"
 #include "MaterialSystem/ShaderEffects/Outline/UnlitTexturedOutlinedShaderEffect.h"
 #include <EditorUI/Viewport/ViewportCamera.h>
+#include "PerSkeletonData.h"
 
 
 namespace dmbrn
@@ -23,7 +24,10 @@ namespace dmbrn
 			viewport_camera.bindData(frame, command_buffer);
 		}
 
-		static inline UnlitTexturedShaderEffect un_lit_textured;
-		static inline UnlitTexturedOutlinedShaderEffect outlined_;
+		static inline PerRenderableData per_object_data_buffer_{Singletons::device, Singletons::physical_device};
+		static inline PerSkeletonData per_skeleton_data_{Singletons::device, Singletons::physical_device,per_object_data_buffer_};
+
+		static inline UnlitTexturedShaderEffect un_lit_textured{per_object_data_buffer_,per_skeleton_data_};
+		static inline UnlitTexturedOutlinedShaderEffect outlined_{per_object_data_buffer_,per_skeleton_data_};
 	};
 }

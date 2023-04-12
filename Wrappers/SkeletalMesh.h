@@ -4,11 +4,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include <assimp/material.h>
 #include <assimp/mesh.h>
 #include<glm/glm.hpp>
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
-#include "Texture.h"
 #include "BonedVertex.h"
 #include "Wrappers/HostLocalBuffer.h"
 

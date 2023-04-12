@@ -1,10 +1,10 @@
 #pragma once
 
-#include <entt/entt.hpp>
 #include "Enttity.h"
-#include "Wrappers/Singletons/Renderer.h"
+#include "Componenets/RelationshipComponent.h"
+#include "Componenets/RenderableComponent.h"
+#include "Componenets/TagComponent.h"
 #include "Wrappers/ModelImporter.h"
-#include "Wrappers/SkeletalMesh.h"
 
 namespace dmbrn
 {
@@ -95,7 +95,7 @@ namespace dmbrn
 		// for now updates data for all entities
 		void updatePerObjectData(uint32_t frame)
 		{
-			char* data = RenderableComponent::per_object_data_buffer_.map(frame);
+			char* data = Renderer::per_object_data_buffer_.map(frame);
 
 			// TODO: iterate all renderable, update mtxs
 			auto group = registry_.group<RenderableComponent>(entt::get<TransformComponent>);
@@ -113,7 +113,7 @@ namespace dmbrn
 				}
 			}
 
-			RenderableComponent::per_object_data_buffer_.unMap(frame);
+			Renderer::per_object_data_buffer_.unMap(frame);
 		}
 
 		// may perform culling

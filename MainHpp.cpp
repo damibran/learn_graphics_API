@@ -10,8 +10,6 @@
 #include "Main/Scene.h"
 #include "EditorUI/EditorUI.h"
 
-#include <imgui.h>
-
 namespace dmbrn
 {
 	class HelloTriangleApplication

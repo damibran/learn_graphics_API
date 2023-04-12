@@ -1,12 +1,10 @@
 #pragma once
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
 
-#include "Wrappers/Singletons/Renderer.h"
+#include "Main/Enttity.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
 #include "EditorUI/Viewport/ViewportCamera.h"
-#include "Main/Enttity.h"
 
 namespace dmbrn
 {
@@ -173,8 +171,8 @@ namespace dmbrn
 				model.getShader()->addToRenderQueue({&model.mesh, renderable.inGPU_transform_offset});
 			}
 
-			Renderer::un_lit_textured.draw(current_frame, command_buffer, RenderableComponent::per_object_data_buffer_);
-			Renderer::outlined_.draw(current_frame, command_buffer, RenderableComponent::per_object_data_buffer_);
+			Renderer::un_lit_textured.draw(current_frame, command_buffer);
+			Renderer::outlined_.draw(current_frame, command_buffer);
 
 			command_buffer.endRenderPass();
 		}

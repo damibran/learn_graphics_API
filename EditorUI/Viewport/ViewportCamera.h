@@ -3,9 +3,12 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "CameraRenderData.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
+#include "imgui_internal.h"
 
-#include "Main/Componenets/Components.h"
+#include "Main/Componenets/TransformComponent.h"
+#include "Main/Componenets/CameraComponent.h"
 
 namespace dmbrn
 {

@@ -1,15 +1,12 @@
 #pragma once
 #include<entt/entt.hpp>
 
-#include "MaterialSystem/ShaderEffects/ShaderEffect.h"
-
-#include "Wrappers/SkeletalMesh.h"
+#include "Main/Componenets/ModelComponent.h"
+#include "Main/Componenets/SkeletalModelComponent.h"
+#include "Componenets/TagComponent.h"
 
 namespace dmbrn
 {
-	struct SkeletalModelComponent;
-	struct ModelComponent;
-
 	class Enttity
 	{
 	public:

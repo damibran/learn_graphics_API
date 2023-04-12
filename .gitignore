@@ -8,6 +8,7 @@ assimp-vc143-mt.dll
 vcpkg_installed
 Models/Bistro_v5_2
 Models/PKG_A_Curtains
+doc
 
 # User-specific files
 *.rsuser

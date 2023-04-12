@@ -1,5 +1,7 @@
 #include "Enttity.h"
-#include "Componenets/Components.h"
+#include "Componenets/RelationshipComponent.h"
+#include "Componenets/RenderableComponent.h"
+
 
 namespace dmbrn
 {
