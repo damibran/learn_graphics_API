@@ -4,7 +4,13 @@
 #include "Componenets/RelationshipComponent.h"
 #include "Componenets/RenderableComponent.h"
 #include "Componenets/TagComponent.h"
-#include "Wrappers/ModelImporter.h"
+#include "Componenets/BoneComponenet.h"
+#include "Componenets/SkeletalModelComponent.h"
+#include "Utils/AI_GLM_utils.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+
 
 namespace dmbrn
 {
@@ -15,16 +21,21 @@ namespace dmbrn
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
-			ModelImporter::Import(*this, false, "Models\\SkinTest\\RiggedSimple.dae");
+			//ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
 			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.fbx");
 
-			//ModelImporter::Import(*this, false, "Models\\Char\\TwoChar.fbx");
+			//ModelImporter::Import(*this,true,"Models\\anim_test.fbx");
+
+			ModelImporter::Import(*this, true, "Models\\Dragon\\2dragon.gltf");
+
+			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
+
+			//ModelImporter::Import(*this, true,"Models\\Char\\Warrok W Kurniawan.fbx");
 
 			RelationshipComponent root_rc = scene_root_.getComponent<RelationshipComponent>();
 
-			printSceneRecursively(scene_root_,"");
+			printSceneRecursively(scene_root_, "");
 
-			//ModelImporter::Import(*this, false,"Models\\Char\\Warrok W Kurniawan.fbx");
 
 			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
 			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
@@ -38,13 +49,13 @@ namespace dmbrn
 			const TagComponent& tag = node.getComponent<TagComponent>();
 			const RelationshipComponent& node_rc = node.getComponent<RelationshipComponent>();
 
-			std::cout<<tab+tag.tag<<std::endl;
+			std::cout << tab + tag.tag << std::endl;
 
 			Enttity cur_child = node_rc.first;
 
-			while(cur_child)
+			while (cur_child)
 			{
-				printSceneRecursively(cur_child, tab+" ");
+				printSceneRecursively(cur_child, tab + " ");
 				cur_child = cur_child.getComponent<RelationshipComponent>().next;
 			}
 		}
@@ -69,35 +80,16 @@ namespace dmbrn
 			enttity.destroy();
 		}
 
-		void recursivelyAddTo(SceneNode& node, Enttity parent)
-		{
-			Enttity child_ent{registry_, node.name, parent};
-
-			if (node.mesh.render_data_)
-				child_ent.addModelComponent(std::move(node.mesh), &Renderer::un_lit_textured);
-
-			TransformComponent& t = child_ent.getComponent<TransformComponent>();
-			t.position = node.transform.position;
-			t.rotation = node.transform.rotation;
-			t.scale = node.transform.scale;
-
-			for (auto& child : node.children)
-			{
-				recursivelyAddTo(child, child_ent);
-			}
-		}
-
 		void updateGlobalTransforms(uint32_t frame)
 		{
 			dirtyTraverseTree(scene_root_, frame);
 		}
 
 		// for now updates data for all entities
-		void updatePerObjectData(uint32_t frame)
+		void updatePerRenderableData(uint32_t frame)
 		{
-			char* data = Renderer::per_object_data_buffer_.map(frame);
+			char* data = Renderer::per_renderable_data_buffer_.map(frame);
 
-			// TODO: iterate all renderable, update mtxs
 			auto group = registry_.group<RenderableComponent>(entt::get<TransformComponent>);
 
 			for (auto entity : group)
@@ -113,7 +105,34 @@ namespace dmbrn
 				}
 			}
 
-			Renderer::per_object_data_buffer_.unMap(frame);
+			Renderer::per_renderable_data_buffer_.unMap(frame);
+		}
+
+		void updatePerSkeletalData(uint32_t frame)
+		{
+			char* data = Renderer::per_skeleton_data_.map(frame);
+
+			auto view = registry_.view<SkeletalModelComponent>();
+
+			for (auto entt : view)
+			{
+				SkeletalModelComponent& skeletal_comp = view.get<SkeletalModelComponent>(entt);
+
+				// if is visible
+				for (Enttity enttity : skeletal_comp.bone_enttities)
+				{
+					auto [bone, trans] = enttity.getComponent<BoneComponent, TransformComponent>();
+
+					if (bone.need_gpu_state_update)
+					{
+						bone.need_gpu_state_update = false;
+						auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data + skeletal_comp.
+							in_GPU_mtxs_offset);
+						ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.render_data_->
+							getOffsetMtxs()[bone.bone_ind];
+					}
+				}
+			}
 		}
 
 		// may perform culling
@@ -135,7 +154,7 @@ namespace dmbrn
 
 		RelationshipComponent& getRootRelationshipComponent()
 		{
-			return scene_root_.getComponent<RelationshipComponent>();	
+			return scene_root_.getComponent<RelationshipComponent>();
 		}
 
 	private:
@@ -147,17 +166,22 @@ namespace dmbrn
 		public:
 			static void Import(Scene& scene, bool with_bones, const std::string& path)
 			{
+				Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE, aiDefaultLogStream_STDOUT);
+
 				Assimp::Importer importer;
 				const aiScene* ai_scene = importer.ReadFile(
-					path, aiProcess_Triangulate | aiProcess_FlipUVs | (with_bones
-						                                                   ? aiProcess_PopulateArmatureData
-						                                                   : 0));
+					path, aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_FlipUVs | (with_bones
+						? (aiProcess_PopulateArmatureData | aiProcess_LimitBoneWeights)
+						: 0));
 				//| aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
 
 				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
 				{
 					throw std::runtime_error(std::string("ERROR::ASSIMP:: ") + importer.GetErrorString());
 				}
+
+				printAiScene(ai_scene);
+				printAnimations(ai_scene);
 
 				// retrieve the directory path of the filepath
 				const std::string directory = path.substr(0, path.find_last_of('\\'));
@@ -168,28 +192,50 @@ namespace dmbrn
 
 				with_bones_ = with_bones;
 
-
 				scale_factor_ = 1.0f;
 				if (extension == "fbx")
 					scale_factor_ = 0.01;
 
-				// process ASSIMP's root node recursively
-				processNode(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
-				            scene.addNewEntityToRoot(model_name));
+				populateTree(scene, ai_scene->mRootNode, scene.addNewEntityToRoot(model_name));
 
-				if(with_bones)
-					armature_to_bones_to_id_.clear();
+				// process ASSIMP's root node recursively
+				processNodeData(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
+				                scene.addNewEntityToRoot(model_name));
+
+				Assimp::DefaultLogger::kill();
 			}
 
 		private:
-			static inline std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>>
-			armature_to_bones_to_id_;
+			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
 			static inline bool with_bones_ = false;
 			static inline float scale_factor_ = 1.;
 
-			static void processNode(Scene& scene, aiNode* ai_node, const aiScene* ai_scene,
-			                        const std::string& directory,
-			                        const std::string& parentName, Enttity parent)
+			static void populateTree(Scene& scene, aiNode* ai_node, Enttity curent)
+			{
+				ainode_to_enttity[ai_node] = curent;
+
+				for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
+				{
+					Enttity child = scene.addNewEntityAsChild(curent, ai_node->mChildren[i]->mName.C_Str());
+					TransformComponent& trans = child.getComponent<TransformComponent>();
+
+					aiVector3D translation;
+					aiVector3D orientation;
+					aiVector3D scale;
+
+					ai_node->mTransformation.Decompose(scale, orientation, translation);
+
+					trans.position = toGlm(translation);
+					trans.rotation = toGlm(orientation);
+					trans.scale = toGlm(scale);
+
+					populateTree(scene, ai_node->mChildren[i], child);
+				}
+			}
+
+			static void processNodeData(Scene& scene, aiNode* ai_node, const aiScene* ai_scene,
+			                            const std::string& directory,
+			                            const std::string& parentName, Enttity parent)
 			{
 				std::string name_this = parentName + "." + ai_node->mName.C_Str();
 
@@ -204,45 +250,20 @@ namespace dmbrn
 						aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
 						Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
-						// impotrt as skeletal mesh
 						if (mesh->HasBones() && with_bones_)
 						{
-							aiBone* root_bone = mesh->mBones[0];
-							std::string armature_name = root_bone->mArmature->mName.C_Str();
-
-							// assume invariant that armatures have different names
-							if (auto it = armature_to_bones_to_id_.find(armature_name); it ==
-								armature_to_bones_to_id_.end())
+							// import as skeletal mesh
+							std::vector<Enttity> bone_entts;
+							for (int j = 0; j < mesh->mNumBones; ++j)
 							{
-								armature_to_bones_to_id_[armature_name] = {};
-								armature_to_bones_to_id_[armature_name][root_bone->mName.C_Str()]
-									= 0;
+								aiBone* bone = mesh->mBones[j];
 
-								std::vector<glm::mat4> bones_offset_mtxs;
-								std::unordered_map<std::string, uint32_t>& bone_name_to_id = armature_to_bones_to_id_[
-									armature_name];
+								Enttity entt = ainode_to_enttity[bone->mNode];
+								entt.addComponent<BoneComponent>(j);
 
-								for (int j = 1; j < mesh->mNumBones; ++j)
-								{
-									aiBone* bone = mesh->mBones[j];
-
-									uint32_t cur_id = bone_name_to_id.size();
-
-									bone_name_to_id[bone->mName.C_Str()] = cur_id;
-
-									bones_offset_mtxs.push_back(toGlm(bone->mOffsetMatrix));
-								}
-
-								Enttity new_entty = scene.addNewEntityAsChild(parent, mesh->mName.C_Str());
-								//new_entty.addComponent<SkeletalMeshComp>();
+								bone_entts.push_back(entt);
 							}
-							else
-							{
-								throw std::runtime_error("Armatures must have different names");
-							}
-						}
-						else if (!mesh->HasBones() || !with_bones_)
-						{
+
 							aiVector3D translation;
 							aiVector3D orientation;
 							aiVector3D scale;
@@ -257,10 +278,33 @@ namespace dmbrn
 							trans.rotation = toGlm(orientation);
 							trans.scale = toGlm(scale) * (scale_factor_);
 
-							Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
+							Material* material =
+								DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
+
+							new_entty.addSkeletalModelComponent(SkeletalMesh(material, mesh_name, mesh), bone_entts,
+							                                    &Renderer::un_lit_textured
+							);
+						}
+						else if (!mesh->HasBones() || !with_bones_)
+						{
+							// import as static mesh
+
+							aiVector3D translation;
+							aiVector3D orientation;
+							aiVector3D scale;
+
+							ai_node->mTransformation.Decompose(scale, orientation, translation);
+
+							Enttity new_entty = scene.addNewEntityAsChild(parent, mesh->mName.C_Str());
+
+							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
+
+							trans.position = toGlm(translation) * (scale_factor_);
+							trans.rotation = toGlm(orientation);
+							trans.scale = toGlm(scale) * (scale_factor_);
 
 							new_entty.addModelComponent(Mesh(material, mesh_name, mesh),
-							                                       &Renderer::un_lit_textured);
+							                            &Renderer::un_lit_textured);
 						}
 						else
 						{
@@ -272,20 +316,8 @@ namespace dmbrn
 				// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 				for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 				{
-					Enttity child = scene.addNewEntityAsChild(parent, ai_node->mChildren[i]->mName.C_Str());
-					TransformComponent& trans = child.getComponent<TransformComponent>();
-
-					aiVector3D translation;
-					aiVector3D orientation;
-					aiVector3D scale;
-
-					ai_node->mTransformation.Decompose(scale, orientation, translation);
-
-					trans.position = toGlm(translation);
-					trans.rotation = toGlm(orientation);
-					trans.scale = toGlm(scale);
-
-					processNode(scene, ai_node->mChildren[i], ai_scene, directory, name_this, child);
+					processNodeData(scene, ai_node->mChildren[i], ai_scene, directory, name_this,
+					                ainode_to_enttity[ai_node->mChildren[i]]);
 				}
 			}
 		};
@@ -305,7 +337,8 @@ namespace dmbrn
 
 				if (ent_rc.parent)
 				{
-					parent_trans = ent_rc.parent.getComponent<TransformComponent>().globalTransformMatrix;//ent_rc.parent.getComponent<TransformComponent>().getMatrix();
+					parent_trans = ent_rc.parent.getComponent<TransformComponent>().globalTransformMatrix;
+					//ent_rc.parent.getComponent<TransformComponent>().getMatrix();
 				}
 				else // this is root
 					parent_trans = glm::mat4(1.0f);
@@ -342,9 +375,14 @@ namespace dmbrn
 				renderable->need_GPU_state_update = true;
 			}
 
+			if (BoneComponent* bone = ent.tryGetComponent<BoneComponent>())
+			{
+				bone->need_gpu_state_update = true;
+			}
+
 			const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
 			Enttity cur_child = ent_rc.first;
-			while (cur_child )
+			while (cur_child)
 			{
 				editedTraverseTree(cur_child, this_matrix, frame);
 				cur_child = cur_child.getComponent<RelationshipComponent>().next;

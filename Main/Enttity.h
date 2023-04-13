@@ -2,14 +2,16 @@
 #include<entt/entt.hpp>
 
 #include "Main/Componenets/ModelComponent.h"
-#include "Main/Componenets/SkeletalModelComponent.h"
 #include "Componenets/TagComponent.h"
 
 namespace dmbrn
 {
+	struct SkeletalModelComponent;
 	class Enttity
 	{
 	public:
+		Enttity() = default;
+
 		Enttity(Enttity&& other): registry_(other.registry_), entityID_(other.entityID_)
 		{
 		}
@@ -51,20 +53,34 @@ namespace dmbrn
 			return entityID_ == other.entityID_ && registry_ == other.registry_;
 		}
 
-		template <class T>
-		T& getComponent()
+		template <typename... Type>
+		[[nodiscard]] decltype(auto) getComponent()
 		{
-			return registry_->get<T>(entityID_);
+			if constexpr (sizeof...(Type) == 1u)
+			{
+				return (const_cast<Type&>(registry_->get<Type>(entityID_)), ...);
+			}
+			else
+			{
+				return std::forward_as_tuple(registry_->get<Type>(entityID_)...);
+			}
 		}
 
-		template <class T>
-		const T& getComponent() const
+		template <typename... Type>
+		[[nodiscard]] decltype(auto) getComponent() const
 		{
-			return registry_->get<T>(entityID_);
+			if constexpr (sizeof...(Type) == 1u)
+			{
+				return (const_cast<Type&>(registry_->get<Type>(entityID_)), ...);
+			}
+			else
+			{
+				return std::forward_as_tuple(registry_->get<Type>(entityID_)...);
+			}
 		}
 
-		template <typename Type, typename... Args>
-		void addComponent(Args&&...args)
+		template <typename Type, typename ... Args>
+		void addComponent(Args&&... args)
 		{
 			static_assert(!std::is_same_v<Type, ModelComponent>);
 			static_assert(!std::is_same_v<Type, SkeletalModelComponent>);
@@ -74,7 +90,8 @@ namespace dmbrn
 
 		void addModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr);
 
-		void addSkeletalModelComponent(SkeletalMesh&& mesh, ShaderEffect* shader = nullptr);
+		void addSkeletalModelComponent(SkeletalMesh&& mesh, std::vector<Enttity> bone_entts,
+		                               ShaderEffect* shader = nullptr);
 
 		template <typename T>
 		T* tryGetComponent()

@@ -6,6 +6,7 @@
 
 #include <assimp/mesh.h>
 #include<glm/glm.hpp>
+#include "Utils/AI_GLM_utils.h"
 #include"MaterialSystem/Materials/Diffusion/DiffusionMaterial.h"
 #include "BonedVertex.h"
 #include "Wrappers/HostLocalBuffer.h"
@@ -65,9 +66,15 @@ namespace dmbrn
 				return registry_.size();
 			}
 
+			const std::vector<glm::mat4>& getOffsetMtxs()const
+			{
+				return bones_offset_mtxs;
+			}
+
 		private:
 			static inline std::unordered_map<std::vector<aiVector3D>, SkeletalMeshRenderData> registry_;
 			uint32_t indices_count;
+			std::vector<glm::mat4> bones_offset_mtxs;
 			std::vector<std::string> use_this_mesh_;
 			HostLocalBuffer<BonedVertex> vertex_buffer_;
 			HostLocalBuffer<uint16_t> index_buffer_;
@@ -131,12 +138,14 @@ namespace dmbrn
 						indices.push_back(face.mIndices[j]);
 				}
 
+				// iterate all bones
 				for (unsigned int i = 0; i < mesh->mNumBones; ++i)
 				{
 					aiBone* bone = mesh->mBones[i];
 
-					assert(BonedVertex::max_count_of_bones_per_vrtx == bone->mNumWeights);
+					bones_offset_mtxs.push_back(toGlm(bone->mOffsetMatrix));
 
+					// iterate all weights, add bone id (i) and weight to corresponding vertex
 					for (unsigned int j = 0; j < bone->mNumWeights; ++j)
 					{
 						aiVertexWeight vw = bone->mWeights[j];
@@ -144,7 +153,9 @@ namespace dmbrn
 						unsigned int cur_vrtx_bone_count = vertex_bone_count[vw.mVertexId]++;
 						// save values for this bone move to next after ((++))
 
-						vertices[vw.mVertexId].bone_IDs[cur_vrtx_bone_count] = j;
+						assert(cur_vrtx_bone_count<BonedVertex::max_count_of_bones_per_vrtx);
+
+						vertices[vw.mVertexId].bone_IDs[cur_vrtx_bone_count] = i;
 						vertices[vw.mVertexId].bone_weights[cur_vrtx_bone_count] = vw.mWeight;
 					}
 				}

@@ -170,6 +170,7 @@
   <ItemGroup>
     <ClCompile Include="MainHpp.cpp" />
     <ClCompile Include="Main\Enttity.cpp" />
+    <ClCompile Include="Utils\AI_GLM_utils.cpp" />
     <ClCompile Include="Utils\UtilsFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,7 @@
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
+    <ClInclude Include="Main\Componenets\BoneComponenet.h" />
     <ClInclude Include="Main\Componenets\CameraComponent.h" />
     <ClInclude Include="Main\Componenets\ModelComponent.h" />
     <ClInclude Include="Main\Componenets\RelationshipComponent.h" />
@@ -236,7 +238,7 @@
     <ClInclude Include="Wrappers\Instance.h" />
     <ClInclude Include="Wrappers\LogicalDevice.h" />
     <ClInclude Include="Wrappers\Mesh.h" />
-    <ClInclude Include="Wrappers\ModelImporter.h" />
+    <ClInclude Include="Utils\AI_GLM_utils.h" />
     <ClInclude Include="Wrappers\PhysicalDevice.h" />
     <ClInclude Include="Wrappers\RenderPass.h" />
     <ClInclude Include="Wrappers\Singletons.h" />

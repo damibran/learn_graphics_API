@@ -24,6 +24,9 @@
     <ClCompile Include="Utils\UtilsFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\AI_GLM_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader_push_const.vert" />
@@ -73,7 +76,7 @@
     <ClInclude Include="Wrappers\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\ModelImporter.h">
+    <ClInclude Include="Utils\AI_GLM_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\ImGUIRenderPass.h">
@@ -257,6 +260,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Main\Componenets\SkeletalModelComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main\Componenets\BoneComponenet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

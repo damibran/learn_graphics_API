@@ -1,7 +1,7 @@
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
 #include "Componenets/RenderableComponent.h"
-
+#include "Componenets/SkeletalModelComponent.h"
 
 namespace dmbrn
 {
@@ -39,10 +39,10 @@ namespace dmbrn
 		registry_->emplace<ModelComponent>(entityID_,std::move(mesh), shader);
 	}
 
-	void Enttity::addSkeletalModelComponent(SkeletalMesh&& mesh, ShaderEffect* shader)
+	void Enttity::addSkeletalModelComponent(SkeletalMesh&& mesh, std::vector<Enttity> bone_entts, ShaderEffect* shader)
 	{
 		addComponent<RenderableComponent>();
-		registry_->emplace<SkeletalModelComponent>(entityID_,std::move(mesh), shader);
+		registry_->emplace<SkeletalModelComponent>(entityID_,std::move(mesh), bone_entts,shader);
 	}
 
 	void Enttity::markTransformAsEdited(uint32_t frame)

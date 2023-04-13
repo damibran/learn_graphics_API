@@ -11,7 +11,7 @@ namespace dmbrn
 		bool need_GPU_state_update = true;
 
 		RenderableComponent():
-			inGPU_transform_offset(Renderer::per_object_data_buffer_.registerObject())
+			inGPU_transform_offset(Renderer::per_renderable_data_buffer_.registerObject())
 		{
 		}
 
