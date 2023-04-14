@@ -1,6 +1,5 @@
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
-#include "Componenets/RenderableComponent.h"
 #include "Componenets/SkeletalModelComponent.h"
 
 namespace dmbrn
@@ -33,18 +32,6 @@ namespace dmbrn
 		this_rc.next = old_first;
 	}
 
-	void Enttity::addModelComponent(Mesh&& mesh, ShaderEffect* shader)
-	{
-		addComponent<RenderableComponent>();
-		registry_->emplace<ModelComponent>(entityID_,std::move(mesh), shader);
-	}
-
-	void Enttity::addSkeletalModelComponent(SkeletalMesh&& mesh, std::vector<Enttity> bone_entts, ShaderEffect* shader)
-	{
-		addComponent<RenderableComponent>();
-		registry_->emplace<SkeletalModelComponent>(entityID_,std::move(mesh), bone_entts,shader);
-	}
-
 	void Enttity::markTransformAsEdited(uint32_t frame)
 	// we make it edited for this node and dirty all the way to the root
 	{
@@ -61,14 +48,14 @@ namespace dmbrn
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();
 
-		//if (!this_tc.isDirtyForFrame(frame))
-		//{
-		RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
-		this_tc.markAsDirty();
-		if (this_rc.parent)
+		if (!this_tc.isDirtyForFrame(frame))
 		{
-			this_rc.parent.markTransformAsDirty(frame);
+			RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
+			this_tc.markAsDirty();
+			if (this_rc.parent)
+			{
+				this_rc.parent.markTransformAsDirty(frame);
+			}
 		}
-		//}
 	}
 }

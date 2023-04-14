@@ -159,21 +159,21 @@ namespace dmbrn
 			Renderer::newView(current_frame, camera_, command_buffer);
 
 			// static model drawing
-			auto static_group = scene_.getModelsToDraw();
-			for (auto entity : static_group)
+			auto static_view = scene_.getModelsToDraw();
+			for (auto entity : static_view)
 			{
-				auto [model,renderable] = static_group.get<ModelComponent, RenderableComponent>(entity);
-				model.getShader()->addToRenderQueue({&model.mesh, renderable.inGPU_transform_offset});
+				StaticModelComponent& model = static_view.get<StaticModelComponent>(entity);
+				model.getShader()->addToRenderQueue({&model.mesh, model.inGPU_transform_offset});
 			}
 
 			// skeletal model drawing
 			auto skeletal_group = scene_.getSkeletalModelsToDraw();
 			for (auto entity : skeletal_group)
 			{
-				auto [skeletal_model,renderable] = skeletal_group.get<
-					SkeletalModelComponent, RenderableComponent>(entity);
+				SkeletalModelComponent& skeletal_model = skeletal_group.get<
+					SkeletalModelComponent>(entity);
 				skeletal_model.getShader()->addToRenderQueue({
-					&skeletal_model.mesh, {renderable.inGPU_transform_offset, skeletal_model.in_GPU_mtxs_offset}
+					&skeletal_model.mesh,  skeletal_model.in_GPU_mtxs_offset
 				});
 			}
 

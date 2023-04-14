@@ -29,7 +29,7 @@ namespace dmbrn
 				{
 					if (ImGui::MenuItem("Model Component"))
 					{
-						entity.addModelComponent(Mesh());
+						entity.addComponent<StaticModelComponent>(Mesh());
 						ImGui::CloseCurrentPopup();
 					}
 
@@ -75,7 +75,7 @@ namespace dmbrn
 				}
 			}
 
-			if (auto* comp = entity.tryGetComponent<ModelComponent>())
+			if (auto* comp = entity.tryGetComponent<StaticModelComponent>())
 			{
 				if (ImGui::TreeNodeEx("ModelComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{

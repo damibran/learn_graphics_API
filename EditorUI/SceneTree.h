@@ -94,7 +94,7 @@ namespace dmbrn
 
 		void deselect(Enttity enttity)
 		{
-			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+			if (StaticModelComponent* model_comp = enttity.tryGetComponent<StaticModelComponent>())
 			{
 				model_comp->shader_ = &Renderer::un_lit_textured;
 			}
@@ -110,7 +110,7 @@ namespace dmbrn
 
 		void select(Enttity enttity)
 		{
-			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
+			if (StaticModelComponent* model_comp = enttity.tryGetComponent<StaticModelComponent>())
 			{
 				//model_comp->shader_ = &Renderer::outlined_;
 			}

@@ -3,10 +3,9 @@
 
 namespace dmbrn
 {
-	class PerRenderableData
+	class PerStaticModelData
 	{
-		friend class PerSkeletonData;
-	public:
+		public:
 		size_t dynamic_aligned_size_ = 256;
 
 		static inline constexpr size_t MAX_OBJECT_COUNT = 512;
@@ -16,7 +15,7 @@ namespace dmbrn
 			glm::mat4 model;
 		};
 
-		PerRenderableData(const LogicalDevice& device, const PhysicalDevice& physical_device)
+		PerStaticModelData(const LogicalDevice& device, const PhysicalDevice& physical_device)
 		{
 			size_t minUboAlignment = physical_device->getProperties().limits.minUniformBufferOffsetAlignment;
 			if (minUboAlignment > 0)
@@ -53,6 +52,8 @@ namespace dmbrn
 
 		char* map(uint32_t frame)
 		{
+			if(current_obj_count==0)
+				return nullptr;
 			return static_cast<char*>(uniform_buffers_memory[frame].mapMemory(
 				0, current_obj_count * dynamic_aligned_size_));
 		}

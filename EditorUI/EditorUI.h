@@ -59,7 +59,7 @@ namespace dmbrn
 				showImportWindow();
 
 			scene_.updateGlobalTransforms(current_frame_);
-			scene_.updatePerRenderableData(current_frame_);
+			scene_.updatePerStaticModelData(current_frame_);
 			scene_.updatePerSkeletalData(current_frame_);
 
 			render(Singletons::device, frame, imageIndex);

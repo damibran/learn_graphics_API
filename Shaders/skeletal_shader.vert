@@ -5,15 +5,10 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 proj;
 } ubo;
 
-layout(set = 3, binding=0) uniform DynamicUBO
-{
-    mat4 model;
-}dubo;
-
 const int MAX_BONES = 256;
 const int MAX_BONE_INFLUENCE = 4;
 
-layout(set = 3, binding=1) uniform DynamicSkelUBO
+layout(set = 3, binding=0) uniform DynamicSkelUBO
 {
     mat4[256] finalBonesMatrices;
 }skel_dubo;
@@ -33,6 +28,6 @@ void main() {
     boneTransform     += skel_dubo.finalBonesMatrices[inBoneIDs[2]] * inBoneWeights[2];
     boneTransform     += skel_dubo.finalBonesMatrices[inBoneIDs[3]] * inBoneWeights[3];	
 
-    gl_Position = ubo.proj * ubo.view * dubo.model * boneTransform * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view  * boneTransform * vec4(inPosition, 1.0);
     fragTexCoord = inTexCoord;
 }

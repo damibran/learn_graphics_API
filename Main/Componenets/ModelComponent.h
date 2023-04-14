@@ -1,16 +1,18 @@
 #pragma once
 #include "MaterialSystem/ShaderEffects/ShaderEffect.h"
 #include "Wrappers/Mesh.h"
+#include "Wrappers/Singletons/Renderer.h"
 
 namespace dmbrn
 {
-	struct ModelComponent
+	struct StaticModelComponent
 	{
-		ModelComponent() = default;
+		StaticModelComponent() = default;
 
-		ModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr) :
+		StaticModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr) :
 			mesh(std::move(mesh)),
-			shader_(shader)
+			shader_(shader),
+			inGPU_transform_offset(Renderer::per_static_data_buffer_.registerObject())
 		{
 		}
 
@@ -21,5 +23,7 @@ namespace dmbrn
 
 		Mesh mesh;
 		ShaderEffect* shader_ = nullptr;
+		uint32_t inGPU_transform_offset;
+		bool need_GPU_state_update = true;
 	};
 }

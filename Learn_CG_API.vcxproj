@@ -200,7 +200,6 @@
     <ClInclude Include="Main\Componenets\CameraComponent.h" />
     <ClInclude Include="Main\Componenets\ModelComponent.h" />
     <ClInclude Include="Main\Componenets\RelationshipComponent.h" />
-    <ClInclude Include="Main\Componenets\RenderableComponent.h" />
     <ClInclude Include="Main\Componenets\SkeletalModelComponent.h" />
     <ClInclude Include="Main\Componenets\TagComponent.h" />
     <ClInclude Include="Main\Componenets\TransformComponent.h" />

@@ -2,7 +2,6 @@
 
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
-#include "Componenets/RenderableComponent.h"
 #include "Componenets/TagComponent.h"
 #include "Componenets/BoneComponenet.h"
 #include "Componenets/SkeletalModelComponent.h"
@@ -86,66 +85,74 @@ namespace dmbrn
 		}
 
 		// for now updates data for all entities
-		void updatePerRenderableData(uint32_t frame)
+		void updatePerStaticModelData(uint32_t frame)
 		{
-			char* data = Renderer::per_renderable_data_buffer_.map(frame);
+			char* data = Renderer::per_static_data_buffer_.map(frame);
 
-			auto group = registry_.group<RenderableComponent>(entt::get<TransformComponent>);
-
-			for (auto entity : group)
+			if (data)
 			{
-				auto [model, transform] = group.get(entity);
+				auto group = registry_.group<StaticModelComponent>(entt::get<TransformComponent>);
 
-				if (model.need_GPU_state_update)
+				for (auto entity : group)
 				{
-					model.need_GPU_state_update = false;
-					auto ubo_data = reinterpret_cast<PerRenderableData::UBODynamicData*>(data + model.
-						inGPU_transform_offset);
-					ubo_data->model = transform.globalTransformMatrix;
-				}
-			}
+					auto [model, transform] = group.get(entity);
 
-			Renderer::per_renderable_data_buffer_.unMap(frame);
+					if (model.need_GPU_state_update)
+					{
+						model.need_GPU_state_update = false;
+						auto ubo_data = reinterpret_cast<PerStaticModelData::UBODynamicData*>(data + model.
+							inGPU_transform_offset);
+						ubo_data->model = transform.globalTransformMatrix;
+					}
+				}
+
+				Renderer::per_static_data_buffer_.unMap(frame);
+			}
 		}
 
 		void updatePerSkeletalData(uint32_t frame)
 		{
 			char* data = Renderer::per_skeleton_data_.map(frame);
 
-			auto view = registry_.view<SkeletalModelComponent>();
-
-			for (auto entt : view)
+			if (data)
 			{
-				SkeletalModelComponent& skeletal_comp = view.get<SkeletalModelComponent>(entt);
+				auto view = registry_.view<SkeletalModelComponent>();
 
-				// if is visible
-				for (Enttity enttity : skeletal_comp.bone_enttities)
+				for (auto entt : view)
 				{
-					auto [bone, trans] = enttity.getComponent<BoneComponent, TransformComponent>();
+					SkeletalModelComponent& skeletal_comp = view.get<SkeletalModelComponent>(entt);
 
-					if (bone.need_gpu_state_update)
+					// if is visible
+					for (Enttity enttity : skeletal_comp.bone_enttities)
 					{
-						bone.need_gpu_state_update = false;
-						auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data + skeletal_comp.
-							in_GPU_mtxs_offset);
-						ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.render_data_->getOffsetMtxs()[bone.bone_ind];//glm::mat4(1.f);//
+						auto [bone, trans] = enttity.getComponent<BoneComponent, TransformComponent>();
+
+						if (bone.need_gpu_state_update)
+						{
+							bone.need_gpu_state_update = false;
+							auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data + skeletal_comp.
+								in_GPU_mtxs_offset);
+							ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.
+								render_data_->
+								getOffsetMtxs()[bone.bone_ind]; //glm::mat4(1.f);//
+						}
 					}
 				}
-			}
 
-			Renderer::per_skeleton_data_.unMap(frame);
+				Renderer::per_skeleton_data_.unMap(frame);
+			}
 		}
 
 		// may perform culling
 		auto getModelsToDraw()
 		{
-			return registry_.group<ModelComponent>(entt::get<RenderableComponent>);
+			return registry_.view<StaticModelComponent>();
 		}
 
 		// may perform culling
 		auto getSkeletalModelsToDraw()
 		{
-			return registry_.group<SkeletalModelComponent>(entt::get<RenderableComponent>);
+			return registry_.view<SkeletalModelComponent>();
 		}
 
 		Enttity getNullEntt()
@@ -261,7 +268,7 @@ namespace dmbrn
 					for (unsigned int i = 0; i < ai_node->mNumMeshes; i++)
 					{
 						aiMesh* mesh = ai_scene->mMeshes[ai_node->mMeshes[i]];
-						std::string mesh_name = name_this + + "." + std::string(mesh->mName.C_Str());
+						std::string mesh_name = name_this + "." + std::string(mesh->mName.C_Str());
 
 						aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
 						Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
@@ -286,7 +293,9 @@ namespace dmbrn
 
 							ai_node->mTransformation.Decompose(scale, orientation, translation);
 
-							Enttity new_entty = scene.addNewEntityAsChild(parent, mesh->mName.C_Str());
+							std::string ent_mesh_name = std::string(mesh->mName.C_Str())+":Mesh";
+
+							Enttity new_entty = scene.addNewEntityAsChild(parent, ent_mesh_name);
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
@@ -294,8 +303,9 @@ namespace dmbrn
 							trans.rotation = toGlm(orientation);
 							trans.scale = toGlm(scale) * (scale_factor_);
 
-							new_entty.addSkeletalModelComponent(SkeletalMesh(material, mesh_name, mesh), bone_entts,
-							                                    &Renderer::un_lit_textured
+							new_entty.addComponent<SkeletalModelComponent>(
+								SkeletalMesh(material, mesh_name, mesh), bone_entts,
+								&Renderer::un_lit_textured
 							);
 						}
 						else if (!mesh->HasBones() || !with_bones_)
@@ -308,7 +318,9 @@ namespace dmbrn
 
 							ai_node->mTransformation.Decompose(scale, orientation, translation);
 
-							Enttity new_entty = scene.addNewEntityAsChild(parent, mesh->mName.C_Str());
+							std::string ent_mesh_name = std::string(mesh->mName.C_Str())+":Mesh";
+
+							Enttity new_entty = scene.addNewEntityAsChild(parent, ent_mesh_name);
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
@@ -316,8 +328,8 @@ namespace dmbrn
 							trans.rotation = toGlm(orientation);
 							trans.scale = toGlm(scale) * (scale_factor_);
 
-							new_entty.addModelComponent(Mesh(material, mesh_name, mesh),
-							                            &Renderer::un_lit_textured);
+							new_entty.addComponent<StaticModelComponent>(Mesh(material, mesh_name, mesh),
+							                                             &Renderer::un_lit_textured);
 						}
 						else
 						{
@@ -383,9 +395,9 @@ namespace dmbrn
 
 			ent_tc.globalTransformMatrix = this_matrix;
 
-			if (RenderableComponent* renderable = ent.tryGetComponent<RenderableComponent>())
+			if (StaticModelComponent* static_model_component = ent.tryGetComponent<StaticModelComponent>())
 			{
-				renderable->need_GPU_state_update = true;
+				static_model_component->need_GPU_state_update = true;
 			}
 
 			if (BoneComponent* bone = ent.tryGetComponent<BoneComponent>())

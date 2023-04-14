@@ -249,9 +249,6 @@
     <ClInclude Include="Main\Componenets\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\RenderableComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Main\Componenets\TagComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -82,16 +82,8 @@ namespace dmbrn
 		template <typename Type, typename ... Args>
 		void addComponent(Args&&... args)
 		{
-			static_assert(!std::is_same_v<Type, ModelComponent>);
-			static_assert(!std::is_same_v<Type, SkeletalModelComponent>);
-
 			registry_->emplace<Type>(entityID_, std::forward<Args>(args)...);
 		}
-
-		void addModelComponent(Mesh&& mesh, ShaderEffect* shader = nullptr);
-
-		void addSkeletalModelComponent(SkeletalMesh&& mesh, std::vector<Enttity> bone_entts,
-		                               ShaderEffect* shader = nullptr);
 
 		template <typename T>
 		T* tryGetComponent()

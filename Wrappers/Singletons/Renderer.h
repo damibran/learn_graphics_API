@@ -24,10 +24,10 @@ namespace dmbrn
 			viewport_camera.bindData(frame, command_buffer);
 		}
 
-		static inline PerRenderableData per_renderable_data_buffer_{Singletons::device, Singletons::physical_device};
-		static inline PerSkeletonData per_skeleton_data_{Singletons::device, Singletons::physical_device,per_renderable_data_buffer_};
+		static inline PerStaticModelData per_static_data_buffer_{Singletons::device, Singletons::physical_device};
+		static inline PerSkeletonData per_skeleton_data_{Singletons::device, Singletons::physical_device};
 
-		static inline UnlitTexturedShaderEffect un_lit_textured{per_renderable_data_buffer_,per_skeleton_data_};
+		static inline UnlitTexturedShaderEffect un_lit_textured{per_static_data_buffer_,per_skeleton_data_};
 		//static inline UnlitTexturedOutlinedShaderEffect outlined_{per_renderable_data_buffer_,per_skeleton_data_};
 	};
 }

@@ -49,7 +49,7 @@ namespace dmbrn
 				*CameraRenderData::getDescriptorSetLayout(),
 				*OutlineShaderEffectRenderData::getDescriptorSetLayout(),
 				*DiffusionDescriptorSets::descriptor_layout_,
-				*PerRenderableData::descriptor_layout_
+				*PerStaticModelData::descriptor_layout_
 			};
 
 			const vk::PipelineLayoutCreateInfo pipelineLayoutInfo

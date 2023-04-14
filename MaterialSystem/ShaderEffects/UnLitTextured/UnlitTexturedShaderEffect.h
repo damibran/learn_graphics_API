@@ -10,7 +10,7 @@ namespace dmbrn
 	{
 		//UnlitTexturedShaderEffect()=default;
 
-		UnlitTexturedShaderEffect(PerRenderableData& per_object_data_buffer,
+		UnlitTexturedShaderEffect(PerStaticModelData& per_object_data_buffer,
 		                                  PerSkeletonData& per_skeleton_data):
 			per_object_data_buffer_(per_object_data_buffer),
 			per_skeleton_data_(per_skeleton_data)
@@ -33,11 +33,11 @@ namespace dmbrn
 
 	private:
 
-		PerRenderableData& per_object_data_buffer_;
+		PerStaticModelData& per_object_data_buffer_;
 		PerSkeletonData& per_skeleton_data_;
 
 		void drawStatic(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerRenderableData& per_renderable_data_buffer) 		{
+		                const PerStaticModelData& per_renderable_data_buffer) 		{
 			un_lit_graphics_pipeline_statics_.bindStaticPipeline(command_buffer);
 			un_lit_graphics_pipeline_statics_.bindStaticShaderData(frame, command_buffer);
 
