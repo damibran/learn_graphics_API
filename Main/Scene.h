@@ -20,7 +20,7 @@ namespace dmbrn
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
-			ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
+			//ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
 			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.fbx");
 
 			//ModelImporter::Import(*this,true,"Models\\anim_test.fbx");
@@ -29,7 +29,7 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			//ModelImporter::Import(*this, true,"Models\\Char\\Warrok W Kurniawan.fbx");
+			ModelImporter::Import(*this, true,"Models\\Char\\Defeated_blend.fbx");
 
 			RelationshipComponent root_rc = scene_root_.getComponent<RelationshipComponent>();
 
@@ -178,7 +178,7 @@ namespace dmbrn
 
 				Assimp::Importer importer;
 				const aiScene* ai_scene = importer.ReadFile(
-					path, aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_FlipUVs | (with_bones
+					path, aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_FlipUVs |aiProcess_GlobalScale| (with_bones
 						? (aiProcess_PopulateArmatureData | aiProcess_LimitBoneWeights)
 						: 0));
 				//| aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
@@ -200,9 +200,9 @@ namespace dmbrn
 
 				with_bones_ = with_bones;
 
-				scale_factor_ = 1.0f;
-				if (extension == "fbx")
-					scale_factor_ = 0.01;
+				//scale_factor_ = 1.0f;
+				//if (extension == "fbx")
+				//	scale_factor_ = 0.01;
 
 				// create root
 				Enttity root_ent = scene.addNewEntityToRoot(model_name);
@@ -231,7 +231,7 @@ namespace dmbrn
 		private:
 			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
 			static inline bool with_bones_ = false;
-			static inline float scale_factor_ = 1.;
+			//static inline float scale_factor_ = 1.;
 
 			static void populateTree(Scene& scene, aiNode* ai_node, Enttity curent)
 			{
@@ -299,9 +299,9 @@ namespace dmbrn
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
-							trans.position = toGlm(translation) * (scale_factor_);
+							trans.position = toGlm(translation);
 							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale) * (scale_factor_);
+							trans.scale = toGlm(scale);
 
 							new_entty.addComponent<SkeletalModelComponent>(
 								SkeletalMesh(material, mesh_name, mesh), bone_entts,
@@ -324,9 +324,9 @@ namespace dmbrn
 
 							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
 
-							trans.position = toGlm(translation) * (scale_factor_);
+							trans.position = toGlm(translation) ;//* (scale_factor_);
 							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale) * (scale_factor_);
+							trans.scale = toGlm(scale) ;//* (scale_factor_);
 
 							new_entty.addComponent<StaticModelComponent>(Mesh(material, mesh_name, mesh),
 							                                             &Renderer::un_lit_textured);

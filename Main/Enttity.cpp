@@ -48,14 +48,14 @@ namespace dmbrn
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();
 
-		if (!this_tc.isDirtyForFrame(frame))
-		{
+		//if (!this_tc.isDirtyForFrame(frame))
+		//{
 			RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
 			this_tc.markAsDirty();
 			if (this_rc.parent)
 			{
 				this_rc.parent.markTransformAsDirty(frame);
 			}
-		}
+		//}
 	}
 }
