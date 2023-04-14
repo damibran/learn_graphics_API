@@ -5,7 +5,7 @@
 
 namespace dmbrn
 {
-	struct UnlitTexturedOutlinedShaderEffect : public ShaderEffect
+	/*struct UnlitTexturedOutlinedShaderEffect : public ShaderEffect
 	{
 		//UnlitTexturedOutlinedShaderEffect()=default;
 
@@ -112,5 +112,5 @@ namespace dmbrn
 
 		static inline UnLitTexturedGraphicsPipelineStatics stencil_graphics_pipeline_;
 		static inline OutlineGraphicsPipelineStatics outline_graphics_pipeline_statics_{};
-	};
+	};*/
 }

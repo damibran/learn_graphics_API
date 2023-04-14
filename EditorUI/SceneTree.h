@@ -112,7 +112,7 @@ namespace dmbrn
 		{
 			if (ModelComponent* model_comp = enttity.tryGetComponent<ModelComponent>())
 			{
-				model_comp->shader_ = &Renderer::outlined_;
+				//model_comp->shader_ = &Renderer::outlined_;
 			}
 
 			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;

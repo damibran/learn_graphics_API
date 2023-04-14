@@ -176,9 +176,11 @@
   <ItemGroup>
     <None Include="Shaders\outline_shader.frag" />
     <None Include="Shaders\outline_shader.vert" />
+    <None Include="Shaders\outline_skeletal_shader.vert" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shader_push_const.vert" />
+    <None Include="Shaders\skeletal_shader.vert" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>

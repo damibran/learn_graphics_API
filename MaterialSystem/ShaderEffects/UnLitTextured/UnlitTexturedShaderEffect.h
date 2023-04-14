@@ -28,7 +28,7 @@ namespace dmbrn
 		void draw(int frame, const vk::raii::CommandBuffer& command_buffer) override
 		{
 			drawStatic(frame, command_buffer, per_object_data_buffer_);
-			//drawSkeletal(frame, command_buffer, per_skeleton_data_);
+			drawSkeletal(frame, command_buffer, per_skeleton_data_);
 		}
 
 	private:
@@ -37,18 +37,18 @@ namespace dmbrn
 		PerSkeletonData& per_skeleton_data_;
 
 		void drawStatic(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerRenderableData& per_object_data_buffer) 		{
-			un_lit_graphics_pipeline_statics_.bindPipeline(command_buffer);
-			un_lit_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
+		                const PerRenderableData& per_renderable_data_buffer) 		{
+			un_lit_graphics_pipeline_statics_.bindStaticPipeline(command_buffer);
+			un_lit_graphics_pipeline_statics_.bindStaticShaderData(frame, command_buffer);
 
 			for(auto& [mesh, offset]: static_render_queue){
 
-				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.static_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
-				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *un_lit_graphics_pipeline_statics_.pipeline_layout_,
+				per_renderable_data_buffer.bindDataFor(frame, command_buffer,
+				                                   *un_lit_graphics_pipeline_statics_.static_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
@@ -58,24 +58,24 @@ namespace dmbrn
 		}
 
 		void drawSkeletal(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerSkeletonData& per_object_data_buffer) 		{
-			un_lit_graphics_pipeline_statics_.bindPipeline(command_buffer);
-			un_lit_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
+		                const PerSkeletonData& per_skeletal_data_buffer) 		{
+			un_lit_graphics_pipeline_statics_.bindSkeletalPipeline(command_buffer);
+			un_lit_graphics_pipeline_statics_.bindSkeletalShaderData(frame, command_buffer);
 
 			for(auto& [mesh, offset]: skeletal_render_queue){
 
-				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.skeletal_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
-				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *un_lit_graphics_pipeline_statics_.pipeline_layout_,
+				per_skeletal_data_buffer.bindDataFor(frame, command_buffer,
+				                                   *un_lit_graphics_pipeline_statics_.skeletal_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
 			}
 
-			static_render_queue.clear();
+			skeletal_render_queue.clear();
 		}
 
 	public:

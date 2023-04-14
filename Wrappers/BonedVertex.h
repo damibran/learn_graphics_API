@@ -5,16 +5,22 @@
 
 namespace dmbrn
 {
+	struct SkeletalOffsets
+	{
+		uint32_t renderable_offset;
+		uint32_t skeletal_offset;
+	};
+
 	struct BonedVertex
 	{
 		static inline constexpr uint8_t max_count_of_bones_per_vrtx = 4;
-		static inline constexpr uint16_t max_count_of_bones = 256; // 8-bit bone id
+		static inline constexpr uint16_t max_count_of_bones = 256;
 
 		glm::vec3 pos;
 		glm::vec3 normal;
 		glm::vec2 texCoord;
-		uint8_t bone_IDs[max_count_of_bones_per_vrtx];
-		float bone_weights[max_count_of_bones_per_vrtx];
+		uint32_t bone_IDs[max_count_of_bones_per_vrtx] = {0,0,0,0};
+		float bone_weights[max_count_of_bones_per_vrtx]={0,0,0,0};
 
 		static vk::VertexInputBindingDescription getBindingDescription()
 		{
@@ -47,7 +53,7 @@ namespace dmbrn
 
 			attributeDescriptions[3].binding = 0;
 			attributeDescriptions[3].location = 3;
-			attributeDescriptions[3].format = vk::Format::eR8G8B8A8Uint;
+			attributeDescriptions[3].format = vk::Format::eR32G32B32A32Uint;
 			attributeDescriptions[3].offset = offsetof(BonedVertex, bone_IDs);
 
 			attributeDescriptions[4].binding = 0;

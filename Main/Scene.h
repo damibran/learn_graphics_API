@@ -21,12 +21,12 @@ namespace dmbrn
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
-			//ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
+			ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
 			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.fbx");
 
 			//ModelImporter::Import(*this,true,"Models\\anim_test.fbx");
 
-			ModelImporter::Import(*this, true, "Models\\Dragon\\2dragon.gltf");
+			//ModelImporter::Import(*this, true, "Models\\Dragon\\2dragon.gltf");
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
@@ -128,11 +128,12 @@ namespace dmbrn
 						bone.need_gpu_state_update = false;
 						auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data + skeletal_comp.
 							in_GPU_mtxs_offset);
-						ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.render_data_->
-							getOffsetMtxs()[bone.bone_ind];
+						ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.render_data_->getOffsetMtxs()[bone.bone_ind];//glm::mat4(1.f);//
 					}
 				}
 			}
+
+			Renderer::per_skeleton_data_.unMap(frame);
 		}
 
 		// may perform culling
@@ -196,11 +197,26 @@ namespace dmbrn
 				if (extension == "fbx")
 					scale_factor_ = 0.01;
 
-				populateTree(scene, ai_scene->mRootNode, scene.addNewEntityToRoot(model_name));
+				// create root
+				Enttity root_ent = scene.addNewEntityToRoot(model_name);
+				TransformComponent& trans = root_ent.getComponent<TransformComponent>();
+
+				aiVector3D translation;
+				aiVector3D orientation;
+				aiVector3D scale;
+
+				ai_scene->mRootNode->mTransformation.Decompose(scale, orientation, translation);
+
+				trans.position = toGlm(translation);
+				trans.rotation = toGlm(orientation);
+				trans.scale = toGlm(scale);
+				// create root
+
+				populateTree(scene, ai_scene->mRootNode, root_ent);
 
 				// process ASSIMP's root node recursively
 				processNodeData(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
-				                scene.addNewEntityToRoot(model_name));
+				                root_ent);
 
 				Assimp::DefaultLogger::kill();
 			}
@@ -277,9 +293,6 @@ namespace dmbrn
 							trans.position = toGlm(translation) * (scale_factor_);
 							trans.rotation = toGlm(orientation);
 							trans.scale = toGlm(scale) * (scale_factor_);
-
-							Material* material =
-								DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
 							new_entty.addSkeletalModelComponent(SkeletalMesh(material, mesh_name, mesh), bone_entts,
 							                                    &Renderer::un_lit_textured

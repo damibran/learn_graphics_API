@@ -7,7 +7,7 @@ namespace dmbrn
 	// TODO proper destructor with unregister
 	struct RenderableComponent
 	{
-		size_t inGPU_transform_offset;
+		uint32_t inGPU_transform_offset;
 		bool need_GPU_state_update = true;
 
 		RenderableComponent():

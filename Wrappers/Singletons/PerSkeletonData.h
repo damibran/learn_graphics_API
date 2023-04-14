@@ -66,11 +66,11 @@ namespace dmbrn
 		}
 
 		void bindDataFor(int frame, const vk::raii::CommandBuffer& command_buffer, vk::PipelineLayout layout,
-		                 uint32_t offset) const
+		                 SkeletalOffsets offsets) const
 		{
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
 			                                  layout, 3,
-			                                  *descriptor_sets_[frame], offset);
+			                                  *descriptor_sets_[frame], {offsets.renderable_offset,offsets.skeletal_offset});
 		}
 
 		size_t registerObject()

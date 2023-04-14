@@ -15,7 +15,7 @@ namespace dmbrn
 		static void setRenderPass(const vk::raii::RenderPass& render_pass)
 		{
 			UnlitTexturedShaderEffect::setRenderPass(render_pass);
-			UnlitTexturedOutlinedShaderEffect::setRenderPass(render_pass);
+			//UnlitTexturedOutlinedShaderEffect::setRenderPass(render_pass);
 		}
 
 		static void newView(int frame, ViewportCamera& viewport_camera, const vk::raii::CommandBuffer& command_buffer)
@@ -28,6 +28,6 @@ namespace dmbrn
 		static inline PerSkeletonData per_skeleton_data_{Singletons::device, Singletons::physical_device,per_renderable_data_buffer_};
 
 		static inline UnlitTexturedShaderEffect un_lit_textured{per_renderable_data_buffer_,per_skeleton_data_};
-		static inline UnlitTexturedOutlinedShaderEffect outlined_{per_renderable_data_buffer_,per_skeleton_data_};
+		//static inline UnlitTexturedOutlinedShaderEffect outlined_{per_renderable_data_buffer_,per_skeleton_data_};
 	};
 }

@@ -31,7 +31,7 @@ namespace dmbrn
 			last_used_focused = this;
 		}
 
-		void newImGuiFrame(float delta_t,uint32_t frame,uint32_t imageIndex)
+		void newImGuiFrame(float delta_t, uint32_t frame, uint32_t imageIndex)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
@@ -88,23 +88,26 @@ namespace dmbrn
 
 					TransformComponent& t_c = selected_->getComponent<TransformComponent>();
 
-					const glm::mat4& parent_trans = selected_->getComponent<RelationshipComponent>().parent.getComponent<TransformComponent>().globalTransformMatrix;
+					const glm::mat4& parent_trans = selected_->getComponent<RelationshipComponent>().parent.getComponent
+						<TransformComponent>().globalTransformMatrix;
 
 					glm::mat4 local_trans = t_c.getMatrix();
 
-					if(ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                     current_operation, ImGuizmo::MODE::LOCAL,
-					                     glm::value_ptr(local_trans)))
+					if (ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
+					                         current_operation, ImGuizmo::MODE::LOCAL,
+					                         glm::value_ptr(local_trans)))
 
-					if (ImGuizmo::IsUsing())
-					{
-						ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans), glm::value_ptr(t_c.position),
-						                                      glm::value_ptr(t_c.rotation), glm::value_ptr(t_c.scale));
+						if (ImGuizmo::IsUsing())
+						{
+							ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans),
+							                                      glm::value_ptr(t_c.position),
+							                                      glm::value_ptr(t_c.rotation),
+							                                      glm::value_ptr(t_c.scale));
 
-						selected_->markTransformAsEdited(frame);
+							selected_->markTransformAsEdited(frame);
 
-						last_used_focused = this;
-					}
+							last_used_focused = this;
+						}
 				}
 			}
 
@@ -159,7 +162,7 @@ namespace dmbrn
 			auto static_group = scene_.getModelsToDraw();
 			for (auto entity : static_group)
 			{
-				auto [model,renderable] = static_group.get<ModelComponent,RenderableComponent>(entity);
+				auto [model,renderable] = static_group.get<ModelComponent, RenderableComponent>(entity);
 				model.getShader()->addToRenderQueue({&model.mesh, renderable.inGPU_transform_offset});
 			}
 
@@ -167,12 +170,15 @@ namespace dmbrn
 			auto skeletal_group = scene_.getSkeletalModelsToDraw();
 			for (auto entity : skeletal_group)
 			{
-				auto [model,renderable] = skeletal_group.get<SkeletalModelComponent,RenderableComponent>(entity);
-				model.getShader()->addToRenderQueue({&model.mesh, renderable.inGPU_transform_offset});
+				auto [skeletal_model,renderable] = skeletal_group.get<
+					SkeletalModelComponent, RenderableComponent>(entity);
+				skeletal_model.getShader()->addToRenderQueue({
+					&skeletal_model.mesh, {renderable.inGPU_transform_offset, skeletal_model.in_GPU_mtxs_offset}
+				});
 			}
 
 			Renderer::un_lit_textured.draw(current_frame, command_buffer);
-			Renderer::outlined_.draw(current_frame, command_buffer);
+			//Renderer::outlined_.draw(current_frame, command_buffer);
 
 			command_buffer.endRenderPass();
 		}
