@@ -21,20 +21,20 @@ namespace dmbrn
 			scene_root_(registry_, "SceneRoot")
 		{
 			//ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
-			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.fbx");
+
+			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.dae");
 
 			//ModelImporter::Import(*this,true,"Models\\anim_test.fbx");
 
-			//ModelImporter::Import(*this, true, "Models\\Dragon\\2dragon.gltf");
+			//ModelImporter::Import(*this, true, "Models\\MyTest\\Test.dae");
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			ModelImporter::Import(*this, true,"Models\\Char\\Defeated_blend.fbx");
+			ModelImporter::Import(*this, true,"Models\\Char\\Defeated.dae");
 
-			RelationshipComponent root_rc = scene_root_.getComponent<RelationshipComponent>();
+			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
 			printSceneRecursively(scene_root_, "");
-
 
 			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
 			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
@@ -178,9 +178,10 @@ namespace dmbrn
 
 				Assimp::Importer importer;
 				const aiScene* ai_scene = importer.ReadFile(
-					path, aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_FlipUVs |aiProcess_GlobalScale| (with_bones
-						? (aiProcess_PopulateArmatureData | aiProcess_LimitBoneWeights)
-						: 0));
+					path, aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_FlipUVs |
+					aiProcess_GlobalScale | (with_bones
+						                         ? (aiProcess_PopulateArmatureData | aiProcess_LimitBoneWeights)
+						                         : 0));
 				//| aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
 
 				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
@@ -207,16 +208,24 @@ namespace dmbrn
 				// create root
 				Enttity root_ent = scene.addNewEntityToRoot(model_name);
 				TransformComponent& trans = root_ent.getComponent<TransformComponent>();
-
+				
 				aiVector3D translation;
 				aiVector3D orientation;
 				aiVector3D scale;
-
+				
+				glob_inv_mat = glm::inverse(toGlm(ai_scene->mRootNode->mTransformation));
+				
 				ai_scene->mRootNode->mTransformation.Decompose(scale, orientation, translation);
-
+				
 				trans.position = toGlm(translation);
-				trans.rotation = toGlm(orientation);
+				trans.setQuat(toGlm(orientation));
 				trans.scale = toGlm(scale);
+				
+				std::cout << "Node name:" << ai_scene->mRootNode->mName.C_Str() <<
+						"\n		scale:" <<std::to_string(scale) <<
+						"\n		rotation:" << std::to_string(orientation) <<
+						"\n		position:" <<std::to_string(translation) <<
+						std::endl;
 				// create root
 
 				populateTree(scene, ai_scene->mRootNode, root_ent);
@@ -231,6 +240,7 @@ namespace dmbrn
 		private:
 			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
 			static inline bool with_bones_ = false;
+			static inline glm::mat4 glob_inv_mat;
 			//static inline float scale_factor_ = 1.;
 
 			static void populateTree(Scene& scene, aiNode* ai_node, Enttity curent)
@@ -243,13 +253,20 @@ namespace dmbrn
 					TransformComponent& trans = child.getComponent<TransformComponent>();
 
 					aiVector3D translation;
-					aiVector3D orientation;
+					aiQuaternion orientation;
 					aiVector3D scale;
 
-					ai_node->mTransformation.Decompose(scale, orientation, translation);
+					ai_node->mChildren[i]->mTransformation.Decompose(scale, orientation, translation);
+
+					std::cout << "Node name:" << ai_node->mChildren[i]->mName.C_Str() <<
+						"\n		scale:" <<std::to_string(scale) <<
+						//"\n		rotation:" << std::to_string(orientation) <<
+						"\n		position:" <<std::to_string(translation) <<
+						std::endl;
+
 
 					trans.position = toGlm(translation);
-					trans.rotation = toGlm(orientation);
+					trans.setQuat(toGlm(orientation));
 					trans.scale = toGlm(scale);
 
 					populateTree(scene, ai_node->mChildren[i], child);
@@ -287,21 +304,9 @@ namespace dmbrn
 								bone_entts.push_back(entt);
 							}
 
-							aiVector3D translation;
-							aiVector3D orientation;
-							aiVector3D scale;
-
-							ai_node->mTransformation.Decompose(scale, orientation, translation);
-
-							std::string ent_mesh_name = std::string(mesh->mName.C_Str())+":Mesh";
+							std::string ent_mesh_name = std::string(mesh->mName.C_Str()) + ":Mesh";
 
 							Enttity new_entty = scene.addNewEntityAsChild(parent, ent_mesh_name);
-
-							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
-
-							trans.position = toGlm(translation);
-							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale);
 
 							new_entty.addComponent<SkeletalModelComponent>(
 								SkeletalMesh(material, mesh_name, mesh), bone_entts,
@@ -311,22 +316,9 @@ namespace dmbrn
 						else if (!mesh->HasBones() || !with_bones_)
 						{
 							// import as static mesh
-
-							aiVector3D translation;
-							aiVector3D orientation;
-							aiVector3D scale;
-
-							ai_node->mTransformation.Decompose(scale, orientation, translation);
-
-							std::string ent_mesh_name = std::string(mesh->mName.C_Str())+":Mesh";
+							std::string ent_mesh_name = std::string(mesh->mName.C_Str()) + ":Mesh";
 
 							Enttity new_entty = scene.addNewEntityAsChild(parent, ent_mesh_name);
-
-							TransformComponent& trans = new_entty.getComponent<TransformComponent>();
-
-							trans.position = toGlm(translation) ;//* (scale_factor_);
-							trans.rotation = toGlm(orientation);
-							trans.scale = toGlm(scale) ;//* (scale_factor_);
 
 							new_entty.addComponent<StaticModelComponent>(Mesh(material, mesh_name, mesh),
 							                                             &Renderer::un_lit_textured);

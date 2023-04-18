@@ -106,7 +106,7 @@ namespace dmbrn
 			transform_.translate(tspeed * glm::mat3(transform_.getRotationMatrix()) * dir);
 		}
 
-		void rotateCamera(const glm::vec2 mouse_dir)
+		void rotateCamera(const glm::vec2& mouse_dir)
 		{
 			glm::vec2 offset(mouse_dir.y, mouse_dir.x);
 
@@ -116,7 +116,7 @@ namespace dmbrn
 
 			t += glm::vec3(offset.x, 0, offset.y);
 
-			transform_.rotation = t;
+			glm::vec3 rot_deg = t;
 
 			const bool constrainPitch = true;
 
@@ -125,11 +125,13 @@ namespace dmbrn
 			// make sure that when pitch is out of bounds, screen doesn't get flipped
 			if (constrainPitch)
 			{
-				if (pitch > 179)
-					transform_.rotation.x = 179;
+				if (pitch > 160)
+					rot_deg.x = 160;
 				if (pitch < 1)
-					transform_.rotation.x = 1;
+					rot_deg.x = 1;
 			}
+
+			transform_.setDegrees(rot_deg);
 		}
 	};
 }

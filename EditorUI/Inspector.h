@@ -61,10 +61,14 @@ namespace dmbrn
 				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					bool edited=false;
+					glm::vec3 rot_deg = comp->getRotationDegrees();
 					if(drawVec3Control("Translation", comp->position))
 						edited = true;
-					if(drawVec3Control("Rotation", comp->rotation))
+					if(drawVec3Control("Rotation", rot_deg))
+					{
+						comp->setDegrees(rot_deg);
 						edited = true;
+					}
 					if(drawVec3Control("Scale", comp->scale, 1.0f))
 						edited = true;
 

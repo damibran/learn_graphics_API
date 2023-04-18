@@ -2,6 +2,7 @@
 
 #include "Wrappers/Singletons/LogicalDevice.h"
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include "glm/ext/matrix_transform.hpp"
 
 namespace dmbrn
@@ -9,7 +10,6 @@ namespace dmbrn
 	struct TransformComponent
 	{
 		glm::vec3 position;
-		glm::vec3 rotation; // pitch ,yaw, roll in degrees
 		glm::vec3 scale;
 
 		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> dirty;
@@ -21,8 +21,8 @@ namespace dmbrn
 		                   glm::vec3 rot = {0, 0, 0},
 		                   glm::vec3 scale = {1, 1, 1}) :
 			position(pos),
-			rotation(rot),
-			scale(scale)
+			scale(scale),
+			rotation{glm::radians(rot)}
 		{
 			for (size_t i = 0; i < LogicalDevice::MAX_FRAMES_IN_FLIGHT; ++i)
 			{
@@ -33,9 +33,10 @@ namespace dmbrn
 
 		[[nodiscard]] glm::mat4 getRotationMatrix() const
 		{
-			return glm::rotate(glm::mat4{1}, glm::radians(rotation.z), {0, 0, 1}) *
-				glm::rotate(glm::mat4{1}, glm::radians(rotation.y), {0, 1, 0}) *
-				glm::rotate(glm::mat4{1}, glm::radians(rotation.x), {1, 0, 0});
+			return glm::mat4_cast(rotation);
+			//return glm::rotate(glm::mat4{1}, glm::radians(rotation.z), {0, 0, 1}) *
+			//	glm::rotate(glm::mat4{1}, glm::radians(rotation.y), {0, 1, 0}) *
+			//	glm::rotate(glm::mat4{1}, glm::radians(rotation.x), {1, 0, 0});
 		}
 
 		glm::mat4 getMatrix() const
@@ -49,14 +50,24 @@ namespace dmbrn
 			position = glm::translate(glm::mat4(1), v) * glm::vec4(position, 1);
 		}
 
-		void rotate(const glm::vec3& r)
+		//void rotate(const glm::vec3& r)
+		//{
+		//	rotation += r;
+		//}
+
+		void setDegrees(const glm::vec3 deg)
 		{
-			rotation += r;
+			rotation = glm::quat(glm::radians(deg));
+		}
+
+		void setQuat(const glm::quat q)
+		{
+			rotation = q;
 		}
 
 		glm::vec3 getRotationDegrees() const
 		{
-			return rotation;
+			return glm::degrees(glm::eulerAngles(rotation));
 		}
 
 		void markAsEdited()
@@ -80,5 +91,8 @@ namespace dmbrn
 		{
 			return edited[frame];
 		}
+
+	private:
+		glm::quat rotation;
 	};
 }

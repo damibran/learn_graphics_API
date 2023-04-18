@@ -81,4 +81,45 @@ namespace std
 			return same;
 		}
 	};
+
+	inline string to_string(const aiVector3D& vec)
+	{
+		string res;
+
+		for (int i = 0; i < 3; ++i)
+		{
+			res+=to_string(vec[i])+" ";
+		}
+
+		return res;
+	}
+
+	inline string to_string(const aiMatrix4x4& mat)
+	{
+		string res;
+		for (int i = 0; i < 4; ++i)
+		{
+			auto vec = mat[i];
+			for (int j = 0; j < 4; ++j)
+			{
+				res += to_string(vec[j]) + " ";
+			}
+			res += "\n";
+		}
+		return res;
+	}
+
+	inline string to_string(const glm::mat4& mat)
+	{
+		string res{};
+		for (int i = 0; i < 4; ++i)
+		{
+			for (int j = 0; j < 4; ++j)
+			{
+				res+=to_string(mat[j][i])+" ";
+			}
+			res+="\n";
+		}
+		return res;
+	}
 }

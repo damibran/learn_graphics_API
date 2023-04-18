@@ -5,10 +5,14 @@
 
 namespace dmbrn
 {
-	// TODO merge toGLM
 	glm::vec3 toGlm(const aiVector3D& vec)
 	{
-		return {vec.x, vec.y, vec.z};
+		return glm::vec3{vec.x, vec.y, vec.z};
+	}
+
+	glm::quat toGlm(const aiQuaternion& quat)
+	{
+		return glm::quat{quat.w,quat.x,quat.y,quat.z};
 	}
 
 	glm::mat4 toGlm(const aiMatrix4x4& mat)
@@ -27,20 +31,7 @@ namespace dmbrn
 		return {vec.x / s, vec.y / s, vec.z / s};
 	}
 
-	std::string toString(const aiMatrix4x4& mat)
-	{
-		std::string res;
-		for (int i = 0; i < 4; ++i)
-		{
-			auto vec = mat[i];
-			for (int j = 0; j < 4; ++j)
-			{
-				res += std::to_string(vec[j]) + " ";
-			}
-			res += "\n";
-		}
-		return res;
-	}
+
 
 	void printAiScene(const aiScene* scene)
 	{

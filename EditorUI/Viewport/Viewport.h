@@ -94,15 +94,18 @@ namespace dmbrn
 					glm::mat4 local_trans = t_c.getMatrix();
 
 					if (ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                         current_operation, ImGuizmo::MODE::LOCAL,
+					                         current_operation, ImGuizmo::MODE::WORLD,
 					                         glm::value_ptr(local_trans)))
 
 						if (ImGuizmo::IsUsing())
 						{
+							glm::vec3 rot_deg;
 							ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans),
 							                                      glm::value_ptr(t_c.position),
-							                                      glm::value_ptr(t_c.rotation),
+							                                      glm::value_ptr(rot_deg),
 							                                      glm::value_ptr(t_c.scale));
+
+							t_c.setDegrees(rot_deg);
 
 							selected_->markTransformAsEdited(frame);
 

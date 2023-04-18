@@ -66,7 +66,7 @@ namespace dmbrn
 				return registry_.size();
 			}
 
-			const std::vector<glm::mat4>& getOffsetMtxs()const
+			const std::vector<glm::mat4>& getOffsetMtxs() const
 			{
 				return bones_offset_mtxs;
 			}
