@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/gtc/type_ptr.hpp>
-
+#include <glm/gtx/matrix_decompose.hpp>
 #include "Main/Enttity.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
@@ -75,6 +75,7 @@ namespace dmbrn
 			{
 				if (*selected_)
 				{
+					float size_clip_space = 0.1f;
 					ImGuizmo::SetOrthographic(false);
 					ImGuizmo::SetDrawlist();
 					float windowWidth = (float)ImGui::GetWindowWidth();
@@ -93,8 +94,14 @@ namespace dmbrn
 
 					glm::mat4 local_trans = t_c.getMatrix();
 
+					float avg_pseudo_scale = (parent_trans[0][0] + parent_trans[1][1]+parent_trans[2][2])/3;
+
+					size_clip_space = size_clip_space / avg_pseudo_scale;
+
+					ImGuizmo::SetGizmoSizeClipSpace(size_clip_space);
+
 					if (ImGuizmo::Manipulate(glm::value_ptr(cameraView * parent_trans), glm::value_ptr(cameraProj),
-					                         current_operation, ImGuizmo::MODE::WORLD,
+					                         current_operation, ImGuizmo::MODE::LOCAL,
 					                         glm::value_ptr(local_trans)))
 
 						if (ImGuizmo::IsUsing())
@@ -176,7 +183,7 @@ namespace dmbrn
 				SkeletalModelComponent& skeletal_model = skeletal_group.get<
 					SkeletalModelComponent>(entity);
 				skeletal_model.getShader()->addToRenderQueue({
-					&skeletal_model.mesh,  skeletal_model.in_GPU_mtxs_offset
+					&skeletal_model.mesh, skeletal_model.in_GPU_mtxs_offset
 				});
 			}
 
