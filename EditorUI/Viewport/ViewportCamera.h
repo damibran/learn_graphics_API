@@ -112,21 +112,19 @@ namespace dmbrn
 
 			offset *= mouse_sensitivity_;
 
-			glm::vec3 t(transform_.getRotationDegrees());
+			glm::vec3 rot_deg(transform_.getRotationDegrees());
 
-			t += glm::vec3(offset.x, 0, offset.y);
-
-			glm::vec3 rot_deg = t;
+			rot_deg += glm::vec3(offset.x, 0, offset.y);
 
 			const bool constrainPitch = true;
 
-			float pitch = transform_.getRotationDegrees().x;
+			float pitch = rot_deg.x;
 
 			// make sure that when pitch is out of bounds, screen doesn't get flipped
 			if (constrainPitch)
 			{
-				if (pitch > 160)
-					rot_deg.x = 160;
+				if (pitch > 179)
+					rot_deg.x = 179;
 				if (pitch < 1)
 					rot_deg.x = 1;
 			}
