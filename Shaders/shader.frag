@@ -1,5 +1,5 @@
 #version 450
-#extension GL_KHR_glsl : enable
+//#extension GL_KHR_glsl : enable
 
 const vec3 light_dir = vec3(0,0,1);
 
@@ -22,6 +22,14 @@ layout(location = 2) in vec3 inNormal;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    float factor = max(dot(inNormal,light_dir),0.5);
-    outColor = factor*properties.base_color * texture(texSampler, fragTexCoord);
+    
+    const vec4 lightColor = vec4(1.0,1.0,1.0,1.0);
+
+    const float ambientStrength = 1.0;
+    vec4 ambient = ambientStrength * lightColor;
+
+    float diff = 0.05*max(dot(inNormal,light_dir),0.0);
+    vec4 diffuse = diff * lightColor;
+
+    outColor = (ambient + diffuse)*0.5*properties.base_color * texture(texSampler, fragTexCoord);
 }
