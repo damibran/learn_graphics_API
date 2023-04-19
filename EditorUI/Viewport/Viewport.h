@@ -94,9 +94,11 @@ namespace dmbrn
 
 					glm::mat4 local_trans = t_c.getMatrix();
 
-					float avg_pseudo_scale = (parent_trans[0][0] + parent_trans[1][1]+parent_trans[2][2])/3;
+					glm::vec3 parent_glob_scale = getScale(parent_trans);
 
-					size_clip_space = size_clip_space / avg_pseudo_scale;
+					float avg_scale = (parent_glob_scale.x + parent_glob_scale.y+ parent_glob_scale.z)/3;
+
+					size_clip_space = size_clip_space / avg_scale;
 
 					ImGuizmo::SetGizmoSizeClipSpace(size_clip_space);
 

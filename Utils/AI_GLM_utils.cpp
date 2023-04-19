@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stack>
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace dmbrn
 {
@@ -24,6 +25,51 @@ namespace dmbrn
 			mat.a3, mat.b3, mat.c3, mat.d3,
 			mat.a4, mat.b4, mat.c4, mat.d4,
 		};
+	}
+
+	glm::vec3 getScale(const glm::mat4 mat)
+	{
+		glm::vec3 Row[3];
+		glm::vec3 Scale,Skew;
+
+		for(glm::length_t i = 0; i < 3; ++i)
+		for(glm::length_t j = 0; j < 3; ++j)
+			Row[i][j] = mat[i][j];
+
+		// Compute X scale factor and normalize first row.
+		Scale.x = length(Row[0]);// v3Length(Row[0]);
+
+		Row[0] = glm::detail::scale(Row[0], static_cast<float>(1));
+
+		// Compute XY shear factor and make 2nd row orthogonal to 1st.
+		Skew.z = dot(Row[0], Row[1]);
+		Row[1] = glm::detail::combine(Row[1], Row[0], static_cast<float>(1), -Skew.z);
+
+		// Now, compute Y scale and normalize 2nd row.
+		Scale.y = length(Row[1]);
+		Row[1] = glm::detail::scale(Row[1], static_cast<float>(1));
+
+		// Compute XZ and YZ shears, orthogonalize 3rd row.
+		Skew.y = glm::dot(Row[0], Row[2]);
+		Row[2] =glm::detail::combine(Row[2], Row[0], static_cast<float>(1), -Skew.y);
+		Skew.x = glm::dot(Row[1], Row[2]);
+		Row[2] = glm::detail::combine(Row[2], Row[1], static_cast<float>(1), -Skew.x);
+
+		// Next, get Z scale and normalize 3rd row.
+		Scale.z = length(Row[2]);
+		Row[2] = glm::detail::scale(Row[2], static_cast<float>(1));
+
+		glm::vec3 Pdum3 = cross(Row[1], Row[2]); // v3Cross(row[1], row[2], Pdum3);
+		if(dot(Row[0], Pdum3) < 0)
+		{
+			for(glm::length_t i = 0; i < 3; i++)
+			{
+				Scale[i] *= static_cast<float>(-1);
+				Row[i] *= static_cast<float>(-1);
+			}
+		}
+
+		return Scale;
 	}
 
 	glm::vec3 operator/(const glm::vec3& vec, const float s)

@@ -15,6 +15,8 @@ namespace dmbrn
 
 	glm::mat4 toGlm(const aiMatrix4x4& mat);
 
+	glm::vec3 getScale(const glm::mat4 mat);
+
 	glm::vec3 operator/(const glm::vec3& vec, const float s);
 
 	void printAiScene(const aiScene* scene);
