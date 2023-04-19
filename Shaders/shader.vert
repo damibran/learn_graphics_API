@@ -21,5 +21,5 @@ layout(location = 2) out vec3 outNormal;
 void main() {
     gl_Position = ubo.proj * ubo.view * dubo.model * vec4(inPosition, 1.0);
     fragTexCoord = inTexCoord;
-    outNormal = mat3(transpose(inverse(dubo.model))) *inNormal;
+    outNormal = normalize(mat3(transpose(inverse(dubo.model))) *inNormal);
 }

@@ -31,5 +31,5 @@ void main() {
 
     gl_Position = ubo.proj * ubo.view  * boneTransform * vec4(inPosition, 1.0);
     fragTexCoord = inTexCoord;
-    outNormal = mat3(transpose(inverse(boneTransform)))*inNormal;
+    outNormal = normalize(mat3(transpose(inverse(boneTransform)))*inNormal);
 }

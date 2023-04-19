@@ -28,7 +28,7 @@ void main() {
     const float ambientStrength = 1.0;
     vec4 ambient = ambientStrength * lightColor;
 
-    float diff = 0.05*max(dot(inNormal,light_dir),0.0);
+    float diff = 1.0*max(dot(inNormal,light_dir),0.0);
     vec4 diffuse = diff * lightColor;
 
     outColor = (ambient + diffuse)*0.5*properties.base_color * texture(texSampler, fragTexCoord);

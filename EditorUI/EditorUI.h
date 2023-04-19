@@ -36,7 +36,7 @@ namespace dmbrn
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 		}
 
-		void drawFrame(float delta_time)
+		void drawFrame(double g_time,float delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
@@ -58,6 +58,7 @@ namespace dmbrn
 			if(show_model_import)
 				showImportWindow();
 
+			scene_.updateAnimations(delta_time, g_time,current_frame_);
 			scene_.updateGlobalTransforms(current_frame_);
 			scene_.updatePerStaticModelData(current_frame_);
 			scene_.updatePerSkeletalData(current_frame_);

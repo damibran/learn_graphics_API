@@ -62,7 +62,7 @@ namespace std
 			return res;
 		}
 	};
-
+	
 	template <>
 	struct equal_to<std::vector<aiVector3D>>
 	{

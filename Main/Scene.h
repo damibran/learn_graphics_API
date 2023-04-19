@@ -10,6 +10,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include "Wrappers/Animation.h"
+#include "Componenets/AnimationComponent.h"
+
 
 namespace dmbrn
 {
@@ -30,7 +33,7 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			ModelImporter::Import(*this, true,"Models\\Char\\Defeated.dae");
+			ModelImporter::Import(*this, "Models\\Char\\Defeated.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
@@ -143,6 +146,24 @@ namespace dmbrn
 			}
 		}
 
+
+		void updateAnimations(double delta_t, double g_time, uint32_t frame)
+		{
+			auto view = registry_.view<AnimationComponent>();
+
+			for (auto ent : view)
+			{
+				AnimationComponent& anim = view.get<AnimationComponent>(ent);
+
+				if (anim.playing)
+				{
+					AnimationClip& playing_clip = anim.animation_clips[anim.playing_ind];
+
+					playing_clip.updateTransforms(anim.getLocalTime(g_time, delta_t), frame);
+				}
+			}
+		}
+
 		// may perform culling
 		auto getModelsToDraw()
 		{
@@ -172,7 +193,7 @@ namespace dmbrn
 		class ModelImporter
 		{
 		public:
-			static void Import(Scene& scene, bool with_bones, const std::string& path)
+			static void Import(Scene& scene, const std::string& path, bool with_anim = false, bool with_bones = false)
 			{
 				Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE, aiDefaultLogStream_STDOUT);
 
@@ -196,52 +217,105 @@ namespace dmbrn
 				const std::string directory = path.substr(0, path.find_last_of('\\'));
 				const std::string model_name = path.substr(path.find_last_of('\\') + 1,
 				                                           path.find_last_of('.') - path.find_last_of('\\') - 1);
-				const std::string extension = path.substr(path.find_last_of('.') + 1,
-				                                          path.size() - path.find_last_of('.'));
 
 				with_bones_ = with_bones;
-
-				//scale_factor_ = 1.0f;
-				//if (extension == "fbx")
-				//	scale_factor_ = 0.01;
+				with_anim_ = with_anim;
 
 				// create root
 				Enttity root_ent = scene.addNewEntityToRoot(model_name);
-				TransformComponent& trans = root_ent.getComponent<TransformComponent>();
-				
-				aiVector3D translation;
-				aiVector3D orientation;
-				aiVector3D scale;
-				
-				glob_inv_mat = glm::inverse(toGlm(ai_scene->mRootNode->mTransformation));
-				
-				ai_scene->mRootNode->mTransformation.Decompose(scale, orientation, translation);
-				
-				trans.position = toGlm(translation);
-				trans.setQuat(toGlm(orientation));
-				trans.scale = toGlm(scale);
-				
-				std::cout << "Node name:" << ai_scene->mRootNode->mName.C_Str() <<
-						"\n		scale:" <<std::to_string(scale) <<
-						"\n		rotation:" << std::to_string(orientation) <<
-						"\n		position:" <<std::to_string(translation) <<
-						std::endl;
-				// create root
+				importNodeTransform(root_ent, ai_scene->mRootNode);
+
+				if (with_anim_)
+					populateAnimNodes(ai_scene);
 
 				populateTree(scene, ai_scene->mRootNode, root_ent);
+
+				// TODO check if all anim node enntts not empty
+
+				if (with_anim_)
+					importAnimations(root_ent, ai_scene);
 
 				// process ASSIMP's root node recursively
 				processNodeData(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
 				                root_ent);
 
 				Assimp::DefaultLogger::kill();
+				ainode_to_enttity.clear();
+				anim_node_name_to_enttity.clear();
 			}
 
 		private:
 			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
+			static inline std::unordered_map<std::string, Enttity> anim_node_name_to_enttity;
 			static inline bool with_bones_ = false;
-			static inline glm::mat4 glob_inv_mat;
-			//static inline float scale_factor_ = 1.;
+			static inline bool with_anim_ = false;
+
+			static void importAnimations(Enttity root_ent, const aiScene* ai_scene)
+			{
+				std::vector<AnimationClip> animation_clips(ai_scene->mNumAnimations);
+
+				for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
+				{
+					aiAnimation* anim = ai_scene->mAnimations[i];
+					AnimationClip& clip = animation_clips[i];
+
+					clip.name = anim->mName.C_Str();
+					clip.duration = anim->mDuration / anim->mTicksPerSecond;
+					clip.channels.reserve(anim->mNumChannels);
+
+					for (unsigned j = 0; j < anim->mNumChannels; ++j)
+					{
+						aiNodeAnim* node_anim = anim->mChannels[j];
+						Enttity node_entt = anim_node_name_to_enttity[node_anim->mNodeName.C_Str()];
+
+						AnimationChannels channels;
+
+						channels.enttity = node_entt;
+
+						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
+						{
+							aiVectorKey pos_k = node_anim->mPositionKeys[k];
+							channels.positions.insert({pos_k.mTime, toGlm(pos_k.mValue)});
+						}
+
+						for (unsigned k = 0; k < node_anim->mNumRotationKeys; ++k)
+						{
+							aiQuatKey rot_k = node_anim->mRotationKeys[k];
+							channels.rotations.insert({rot_k.mTime, toGlm(rot_k.mValue)});
+						}
+
+						for (unsigned k = 0; k < node_anim->mNumScalingKeys; ++k)
+						{
+							aiVectorKey scale_k = node_anim->mScalingKeys[k];
+							channels.scales.insert({scale_k.mTime, toGlm(scale_k.mValue)});
+						}
+
+
+						clip.channels.push_back(std::move(channels));
+					}
+				}
+
+				root_ent.addComponent<AnimationComponent>(std::move(animation_clips));
+			}
+
+			static void populateAnimNodes(const aiScene* ai_scene)
+			{
+				for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
+				{
+					for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
+					{
+						aiAnimation* anim = ai_scene->mAnimations[i];
+
+						for (unsigned j = 0; j < anim->mNumChannels; ++j)
+						{
+							aiNodeAnim* node_anim = anim->mChannels[j];
+							if (anim_node_name_to_enttity.find(node_anim->mNodeName.C_Str()) ==
+								anim_node_name_to_enttity.end())
+								anim_node_name_to_enttity.insert({node_anim->mNodeName.C_Str(), Enttity{}});
+						}
+					}
+				}
+			}
 
 			static void populateTree(Scene& scene, aiNode* ai_node, Enttity curent)
 			{
@@ -249,27 +323,18 @@ namespace dmbrn
 
 				for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 				{
-					Enttity child = scene.addNewEntityAsChild(curent, ai_node->mChildren[i]->mName.C_Str());
-					TransformComponent& trans = child.getComponent<TransformComponent>();
+					aiNode* ai_child = ai_node->mChildren[i];
+					std::string child_name = ai_child->mName.C_Str();
+					Enttity child = scene.addNewEntityAsChild(curent, child_name);
+					importNodeTransform(child, ai_child);
 
-					aiVector3D translation;
-					aiQuaternion orientation;
-					aiVector3D scale;
+					if (with_anim_)
+					{
+						if (anim_node_name_to_enttity.find(child_name) != anim_node_name_to_enttity.end())
+							anim_node_name_to_enttity[child_name] = child;
+					}
 
-					ai_node->mChildren[i]->mTransformation.Decompose(scale, orientation, translation);
-
-					std::cout << "Node name:" << ai_node->mChildren[i]->mName.C_Str() <<
-						"\n		scale:" <<std::to_string(scale) <<
-						//"\n		rotation:" << std::to_string(orientation) <<
-						"\n		position:" <<std::to_string(translation) <<
-						std::endl;
-
-
-					trans.position = toGlm(translation);
-					trans.setQuat(toGlm(orientation));
-					trans.scale = toGlm(scale);
-
-					populateTree(scene, ai_node->mChildren[i], child);
+					populateTree(scene, ai_child, child);
 				}
 			}
 
@@ -336,6 +401,21 @@ namespace dmbrn
 					processNodeData(scene, ai_node->mChildren[i], ai_scene, directory, name_this,
 					                ainode_to_enttity[ai_node->mChildren[i]]);
 				}
+			}
+
+			static void importNodeTransform(Enttity ent, aiNode* ainode)
+			{
+				TransformComponent& trans = ent.getComponent<TransformComponent>();
+
+				aiVector3D translation;
+				aiVector3D orientation;
+				aiVector3D scale;
+
+				ainode->mTransformation.Decompose(scale, orientation, translation);
+
+				trans.position = toGlm(translation);
+				trans.setQuat(toGlm(orientation));
+				trans.scale = toGlm(scale);
 			}
 		};
 

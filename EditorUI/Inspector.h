@@ -99,6 +99,25 @@ namespace dmbrn
 					ImGui::TreePop();
 				}
 			}
+
+			if(auto* comp = entity.tryGetComponent<AnimationComponent>())
+			{
+				if(ImGui::TreeNodeEx("AnimationComponent",ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					for (size_t i = 0; i < comp->animation_clips.size(); ++i)
+					{
+						ImGui::Text(comp->animation_clips[i].name.c_str()); ImGui::SameLine();
+						if(ImGui::Button("Play",{40,20}))
+						{
+							comp->playing=true;
+							comp->playing_ind=i;
+							comp->start_time=std::chrono::system_clock::now().time_since_epoch().count();
+						}
+					}
+			
+					ImGui::TreePop();
+				}
+			}
 		}
 
 		static bool drawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,

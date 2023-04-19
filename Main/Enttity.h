@@ -7,6 +7,7 @@
 namespace dmbrn
 {
 	struct SkeletalModelComponent;
+
 	class Enttity
 	{
 	public:
@@ -48,7 +49,7 @@ namespace dmbrn
 			entityID_ = other.entityID_;
 		}
 
-		bool operator==(const Enttity& other)
+		bool operator==(const Enttity& other)const
 		{
 			return entityID_ == other.entityID_ && registry_ == other.registry_;
 		}
@@ -105,7 +106,6 @@ namespace dmbrn
 		void markTransformAsEdited(uint32_t frame);
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }
-		//operator entt::entity() const { return entityID_; }
 
 	private:
 		entt::registry* registry_ = nullptr;

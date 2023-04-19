@@ -264,5 +264,11 @@
     <ClInclude Include="Main\Componenets\BoneComponenet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Main\Componenets\AnimationComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wrappers\Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
