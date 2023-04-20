@@ -6,6 +6,10 @@
 #include <iostream>
 #include <thread>
 
+using duration = std::chrono::duration<double>;
+using sys_clock = std::chrono::system_clock;
+using time_point = std::chrono::time_point<sys_clock, duration>;
+
 #include "Wrappers/Singletons/Singletons.h"
 #include "Main/Scene.h"
 #include "EditorUI/EditorUI.h"
@@ -25,13 +29,13 @@ namespace dmbrn
 		{
 			while (!Singletons::window.windowShouldClose())
 			{
-				tp2_ = std::chrono::system_clock::now();
-				const std::chrono::duration<float> elapsed_time = tp2_ - tp1_;
+				tp2_ = sys_clock::now();
+				const duration elapsed_time = tp2_ - tp1_;
 				tp1_ = tp2_;
 				const float delta_time = elapsed_time.count();
 
 				glfwPollEvents();
-				editor_ui_.drawFrame(tp2_.time_since_epoch().count(),delta_time);
+				editor_ui_.drawFrame(tp2_, delta_time);
 
 				Singletons::window.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
 			}
@@ -42,8 +46,8 @@ namespace dmbrn
 		Scene scene_;
 		EditorUI editor_ui_;
 
-		std::chrono::system_clock::time_point tp1_ = std::chrono::system_clock::now();
-		std::chrono::system_clock::time_point tp2_ = std::chrono::system_clock::now();
+		time_point tp1_ = std::chrono::time_point_cast<duration>(sys_clock::now());
+		time_point tp2_ = std::chrono::time_point_cast<duration>(sys_clock::now());
 	};
 }
 

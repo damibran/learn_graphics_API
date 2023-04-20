@@ -147,7 +147,7 @@ namespace dmbrn
 		}
 
 
-		void updateAnimations(double delta_t, double g_time, uint32_t frame)
+		void updateAnimations( time_point g_time, uint32_t frame)
 		{
 			auto view = registry_.view<AnimationComponent>();
 
@@ -159,7 +159,7 @@ namespace dmbrn
 				{
 					AnimationClip& playing_clip = anim.animation_clips[anim.playing_ind];
 
-					playing_clip.updateTransforms(anim.getLocalTime(g_time, delta_t), frame);
+					playing_clip.updateTransforms(anim.getLocalTime(g_time), frame);
 				}
 			}
 		}
@@ -230,7 +230,7 @@ namespace dmbrn
 
 				populateTree(scene, ai_scene->mRootNode, root_ent);
 
-				// TODO check if all anim node enntts not empty
+				// TODO check if there is no empty anim node 
 
 				if (with_anim_)
 					importAnimations(root_ent, ai_scene);
@@ -260,7 +260,7 @@ namespace dmbrn
 					AnimationClip& clip = animation_clips[i];
 
 					clip.name = anim->mName.C_Str();
-					clip.duration = anim->mDuration / anim->mTicksPerSecond;
+					clip.duration = duration{anim->mDuration / anim->mTicksPerSecond};
 					clip.channels.reserve(anim->mNumChannels);
 
 					for (unsigned j = 0; j < anim->mNumChannels; ++j)
@@ -275,19 +275,19 @@ namespace dmbrn
 						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
 						{
 							aiVectorKey pos_k = node_anim->mPositionKeys[k];
-							channels.positions.insert({pos_k.mTime, toGlm(pos_k.mValue)});
+							channels.positions.insert({pos_k.mTime / anim->mTicksPerSecond, toGlm(pos_k.mValue)});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumRotationKeys; ++k)
 						{
 							aiQuatKey rot_k = node_anim->mRotationKeys[k];
-							channels.rotations.insert({rot_k.mTime, toGlm(rot_k.mValue)});
+							channels.rotations.insert({rot_k.mTime / anim->mTicksPerSecond, toGlm(rot_k.mValue)});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumScalingKeys; ++k)
 						{
 							aiVectorKey scale_k = node_anim->mScalingKeys[k];
-							channels.scales.insert({scale_k.mTime, toGlm(scale_k.mValue)});
+							channels.scales.insert({scale_k.mTime / anim->mTicksPerSecond, toGlm(scale_k.mValue)});
 						}
 
 

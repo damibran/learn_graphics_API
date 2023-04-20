@@ -20,7 +20,7 @@ namespace dmbrn
 			{
 				Enttity entity = *scene_tree_.getSelected();
 
-				drawComponents(entity,frame);
+				drawComponents(entity, frame);
 
 				if (ImGui::Button("Add Component"))
 					ImGui::OpenPopup("Add Component");
@@ -47,7 +47,7 @@ namespace dmbrn
 		{
 			if (auto* comp = entity.tryGetComponent<TagComponent>())
 			{
-				char buf[256]={0};
+				char buf[256] = {0};
 				strcpy_s(buf, sizeof(buf), comp->tag.c_str());
 
 				if (ImGui::InputText("Tag", buf, sizeof(buf)))
@@ -60,19 +60,19 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					bool edited=false;
+					bool edited = false;
 					glm::vec3 rot_deg = comp->getRotationDegrees();
-					if(drawVec3Control("Translation", comp->position))
+					if (drawVec3Control("Translation", comp->position))
 						edited = true;
-					if(drawVec3Control("Rotation", rot_deg))
+					if (drawVec3Control("Rotation", rot_deg))
 					{
 						comp->setDegrees(rot_deg);
 						edited = true;
 					}
-					if(drawVec3Control("Scale", comp->scale, 1.0f))
+					if (drawVec3Control("Scale", comp->scale, 1.0f))
 						edited = true;
 
-					if(edited)
+					if (edited)
 						entity.markTransformAsEdited(frame);
 
 					ImGui::TreePop();
@@ -100,21 +100,22 @@ namespace dmbrn
 				}
 			}
 
-			if(auto* comp = entity.tryGetComponent<AnimationComponent>())
+			if (auto* comp = entity.tryGetComponent<AnimationComponent>())
 			{
-				if(ImGui::TreeNodeEx("AnimationComponent",ImGuiTreeNodeFlags_DefaultOpen))
+				if (ImGui::TreeNodeEx("AnimationComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					for (size_t i = 0; i < comp->animation_clips.size(); ++i)
 					{
-						ImGui::Text(comp->animation_clips[i].name.c_str()); ImGui::SameLine();
-						if(ImGui::Button("Play",{40,20}))
+						ImGui::Text(comp->animation_clips[i].name.c_str());
+						ImGui::SameLine();
+						if (ImGui::Button("Play", {40, 20}))
 						{
-							comp->playing=true;
-							comp->playing_ind=i;
-							comp->start_time=std::chrono::system_clock::now().time_since_epoch().count();
+							comp->playing = true;
+							comp->playing_ind = i;
+							comp->start_time=std::chrono::time_point_cast<duration>(sys_clock::now());
 						}
 					}
-			
+
 					ImGui::TreePop();
 				}
 			}
@@ -153,8 +154,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			if(ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
-				edited=true;
+			if (ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited = true;
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
@@ -171,8 +172,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			if(ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
-				edited=true;
+			if (ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited = true;
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
 
@@ -189,8 +190,8 @@ namespace dmbrn
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
-			if(ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
-				edited=true;
+			if (ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f"))
+				edited = true;
 			ImGui::PopItemWidth();
 
 			ImGui::PopStyleVar();

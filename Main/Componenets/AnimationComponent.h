@@ -1,5 +1,6 @@
 #pragma once
-
+#include <chrono>
+#include <cmath>
 #include "Wrappers/Animation.h"
 
 namespace dmbrn
@@ -13,7 +14,7 @@ namespace dmbrn
 
 	struct AnimationComponent
 	{
-		const bool loop =false;
+		const bool loop =true;
 
 		AnimationComponent() = default;
 
@@ -25,19 +26,19 @@ namespace dmbrn
 		std::vector<AnimationClip> animation_clips;
 		bool playing = false;
 		unsigned playing_ind = 0;
-		double start_time = 0;
+		time_point start_time;
 
-		double getLocalTime(double g_time,double delta_t)
+		double getLocalTime(time_point g_time)
 		{
 			double l_time;
 			AnimationClip& playing_clip = animation_clips[playing_ind];
 
-			double duration = playing_clip.duration/delta_t;
-
+			double duration_s = playing_clip.duration.count();
+			
 			if (loop)
-				l_time = std::modf(g_time - start_time, &duration);
+				l_time = std::fmod((g_time - start_time).count(), duration_s);
 			else
-				l_time = glm::clamp(g_time - start_time, 0., duration);
+				l_time = glm::clamp((g_time - start_time).count(), 0., duration_s);
 
 			return l_time;
 		}

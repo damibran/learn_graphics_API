@@ -3,7 +3,6 @@
 #include<glm/glm.hpp>
 #include <set>
 #include <string>
-#include <unordered_map>
 
 #include "Main/Enttity.h"
 
@@ -20,7 +19,7 @@ namespace dmbrn
 	struct AnimationClip
 	{
 		std::string name;
-		double duration; // in seconds
+		duration duration; // in seconds
 		std::vector<AnimationChannels> channels;
 
 		void updateTransforms(double l_time, uint32_t frame)
@@ -38,27 +37,33 @@ namespace dmbrn
 		}
 
 	private:
-		float GetScaleFactor(double lastTimeStamp, double nextTimeStamp, double animationTime)
+		double GetScaleFactor(double lastTimeStamp, double nextTimeStamp, double animationTime)
 		{
-			float scaleFactor = 0.0f;
-			float midWayLength = animationTime - lastTimeStamp;
-			float framesDiff = nextTimeStamp - lastTimeStamp;
-			scaleFactor = midWayLength / framesDiff;
-			return scaleFactor;
+			double midWayLength = animationTime - lastTimeStamp;
+			double framesDiff = nextTimeStamp - lastTimeStamp;
+			return midWayLength / framesDiff;
 		}
 
 		glm::vec3 mixPositions(double l_time, const AnimationChannels& chnls)
 		{
-			const auto& [lb,ub] = chnls.positions.equal_range(l_time);
+			auto [lb,ub] = chnls.positions.equal_range(l_time);
+
+			if (lb != chnls.positions.begin())
+				lb--;
+
+			if (ub == chnls.positions.end()--)
+				std::cout << "FDSFF";
 
 			float factor = GetScaleFactor(lb->first, ub->first, l_time);
-
 			return glm::mix(lb->second, ub->second, factor);
 		}
 
 		glm::quat slerpRotation(double l_time, const AnimationChannels& chnls)
 		{
-			const auto& [lb,ub] = chnls.rotations.equal_range(l_time);
+			auto [lb,ub] = chnls.rotations.equal_range(l_time);
+
+			if (lb != chnls.rotations.begin())
+				lb--;
 
 			float factor = GetScaleFactor(lb->first, ub->first, l_time);
 
@@ -67,7 +72,10 @@ namespace dmbrn
 
 		glm::vec3 mixScale(double l_time, const AnimationChannels& chnls)
 		{
-			const auto& [lb,ub] = chnls.scales.equal_range(l_time);
+			auto [lb,ub] = chnls.scales.equal_range(l_time);
+
+			if (lb != chnls.scales.begin())
+				lb--;
 
 			float factor = GetScaleFactor(lb->first, ub->first, l_time);
 
