@@ -359,7 +359,7 @@ namespace dmbrn
 						{
 							// import as skeletal mesh
 							std::vector<Enttity> bone_entts;
-							for (int j = 0; j < mesh->mNumBones; ++j)
+							for (unsigned j = 0; j < mesh->mNumBones; ++j)
 							{
 								aiBone* bone = mesh->mBones[j];
 

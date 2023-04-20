@@ -50,11 +50,8 @@ namespace dmbrn
 
 			if (lb != chnls.positions.begin())
 				lb--;
-
-			if (ub == chnls.positions.end()--)
-				std::cout << "FDSFF";
-
-			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
+			
+			double factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 			return glm::mix(lb->second, ub->second, factor);
 		}
 
@@ -65,9 +62,9 @@ namespace dmbrn
 			if (lb != chnls.rotations.begin())
 				lb--;
 
-			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
+			double factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 
-			return glm::slerp(lb->second, ub->second, factor);
+			return glm::slerp(lb->second, ub->second, static_cast<float>(factor));
 		}
 
 		glm::vec3 mixScale(duration l_time, const AnimationChannels& chnls)
@@ -77,7 +74,7 @@ namespace dmbrn
 			if (lb != chnls.scales.begin())
 				lb--;
 
-			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
+			double factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 
 			return glm::mix(lb->second, ub->second, factor);
 		}

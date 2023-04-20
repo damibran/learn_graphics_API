@@ -31,7 +31,7 @@ namespace dmbrn
 			last_used_focused = this;
 		}
 
-		void newImGuiFrame(float delta_t, uint32_t frame, uint32_t imageIndex)
+		void newImGuiFrame(double delta_t, uint32_t frame, uint32_t imageIndex)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 

@@ -36,7 +36,7 @@ namespace dmbrn
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 		}
 
-		void drawFrame(time_point g_time,float delta_time)
+		void drawFrame(time_point g_time,double delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 

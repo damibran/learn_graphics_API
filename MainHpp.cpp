@@ -32,7 +32,7 @@ namespace dmbrn
 				tp2_ = sys_clock::now();
 				const duration elapsed_time = tp2_ - tp1_;
 				tp1_ = tp2_;
-				const float delta_time = elapsed_time.count();
+				const double delta_time = elapsed_time.count();
 
 				glfwPollEvents();
 				editor_ui_.drawFrame(tp2_, delta_time);

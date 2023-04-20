@@ -104,7 +104,7 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("AnimationComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					for (size_t i = 0; i < comp->animation_clips.size(); ++i)
+					for (unsigned i = 0; i < comp->animation_clips.size(); ++i)
 					{
 						ImGui::Text(comp->animation_clips[i].name.c_str());
 						ImGui::SameLine();

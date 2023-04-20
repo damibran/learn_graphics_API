@@ -24,7 +24,7 @@ namespace dmbrn
 		{
 		}
 
-		void update(float delta_t)
+		void update(double delta_t)
 		{
 			ImGuiContext& g = *GImGui;
 			auto window = ImGui::GetCurrentWindow();
@@ -93,16 +93,16 @@ namespace dmbrn
 		}
 
 	private:
-		float mouse_sensitivity_ = 0.15f;
-		float speed_ = 7;
+		double mouse_sensitivity_ = 0.15;
+		double speed_ = 7.;
 		ImVec2 last_mouse_delt = {0, 0};
 		TransformComponent transform_;
 		CameraComponent camera_comp;
 		CameraRenderData renderer_data_;
 
-		void moveCamera(const glm::vec3 dir, const float dt)
+		void moveCamera(const glm::vec3 dir, const double dt)
 		{
-			const float tspeed = dt * speed_;
+			const float tspeed = static_cast<float>(dt * speed_);
 			transform_.translate(tspeed * glm::mat3(transform_.getRotationMatrix()) * dir);
 		}
 

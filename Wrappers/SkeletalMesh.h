@@ -83,7 +83,7 @@ namespace dmbrn
 				use_this_mesh_({mesh_name})
 			{
 				auto [vertices,indices] = getDataFromMesh(mesh);
-				indices_count = indices.size();
+				indices_count = static_cast<uint32_t>(indices.size());
 
 				vertex_buffer_ = HostLocalBuffer(vertices, vk::BufferUsageFlagBits::eVertexBuffer);
 

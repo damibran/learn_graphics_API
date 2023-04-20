@@ -6,7 +6,7 @@ namespace dmbrn
 	class PerStaticModelData
 	{
 		public:
-		size_t dynamic_aligned_size_ = 256;
+		uint32_t dynamic_aligned_size_ = 256;
 
 		static inline constexpr size_t MAX_OBJECT_COUNT = 512;
 
@@ -17,15 +17,15 @@ namespace dmbrn
 
 		PerStaticModelData(const LogicalDevice& device, const PhysicalDevice& physical_device)
 		{
-			size_t minUboAlignment = physical_device->getProperties().limits.minUniformBufferOffsetAlignment;
+			uint32_t minUboAlignment = static_cast<uint32_t>(physical_device->getProperties().limits.minUniformBufferOffsetAlignment);
 			if (minUboAlignment > 0)
 			{
-				size_t dynamicAlignment = sizeof(UBODynamicData);
+				uint32_t dynamicAlignment = sizeof(UBODynamicData);
 				dynamic_aligned_size_ = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
 			}
 
 			const vk::DeviceSize bufferSize = MAX_OBJECT_COUNT * dynamic_aligned_size_;
-			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
+			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
 				uniform_buffers_.push_back(
 					device->createBuffer(
@@ -71,9 +71,9 @@ namespace dmbrn
 			                                  *descriptor_sets_[frame], offset);
 		}
 
-		size_t registerObject()
+		uint32_t registerObject()
 		{
-			size_t res = current_obj_offset_handle;
+			uint32_t res = current_obj_offset_handle;
 			current_obj_count++;
 			current_obj_offset_handle += dynamic_aligned_size_;
 			return res;
@@ -103,8 +103,8 @@ namespace dmbrn
 		};
 
 	private:
-		size_t current_obj_offset_handle = 0;
-		size_t current_obj_count = 0;
+		uint32_t current_obj_offset_handle = 0;
+		uint32_t current_obj_count = 0;
 		std::vector<vk::raii::Buffer> uniform_buffers_;
 		std::vector<vk::raii::DeviceMemory> uniform_buffers_memory;
 		std::vector<vk::raii::DescriptorSet> descriptor_sets_;
