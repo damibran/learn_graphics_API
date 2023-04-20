@@ -260,7 +260,7 @@ namespace dmbrn
 					AnimationClip& clip = animation_clips[i];
 
 					clip.name = anim->mName.C_Str();
-					clip.duration = duration{anim->mDuration / anim->mTicksPerSecond};
+					clip.duration_ = duration{anim->mDuration / anim->mTicksPerSecond};
 					clip.channels.reserve(anim->mNumChannels);
 
 					for (unsigned j = 0; j < anim->mNumChannels; ++j)
@@ -275,19 +275,19 @@ namespace dmbrn
 						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
 						{
 							aiVectorKey pos_k = node_anim->mPositionKeys[k];
-							channels.positions.insert({pos_k.mTime / anim->mTicksPerSecond, toGlm(pos_k.mValue)});
+							channels.positions.insert({duration{pos_k.mTime / anim->mTicksPerSecond}, toGlm(pos_k.mValue)});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumRotationKeys; ++k)
 						{
 							aiQuatKey rot_k = node_anim->mRotationKeys[k];
-							channels.rotations.insert({rot_k.mTime / anim->mTicksPerSecond, toGlm(rot_k.mValue)});
+							channels.rotations.insert({duration{rot_k.mTime / anim->mTicksPerSecond}, toGlm(rot_k.mValue)});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumScalingKeys; ++k)
 						{
 							aiVectorKey scale_k = node_anim->mScalingKeys[k];
-							channels.scales.insert({scale_k.mTime / anim->mTicksPerSecond, toGlm(scale_k.mValue)});
+							channels.scales.insert({duration{scale_k.mTime / anim->mTicksPerSecond}, toGlm(scale_k.mValue)});
 						}
 
 

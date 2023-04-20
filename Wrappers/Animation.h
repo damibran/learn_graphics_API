@@ -11,18 +11,18 @@ namespace dmbrn
 	struct AnimationChannels
 	{
 		Enttity enttity;
-		std::map<double, glm::vec3> positions;
-		std::map<double, glm::quat> rotations;
-		std::map<double, glm::vec3> scales;
+		std::map<duration, glm::vec3> positions;
+		std::map<duration, glm::quat> rotations;
+		std::map<duration, glm::vec3> scales;
 	};
 
 	struct AnimationClip
 	{
 		std::string name;
-		duration duration; // in seconds
+		duration duration_; // in seconds
 		std::vector<AnimationChannels> channels;
 
-		void updateTransforms(double l_time, uint32_t frame)
+		void updateTransforms(duration l_time, uint32_t frame)
 		{
 			for (auto& chnls : channels)
 			{
@@ -44,7 +44,7 @@ namespace dmbrn
 			return midWayLength / framesDiff;
 		}
 
-		glm::vec3 mixPositions(double l_time, const AnimationChannels& chnls)
+		glm::vec3 mixPositions(duration l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.positions.equal_range(l_time);
 
@@ -54,30 +54,30 @@ namespace dmbrn
 			if (ub == chnls.positions.end()--)
 				std::cout << "FDSFF";
 
-			float factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 			return glm::mix(lb->second, ub->second, factor);
 		}
 
-		glm::quat slerpRotation(double l_time, const AnimationChannels& chnls)
+		glm::quat slerpRotation(duration l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.rotations.equal_range(l_time);
 
 			if (lb != chnls.rotations.begin())
 				lb--;
 
-			float factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 
 			return glm::slerp(lb->second, ub->second, factor);
 		}
 
-		glm::vec3 mixScale(double l_time, const AnimationChannels& chnls)
+		glm::vec3 mixScale(duration l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.scales.equal_range(l_time);
 
 			if (lb != chnls.scales.begin())
 				lb--;
 
-			float factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = GetScaleFactor(lb->first.count(), ub->first.count(), l_time.count());
 
 			return glm::mix(lb->second, ub->second, factor);
 		}
