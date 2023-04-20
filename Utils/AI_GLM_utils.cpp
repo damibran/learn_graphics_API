@@ -102,13 +102,13 @@ namespace dmbrn
 
 	void printAnimations(const aiScene* ai_scene)
 	{
-		for (int i = 0; i < ai_scene->mNumAnimations; ++i)
+		for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
 			aiAnimation* ai_animation = ai_scene->mAnimations[i];
 
 			std::cout << "Animation name:" << ai_animation->mName.C_Str() << std::endl;
 
-			for (int j = 0; j < ai_animation->mNumChannels; ++j)
+			for (unsigned j = 0; j < ai_animation->mNumChannels; ++j)
 			{
 				aiNodeAnim* ai_node_anim = ai_animation->mChannels[j];
 				std::cout << "  AnimNode name: " << ai_node_anim->mNodeName.C_Str() << std::endl;
