@@ -82,6 +82,15 @@ namespace dmbrn
 				dirty[i] = true;
 		}
 
+		bool isDirtyForAllFrames()const
+		{
+			bool res=true;
+			for (int i = 0; i < LogicalDevice::MAX_FRAMES_IN_FLIGHT; ++i)
+				res &= dirty[i];
+
+			return res;
+		}
+
 		bool isDirtyForFrame(uint32_t frame) const
 		{
 			return dirty[frame];

@@ -93,7 +93,7 @@ namespace dmbrn
 
 			ImGui::Text(("Count of unique static meshes: " + std::to_string(Mesh::MeshRenderData::getRegistrySize())).c_str());
 
-			ImGui::Text(("Count of unique static meshes: " + std::to_string(SkeletalMesh::SkeletalMeshRenderData::getRegistrySize())).c_str());
+			ImGui::Text(("Count of unique skeletal meshes: " + std::to_string(SkeletalMesh::SkeletalMeshRenderData::getRegistrySize())).c_str());
 
 			ImGui::Text(("Count of unique materials: " + std::to_string(DiffusionMaterial::getRegistrySize())).c_str());
 

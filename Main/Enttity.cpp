@@ -48,14 +48,14 @@ namespace dmbrn
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();
 
-		//if (!this_tc.isDirtyForFrame(frame))
-		//{
+		if (!this_tc.isDirtyForAllFrames()) // means that one tree branch was edited simultaneously (during one frame) e.g. by animation
+		{
 			RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
 			this_tc.markAsDirty();
 			if (this_rc.parent)
 			{
 				this_rc.parent.markTransformAsDirty(frame);
 			}
-		//}
+		}
 	}
 }
