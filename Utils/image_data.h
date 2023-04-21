@@ -35,7 +35,6 @@ namespace dmbrn
 			data.insert(data.begin(),src,src+len);
 		}
 
-	public:
 		std::vector<unsigned char> data;
 		int width, height, comp_per_pix;
 	};

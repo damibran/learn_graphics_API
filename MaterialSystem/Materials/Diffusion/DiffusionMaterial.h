@@ -77,7 +77,7 @@ namespace dmbrn
 	private:
 		DiffusionMaterial(const std::string& directory, const aiScene* scene,
 		                  const aiMaterial* ai_material) :
-			diffuse(getTexture(aiTextureType_DIFFUSE, 0, directory, scene, ai_material)),
+			diffuse(getTexture(aiTextureType_DIFFUSE, 0, directory, scene, ai_material),true),
 			base_color(Singletons::physical_device, Singletons::device, getBaseColor(ai_material)),
 			descriptor_sets_(Singletons::device, diffuse, base_color)
 		{
