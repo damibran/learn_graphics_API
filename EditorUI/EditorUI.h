@@ -15,6 +15,7 @@
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
 #include "Inspector.h"
+#include "Sequencer/MySequence.h"
 
 namespace dmbrn
 {
@@ -34,9 +35,17 @@ namespace dmbrn
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
+
+			mySequence.mFrameMin = -100;
+			mySequence.mFrameMax = 1000;
+			mySequence.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
+			mySequence.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
+			mySequence.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
+			mySequence.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
+			mySequence.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
 		}
 
-		void drawFrame(time_point g_time,double delta_time)
+		void drawFrame(time_point g_time, double delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
@@ -48,17 +57,18 @@ namespace dmbrn
 			ImGui::ShowDemoWindow();
 
 			viewport_.newImGuiFrame(delta_time, current_frame_, imageIndex);
-			viewport2_.newImGuiFrame(delta_time, current_frame_,imageIndex);
+			viewport2_.newImGuiFrame(delta_time, current_frame_, imageIndex);
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
+			drawSequencer();
 
 			endDockSpace();
 
-			if(show_model_import)
+			if (show_model_import)
 				showImportWindow();
 
-			scene_.updateAnimations(g_time,current_frame_);
+			scene_.updateAnimations(g_time, current_frame_);
 			scene_.updateGlobalTransforms(current_frame_);
 			scene_.updatePerStaticModelData(current_frame_);
 			scene_.updatePerSkeletalData(current_frame_);
@@ -82,6 +92,7 @@ namespace dmbrn
 		Viewport viewport2_;
 		bool show_model_import = false;
 		std::string model_path;
+		MySequence mySequence;
 
 		uint32_t current_frame_ = 0;
 
@@ -91,9 +102,12 @@ namespace dmbrn
 
 			ImGui::Text(("Number of entities created so far: " + std::to_string(scene_.getCountOfEntities())).c_str());
 
-			ImGui::Text(("Count of unique static meshes: " + std::to_string(Mesh::MeshRenderData::getRegistrySize())).c_str());
+			ImGui::Text(
+				("Count of unique static meshes: " + std::to_string(Mesh::MeshRenderData::getRegistrySize())).c_str());
 
-			ImGui::Text(("Count of unique skeletal meshes: " + std::to_string(SkeletalMesh::SkeletalMeshRenderData::getRegistrySize())).c_str());
+			ImGui::Text(
+				("Count of unique skeletal meshes: " + std::to_string(
+					SkeletalMesh::SkeletalMeshRenderData::getRegistrySize())).c_str());
 
 			ImGui::Text(("Count of unique materials: " + std::to_string(DiffusionMaterial::getRegistrySize())).c_str());
 
@@ -108,7 +122,7 @@ namespace dmbrn
 				return;
 			}
 
-			char buf[256]={0};
+			char buf[256] = {0};
 
 			strcpy_s(buf, sizeof(buf), model_path.c_str());
 
@@ -117,7 +131,7 @@ namespace dmbrn
 				model_path = std::string(buf);
 			}
 
-			if(ImGui::Button("Import"))
+			if (ImGui::Button("Import"))
 			{
 				//scene_.addModel(model_path);
 				show_model_import = false;
@@ -211,6 +225,38 @@ namespace dmbrn
 					ImGui::EndMenu();
 				}
 				ImGui::EndMainMenuBar();
+			}
+		}
+
+		void drawSequencer()
+		{
+			if (ImGui::Begin("Sequencer"))
+			{
+				// let's create the sequencer
+				static int selectedEntry = -1;
+				static int firstFrame = 0;
+				static bool expanded = true;
+				static int currentFrame = 100;
+
+				ImGui::PushItemWidth(130);
+				ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+				ImGui::SameLine();
+				ImGui::InputInt("Frame ", &currentFrame);
+				ImGui::SameLine();
+				ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+				ImGui::PopItemWidth();
+				Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame,
+				          ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL
+				          | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+				// add a UI to edit that particular item
+				if (selectedEntry != -1)
+				{
+					const MySequence::MySequenceItem& item = mySequence.myItems[selectedEntry];
+					ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+					// switch (type) ....
+				}
+
+				ImGui::End();
 			}
 		}
 
