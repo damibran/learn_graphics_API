@@ -252,9 +252,9 @@ namespace dmbrn
 				{
 					modFrameCount *= 2;
 					frameStep *= 2;
-				};
+				}
 				int halfModFrameCount = modFrameCount / 2;
-				
+
 				auto drawLine = [&](int i, int regionHeight)
 				{
 					bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
@@ -263,16 +263,16 @@ namespace dmbrn
 						firstFrameUsed * framePixelWidth);
 					int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
 					int tiretEnd = baseIndex ? regionHeight : ItemHeight;
-				
+
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
 						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart),
 						                   ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
-				
+
 						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)ItemHeight),
 						                   ImVec2((float)px, canvas_pos.y + (float)regionHeight - 1), 0x30606060, 1);
 					}
-				
+
 					if (baseIndex && px > (canvas_pos.x + legendWidth))
 					{
 						char tmps[512];
@@ -294,7 +294,8 @@ namespace dmbrn
 						                   0x30606060, 1);
 					}
 				};
-				for (int i = sequence.mFrameMin; i <= sequence.mFrameMax; i += frameStep)
+				for (int i = sequence.mFrameMin - sequence.mFrameMin % frameStep; i <= sequence.mFrameMax; i +=
+				     frameStep)
 				{
 					drawLine(i, ItemHeight);
 				}
@@ -760,5 +761,5 @@ namespace dmbrn
 		//		draw_list->AddText(ImVec2((float)px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
 		//	}
 		//};
-	};	//
+	}; //
 }
