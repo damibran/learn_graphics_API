@@ -168,7 +168,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EditorUI\Sequencer\ImSequencer.cpp" />
     <ClCompile Include="MainHpp.cpp" />
     <ClCompile Include="Main\Enttity.cpp" />
     <ClCompile Include="Utils\AI_GLM_utils.cpp" />
@@ -199,6 +198,7 @@
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
+    <ClInclude Include="Main\AnimationSequence.h" />
     <ClInclude Include="Main\Componenets\AnimationComponent.h" />
     <ClInclude Include="Main\Componenets\BoneComponenet.h" />
     <ClInclude Include="Main\Componenets\CameraComponent.h" />

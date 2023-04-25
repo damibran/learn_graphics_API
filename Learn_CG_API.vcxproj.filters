@@ -279,5 +279,8 @@
     <ClInclude Include="EditorUI\Sequencer\ImSequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Main\AnimationSequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

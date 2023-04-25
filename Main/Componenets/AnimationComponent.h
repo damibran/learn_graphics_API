@@ -33,7 +33,7 @@ namespace dmbrn
 			duration l_time;
 			AnimationClip& playing_clip = animation_clips[playing_ind];
 
-			double duration_s = playing_clip.duration_.count();
+			double duration_s = playing_clip.duration_;
 			
 			if (loop)
 				l_time = duration{std::fmod((g_time - start_time).count(), duration_s)};

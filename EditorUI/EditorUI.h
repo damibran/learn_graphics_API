@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -15,7 +16,7 @@
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
 #include "Inspector.h"
-#include "Sequencer/MySequence.h"
+#include "Sequencer/ImSequencer.h"
 
 namespace dmbrn
 {
@@ -35,14 +36,6 @@ namespace dmbrn
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-
-			mySequence.mFrameMin = -100;
-			mySequence.mFrameMax = 1000;
-			mySequence.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
-			mySequence.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
-			mySequence.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
-			mySequence.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
-			mySequence.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
 		}
 
 		void drawFrame(time_point g_time, double delta_time)
@@ -61,7 +54,7 @@ namespace dmbrn
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
-			drawSequencer();
+			drawSequencer(scene_.getAnimationSequence());
 
 			endDockSpace();
 
@@ -90,9 +83,9 @@ namespace dmbrn
 		Inspector inspector_;
 		Viewport viewport_;
 		Viewport viewport2_;
+		Sequencer sequencer_;
 		bool show_model_import = false;
 		std::string model_path;
-		MySequence mySequence;
 
 		uint32_t current_frame_ = 0;
 
@@ -228,33 +221,33 @@ namespace dmbrn
 			}
 		}
 
-		void drawSequencer()
+		void drawSequencer(AnimationSequence& animation_sequence)
 		{
 			if (ImGui::Begin("Sequencer"))
 			{
 				// let's create the sequencer
-				static int selectedEntry = -1;
+				static std::pair<int,int> selectedEntry = {-1,-1};
 				static int firstFrame = 0;
 				static bool expanded = true;
 				static int currentFrame = 100;
 
 				ImGui::PushItemWidth(130);
-				ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+				ImGui::InputInt("Frame Min", &scene_.getAnimationSequence().mFrameMin);
 				ImGui::SameLine();
 				ImGui::InputInt("Frame ", &currentFrame);
 				ImGui::SameLine();
-				ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+				ImGui::InputInt("Frame Max", &scene_.getAnimationSequence().mFrameMax);
 				ImGui::PopItemWidth();
-				Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, &firstFrame,
-				          ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL
-				          | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+				sequencer_.draw(animation_sequence, &currentFrame, &expanded, &selectedEntry, &firstFrame,
+				          Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
+				                       | Sequencer::SEQUENCER_COPYPASTE | Sequencer::SEQUENCER_CHANGE_FRAME);
 				// add a UI to edit that particular item
-				if (selectedEntry != -1)
-				{
-					const MySequence::MySequenceItem& item = mySequence.myItems[selectedEntry];
-					ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
-					// switch (type) ....
-				}
+				//if (selectedEntry != -1)
+				//{
+				//	const MySequence::MySequenceItem& item = mySequence.myItems[selectedEntry];
+				//	ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+				//	// switch (type) ....
+				//}
 
 				ImGui::End();
 			}

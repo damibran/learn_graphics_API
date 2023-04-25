@@ -12,6 +12,7 @@
 
 #include "Wrappers/Animation.h"
 #include "Componenets/AnimationComponent.h"
+#include "AnimationSequence.h"
 
 
 namespace dmbrn
@@ -38,6 +39,20 @@ namespace dmbrn
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
 			printSceneRecursively(scene_root_, "");
+
+			animation_sequence_.mFrameMin = 0;
+			animation_sequence_.mFrameMax = 800;
+
+			auto view = registry_.view<AnimationComponent>();
+			for (auto ent : view)
+			{
+				AnimationComponent& anim = view.get<AnimationComponent>(ent);
+
+				for (int i = 1; i < 4; ++i)
+				{
+					animation_sequence_.entries_[Enttity{registry_, ent}].insert({i * 200, &anim.animation_clips[0]});
+				}
+			}
 
 			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
 			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
@@ -147,21 +162,21 @@ namespace dmbrn
 		}
 
 
-		void updateAnimations( time_point g_time, uint32_t frame)
+		void updateAnimations(time_point g_time, uint32_t frame)
 		{
 			auto view = registry_.view<AnimationComponent>();
 
-			for (auto ent : view)
-			{
-				AnimationComponent& anim = view.get<AnimationComponent>(ent);
-
-				if (anim.playing)
-				{
-					AnimationClip& playing_clip = anim.animation_clips[anim.playing_ind];
-
-					playing_clip.updateTransforms(anim.getLocalTime(g_time), frame);
-				}
-			}
+			//for (auto ent : view)
+			//{
+			//	AnimationComponent& anim = view.get<AnimationComponent>(ent);
+			//
+			//	if (anim.playing)
+			//	{
+			//		AnimationClip& playing_clip = anim.animation_clips[anim.playing_ind];
+			//
+			//		playing_clip.updateTransforms(anim.getLocalTime(g_time), frame);
+			//	}
+			//}
 		}
 
 		// may perform culling
@@ -186,9 +201,15 @@ namespace dmbrn
 			return scene_root_.getComponent<RelationshipComponent>();
 		}
 
+		AnimationSequence& getAnimationSequence()
+		{
+			return animation_sequence_;
+		}
+
 	private:
 		entt::registry registry_;
 		Enttity scene_root_;
+		AnimationSequence animation_sequence_;
 
 		class ModelImporter
 		{
@@ -259,13 +280,16 @@ namespace dmbrn
 					aiAnimation* anim = ai_scene->mAnimations[i];
 					AnimationClip& clip = animation_clips[i];
 
+					// TODO make it parametarazible or deduced from file 
+					double sample_period = 1. / 30.;
+
 					clip.name = anim->mName.C_Str();
-					clip.duration_ = duration{anim->mDuration / anim->mTicksPerSecond};
 					clip.channels.reserve(anim->mNumChannels);
 
 					for (unsigned j = 0; j < anim->mNumChannels; ++j)
 					{
 						aiNodeAnim* node_anim = anim->mChannels[j];
+
 						Enttity node_entt = anim_node_name_to_enttity[node_anim->mNodeName.C_Str()];
 
 						AnimationChannels channels;
@@ -275,21 +299,38 @@ namespace dmbrn
 						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
 						{
 							aiVectorKey pos_k = node_anim->mPositionKeys[k];
-							channels.positions.insert({duration{pos_k.mTime / anim->mTicksPerSecond}, toGlm(pos_k.mValue)});
+							channels.positions.insert({
+								static_cast<uint32_t>(std::round(pos_k.mTime / anim->mTicksPerSecond / sample_period)),
+								toGlm(pos_k.mValue)
+							});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumRotationKeys; ++k)
 						{
 							aiQuatKey rot_k = node_anim->mRotationKeys[k];
-							channels.rotations.insert({duration{rot_k.mTime / anim->mTicksPerSecond}, toGlm(rot_k.mValue)});
+							channels.rotations.insert({
+								static_cast<uint32_t>(std::round(rot_k.mTime / anim->mTicksPerSecond / sample_period)),
+								toGlm(rot_k.mValue)
+							});
 						}
 
 						for (unsigned k = 0; k < node_anim->mNumScalingKeys; ++k)
 						{
 							aiVectorKey scale_k = node_anim->mScalingKeys[k];
-							channels.scales.insert({duration{scale_k.mTime / anim->mTicksPerSecond}, toGlm(scale_k.mValue)});
+							channels.scales.insert({
+								static_cast<uint32_t>(
+									std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
+								toGlm(scale_k.mValue)
+							});
 						}
 
+						uint32_t min = std::min(channels.positions.begin()->first,std::min(channels.rotations.begin()->first,channels.scales.begin()->first));
+
+						uint32_t max = std::max((--channels.positions.end())->first,
+						                             std::max((--channels.rotations.end())->first,
+						                                      (--channels.scales.end())->first));
+
+						clip.duration_ = max-min;
 
 						clip.channels.push_back(std::move(channels));
 					}

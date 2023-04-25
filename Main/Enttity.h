@@ -107,6 +107,14 @@ namespace dmbrn
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }
 
+		struct hash
+		{
+			size_t operator()(const Enttity& ent)const
+			{
+				return static_cast<uintptr_t>(ent.entityID_) ^ reinterpret_cast<uintptr_t>(ent.registry_);
+			}
+		};
+
 	private:
 		entt::registry* registry_ = nullptr;
 		entt::entity entityID_{entt::null};
