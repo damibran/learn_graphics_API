@@ -43,6 +43,11 @@ namespace dmbrn
 	class Sequencer
 	{
 	public:
+		const float cursorWidth = 8.f;
+		const float MinBarWidth = 44.f;
+		const int ItemHeight = 20;
+		const int legendWidth = 200;
+
 		Sequencer(AnimationSequence& sequence):
 			sequence(sequence),
 			selectedEntity(sequence.end())
@@ -54,6 +59,24 @@ namespace dmbrn
 		int currentFrame = 100;
 		bool expanded = true;
 		int firstFrame = 0;
+
+		float framePixelWidth = 10.f;
+		float framePixelWidthTarget = 10.f;
+
+		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
+		movingEntry = {sequence.end(), std::nullopt};
+
+		int movingPos = -1;
+
+		bool MovingScrollBar = false;
+		bool MovingCurrentFrame = false;
+
+		bool panningView = false;
+		ImVec2 panningViewSource;
+		int panningViewFrame;
+
+		bool sizingRBar = false;
+		bool sizingLBar = false;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -80,16 +103,9 @@ namespace dmbrn
 			ImGuiIO& io = ImGui::GetIO();
 			int mouse_x = (int)(io.MousePos.x);
 			int mouse_y = (int)(io.MousePos.y);
-			static float framePixelWidth = 10.f;
-			static float framePixelWidthTarget = 10.f;
-			int legendWidth = 200;
 
-			static std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
-				movingEntry = {sequence.end(), std::nullopt};
-			static int movingPos = -1;
 			int delEntry = -1;
 			int dupEntry = -1;
-			int ItemHeight = 20;
 
 			bool popupOpened = false;
 			int sequenceCount = sequence.getAnimationComponentCount();
@@ -109,8 +125,6 @@ namespace dmbrn
 			//	controlHeight += int(sequence.GetCustomHeight(i));
 			int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
-			static bool MovingScrollBar = false;
-			static bool MovingCurrentFrame = false;
 			// zoom in/out
 			const int visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
 			const float barWidthRatio = ImMin(visibleFrameCount / (float)frameCount, 1.f);
@@ -118,9 +132,6 @@ namespace dmbrn
 
 			ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
 
-			static bool panningView = false;
-			static ImVec2 panningViewSource;
-			static int panningViewFrame;
 			if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
 			{
 				if (!panningView)
@@ -243,7 +254,7 @@ namespace dmbrn
 					frameStep *= 2;
 				};
 				int halfModFrameCount = modFrameCount / 2;
-
+				
 				auto drawLine = [&](int i, int regionHeight)
 				{
 					bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
@@ -252,16 +263,16 @@ namespace dmbrn
 						firstFrameUsed * framePixelWidth);
 					int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
 					int tiretEnd = baseIndex ? regionHeight : ItemHeight;
-
+				
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
 						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart),
 						                   ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
-
+				
 						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)ItemHeight),
 						                   ImVec2((float)px, canvas_pos.y + (float)regionHeight - 1), 0x30606060, 1);
 					}
-
+				
 					if (baseIndex && px > (canvas_pos.x + legendWidth))
 					{
 						char tmps[512];
@@ -279,8 +290,6 @@ namespace dmbrn
 
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
-						//draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart), ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
-
 						draw_list->AddLine(ImVec2(float(px), float(tiretStart)), ImVec2(float(px), float(tiretEnd)),
 						                   0x30606060, 1);
 					}
@@ -291,12 +300,8 @@ namespace dmbrn
 				}
 				drawLine(sequence.mFrameMin, ItemHeight);
 				drawLine(sequence.mFrameMax, ItemHeight);
-				/*
-				         draw_list->AddLine(canvas_pos, ImVec2(canvas_pos.x, canvas_pos.y + controlHeight), 0xFF000000, 1);
-				         draw_list->AddLine(ImVec2(canvas_pos.x, canvas_pos.y + ItemHeight), ImVec2(canvas_size.x, canvas_pos.y + ItemHeight), 0xFF000000, 1);
-				         */
-				// clip content
 
+				// clip content
 				draw_list->PushClipRect(childFramePos, childFramePos + childFrameSize, true);
 
 				// draw item names in the legend rect on the left
@@ -362,7 +367,7 @@ namespace dmbrn
 				{
 					// TODO selection
 					// selection
-					if (selectedEntity != sequence.end() && selectedEntity==ent_it)
+					if (selectedEntity != sequence.end() && selectedEntity == ent_it)
 					{
 						customHeight = 0;
 						// TODO CustomHeight
@@ -378,7 +383,7 @@ namespace dmbrn
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
 						int start = clip_it->first;
-						int end = clip_it->first+clip_it->second.duration_;
+						int end = clip_it->first + clip_it->second.duration_;
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
@@ -486,7 +491,8 @@ namespace dmbrn
 
 						movingPos += static_cast<int>(diffFrame * framePixelWidth);
 
-						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second), start);
+						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second),
+						                                          start);
 					}
 					if (!io.MouseDown[0])
 					{
@@ -504,7 +510,6 @@ namespace dmbrn
 				// cursor
 				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
 				{
-					static const float cursorWidth = 8.f;
 					float cursorOffset = contentMin.x + legendWidth + (currentFrame - firstFrameUsed) * framePixelWidth
 						+
 						framePixelWidth / 2 - cursorWidth * 0.5f;
@@ -587,16 +592,12 @@ namespace dmbrn
 					bool onLeft = barHandleLeft.Contains(io.MousePos);
 					bool onRight = barHandleRight.Contains(io.MousePos);
 
-					static bool sizingRBar = false;
-					static bool sizingLBar = false;
-
 					draw_list->AddRectFilled(barHandleLeft.Min, barHandleLeft.Max,
 					                         (onLeft || sizingLBar) ? 0xFFAAAAAA : 0xFF666666, 6);
 					draw_list->AddRectFilled(barHandleRight.Min, barHandleRight.Max,
 					                         (onRight || sizingRBar) ? 0xFFAAAAAA : 0xFF666666, 6);
 
 					ImRect scrollBarThumb(scrollBarC, scrollBarD);
-					static const float MinBarWidth = 44.f;
 					if (sizingRBar)
 					{
 						if (!io.MouseDown[0])
@@ -724,5 +725,40 @@ namespace dmbrn
 				draw_list->AddLine(ImVec2(midx, btnRect.Min.y + 3), ImVec2(midx, btnRect.Max.y - 3), btnColor, 2);
 			return clickedBtn;
 		}
-	};
+
+		//void drawLine(int i, int regionHeight)
+		//{
+		//	int modFrameCount = 10;
+		//	int frameStep = 1;
+		//	while ((modFrameCount * framePixelWidth) < 150)
+		//	{
+		//		modFrameCount *= 2;
+		//		frameStep *= 2;
+		//	};
+		//	int halfModFrameCount = modFrameCount / 2;
+		//
+		//	bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
+		//	bool halfIndex = (i % halfModFrameCount) == 0;
+		//	int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
+		//		firstFrameUsed * framePixelWidth);
+		//	int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
+		//	int tiretEnd = baseIndex ? regionHeight : ItemHeight;
+		//
+		//	if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
+		//	{
+		//		draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart),
+		//		                   ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
+		//
+		//		draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)ItemHeight),
+		//		                   ImVec2((float)px, canvas_pos.y + (float)regionHeight - 1), 0x30606060, 1);
+		//	}
+		//
+		//	if (baseIndex && px > (canvas_pos.x + legendWidth))
+		//	{
+		//		char tmps[512];
+		//		ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", i);
+		//		draw_list->AddText(ImVec2((float)px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
+		//	}
+		//};
+	};	//
 }
