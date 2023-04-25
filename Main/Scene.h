@@ -50,7 +50,7 @@ namespace dmbrn
 
 				for (int i = 1; i < 4; ++i)
 				{
-					animation_sequence_.entries_[Enttity{registry_, ent}].insert({i * 200, &anim.animation_clips[0]});
+					animation_sequence_.entries_[Enttity{registry_, ent}].insert({i * 200, anim.animation_clips[0]});
 				}
 			}
 

@@ -7,7 +7,7 @@ namespace dmbrn
 	struct AnimationSequence
 	{
 		int mFrameMin, mFrameMax;
-		std::unordered_map<Enttity, std::multimap<uint32_t, AnimationClip*>, Enttity::hash> entries_;
+		std::unordered_map<Enttity, std::multimap<uint32_t, AnimationClip>, Enttity::hash> entries_;
 
 		using EntityIterator = decltype(entries_)::iterator;
 		using ClipIterator = decltype(entries_)::mapped_type::iterator;
@@ -27,9 +27,9 @@ namespace dmbrn
 			return entries_.end();
 		}
 
-		ClipIterator updateStart(EntityIterator ent_it, ClipIterator clip_it, uint32_t new_start)
+		ClipIterator updateStart(const EntityIterator& ent_it, ClipIterator&& clip_it, uint32_t new_start)
 		{
-			AnimationClip* animation_clip = clip_it->second;
+			AnimationClip animation_clip = std::move(clip_it->second);
 			ent_it->second.erase(clip_it);
 			return {ent_it->second.insert({new_start,animation_clip})};
 		}

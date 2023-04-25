@@ -378,7 +378,7 @@ namespace dmbrn
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
 						int start = clip_it->first;
-						int end = clip_it->first+clip_it->second->duration_;
+						int end = clip_it->first+clip_it->second.duration_;
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
@@ -426,7 +426,7 @@ namespace dmbrn
 
 						draw_list->PushClipRect(slotP1, slotP2, true);
 						draw_list->AddText({slotP1.x + text_offset, slotP1.y}, 0xFF000000,
-						                   clip_it->second->name.c_str());
+						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
 
 						// custom draw
@@ -486,7 +486,7 @@ namespace dmbrn
 
 						movingPos += static_cast<int>(diffFrame * framePixelWidth);
 
-						movingEntry.second = sequence.updateStart(movingEntry.first, *movingEntry.second, start);
+						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second), start);
 					}
 					if (!io.MouseDown[0])
 					{
@@ -667,8 +667,8 @@ namespace dmbrn
 						}
 						else
 						{
-							if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && firstFrame && !
-								MovingCurrentFrame && movingEntry.first != sequence.end())
+							if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && !
+								MovingCurrentFrame && movingEntry.first == sequence.end())
 							{
 								MovingScrollBar = true;
 								panningViewSource = io.MousePos;
