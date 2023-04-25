@@ -9,109 +9,102 @@ namespace dmbrn
 		int mFrameMin, mFrameMax;
 		std::unordered_map<Enttity, std::multimap<uint32_t, AnimationClip*>, Enttity::hash> entries_;
 
+		struct EntityIterator
+		{
+			// may be delete this class
+			struct ClipIterator
+			{
+				bool operator==(const ClipIterator& other) const
+				{
+					return clip_iter == other.clip_iter;
+				}
+
+				bool operator!=(const ClipIterator& other) const
+				{
+					return !(*this == other);
+				}
+
+				ClipIterator& operator++()
+				{
+					++clip_iter;
+					return *this;
+				}
+
+				std::pair<int,int> getStartEnd()
+				{
+					return {static_cast<int>(clip_iter->first), static_cast<int>(clip_iter->first + clip_iter->second->duration_)};
+				}
+
+				std::multimap<uint32_t, AnimationClip*>::pointer operator->()
+				{
+					return &*clip_iter;
+				}
+
+				std::multimap<uint32_t, AnimationClip*>::iterator operator*()
+				{
+					return clip_iter;
+				}
+
+				std::multimap<uint32_t, AnimationClip*>::iterator clip_iter;
+			};
+
+			bool operator==(const EntityIterator& other) const
+			{
+				return ent_iter == other.ent_iter;
+			}
+
+			bool operator!=(const EntityIterator& other) const
+			{
+				return !(*this == other);
+			}
+
+			EntityIterator& operator++()
+			{
+				++ent_iter;
+				++ind;
+
+				return *this;
+			}
+
+			ClipIterator begin()
+			{
+				return ClipIterator{ent_iter->second.begin()};
+			}
+
+			ClipIterator end()
+			{
+				return {ent_iter->second.end()};
+			}
+
+			decltype(entries_)::pointer operator->()
+				{
+					return &*ent_iter;
+				}
+
+			decltype(entries_)::iterator ent_iter;
+			int ind=0;
+		};
+
 		int getAnimationComponentCount()
 		{
 			return entries_.size();
 		}
 
-		// TODO poor interface
-		std::string getItemLabel(int i)
+		EntityIterator begin()
 		{
-			int ind = 0;
-			for (auto it = entries_.begin(); it != entries_.end(); ++it, ++ind)
-			{
-				if (ind == i)
-					return it->first.getComponent<TagComponent>().tag;
-			}
+			return EntityIterator{entries_.begin()};
 		}
 
-		Enttity getEnttity(int i)
+		EntityIterator end()
 		{
-			int ind = 0;
-			for (auto it = entries_.begin(); it != entries_.end(); ++it)
-			{
-				if (ind == i)
-					return it->first;
-			}
+			return EntityIterator{entries_.end()};
 		}
 
-		size_t getClipCount(Enttity ent)
+		EntityIterator::ClipIterator updateStart(EntityIterator ent_it, EntityIterator::ClipIterator clip_it, uint32_t new_start)
 		{
-			return entries_[ent].size();
+			AnimationClip* animation_clip = clip_it->second;
+			ent_it->second.erase(*clip_it);
+			return {ent_it->second.insert({new_start,animation_clip})};
 		}
-
-		// TODO poor interface
-		std::pair<int, int> getStartEnd(Enttity ent, int j)
-		{
-			int ind = 0;
-			for (auto it = entries_[ent].begin(); it != entries_[ent].end(); ++it, ++ind)
-			{
-				// TODO remove casts
-				if (ind == j)
-					return {static_cast<int>(it->first), static_cast<int>(it->first + it->second->duration_)};
-			}
-		}
-
-		std::pair<int, int> getStartEnd(int i, int j)
-		{
-			int indi = 0;
-			for (auto iti = entries_.begin(); iti != entries_.end(); ++iti)
-			{
-				if (indi == i)
-				{
-					int indj = 0;
-					for (auto itj = iti->second.begin(); itj != iti->second.end(); ++itj, ++indj)
-					{
-						// TODO remove casts
-						if (indj == j)
-							return {
-								static_cast<int>(itj->first), static_cast<int>(itj->first + itj->second->duration_)
-							};
-					}
-				}
-			}
-		}
-
-		void updateStart(int i, int j, uint32_t new_start)
-		{
-			int indi = 0;
-			for (auto iti = entries_.begin(); iti != entries_.end(); ++iti)
-			{
-				if (indi == i)
-				{
-					int indj = 0;
-					for (auto itj = iti->second.begin(); itj != iti->second.end(); ++itj, ++indj)
-					{
-						// TODO remove casts
-						if (indj == j)
-						{
-							AnimationClip* animation_clip = itj->second;
-							entries_[iti->first].erase(itj->first);
-							entries_[iti->first].insert({new_start, animation_clip});
-							return;
-						}
-					}
-				}
-			}
-		}
-
-		std::string getClipName(int i, int j)
-		{
-			int indi = 0;
-			for (auto iti = entries_.begin(); iti != entries_.end(); ++iti)
-			{
-				if (indi == i)
-				{
-					int indj = 0;
-					for (auto itj = iti->second.begin(); itj != iti->second.end(); ++itj, ++indj)
-					{
-						// TODO remove casts
-						if (indj == j)
-							return itj->second->name;
-					}
-				}
-			}
-		}
-
 	};
 }

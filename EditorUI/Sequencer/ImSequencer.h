@@ -43,6 +43,19 @@ namespace dmbrn
 	class Sequencer
 	{
 	public:
+		Sequencer(AnimationSequence& sequence):
+		sequence(sequence),
+		selectedEntity(sequence.end())
+		{
+			
+		}
+
+		AnimationSequence& sequence;
+		AnimationSequence::EntityIterator selectedEntity;
+		int currentFrame = 100;
+		bool expanded = true;
+		int firstFrame = 0;
+
 		enum SEQUENCER_OPTIONS
 		{
 			SEQUENCER_EDIT_NONE = 0,
@@ -54,10 +67,16 @@ namespace dmbrn
 			SEQUENCER_EDIT_ALL = SEQUENCER_EDIT_STARTEND | SEQUENCER_CHANGE_FRAME
 		};
 
-		bool draw(AnimationSequence& sequence, int* currentFrame, bool* expanded, std::pair<int, int>* selectedEntry,
-		          int* firstFrame,
-		          int sequenceOptions)
+		bool draw(int sequenceOptions)
 		{
+			ImGui::PushItemWidth(130);
+			ImGui::InputInt("Frame Min", &sequence.mFrameMin);
+			ImGui::SameLine();
+			ImGui::InputInt("Frame ", &currentFrame);
+			ImGui::SameLine();
+			ImGui::InputInt("Frame Max", &sequence.mFrameMax);
+			ImGui::PopItemWidth();
+
 			bool ret = false;
 			ImGuiIO& io = ImGui::GetIO();
 			int mouse_x = (int)(io.MousePos.x);
@@ -66,7 +85,7 @@ namespace dmbrn
 			static float framePixelWidthTarget = 10.f;
 			int legendWidth = 200;
 
-			static std::pair<int, int> movingEntry = {-1, -1};
+			static std::pair<AnimationSequence::EntityIterator,std::optional<AnimationSequence::EntityIterator::ClipIterator>> movingEntry={sequence.end(),std::nullopt};
 			static int movingPos = -1;
 			int delEntry = -1;
 			int dupEntry = -1;
@@ -81,7 +100,7 @@ namespace dmbrn
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
-			int firstFrameUsed = firstFrame ? *firstFrame : 0;
+			int firstFrameUsed = firstFrame;
 
 
 			int controlHeight = sequenceCount * ItemHeight;
@@ -108,10 +127,10 @@ namespace dmbrn
 				{
 					panningViewSource = io.MousePos;
 					panningView = true;
-					panningViewFrame = *firstFrame;
+					panningViewFrame = firstFrame;
 				}
-				*firstFrame = panningViewFrame - int((io.MousePos.x - panningViewSource.x) / framePixelWidth);
-				*firstFrame = ImClamp(*firstFrame, sequence.mFrameMin, sequence.mFrameMax - visibleFrameCount);
+				firstFrame = panningViewFrame - int((io.MousePos.x - panningViewSource.x) / framePixelWidth);
+				firstFrame = ImClamp(firstFrame, sequence.mFrameMin, sequence.mFrameMax - visibleFrameCount);
 			}
 			if (panningView && !io.MouseDown[2])
 			{
@@ -123,11 +142,11 @@ namespace dmbrn
 
 			frameCount = sequence.mFrameMax - sequence.mFrameMin;
 			if (visibleFrameCount >= frameCount && firstFrame)
-				*firstFrame = sequence.mFrameMin;
+				firstFrame = sequence.mFrameMin;
 
 
 			// --
-			if (expanded && !*expanded)
+			if (!expanded)
 			{
 				ImGui::InvisibleButton("canvas", ImVec2(canvas_size.x - canvas_pos.x, (float)ItemHeight));
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
@@ -170,10 +189,10 @@ namespace dmbrn
 				ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
-				if (!MovingCurrentFrame && !MovingScrollBar && (movingEntry.first == -1 || movingEntry.second == -1) &&
+				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first ==sequence.end() &&
 					sequenceOptions &
 					SEQUENCER_CHANGE_FRAME
-					&& currentFrame && *currentFrame >= 0 && topRect.Contains(io.MousePos) && io.MouseDown[0])
+					&& currentFrame >= 0 && topRect.Contains(io.MousePos) && io.MouseDown[0])
 				{
 					MovingCurrentFrame = true;
 				}
@@ -181,11 +200,11 @@ namespace dmbrn
 				{
 					if (frameCount)
 					{
-						*currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrameUsed;
-						if (*currentFrame < sequence.mFrameMin)
-							*currentFrame = sequence.mFrameMin;
-						if (*currentFrame >= sequence.mFrameMax)
-							*currentFrame = sequence.mFrameMax;
+						currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrameUsed;
+						if (currentFrame < sequence.mFrameMin)
+							currentFrame = sequence.mFrameMin;
+						if (currentFrame >= sequence.mFrameMax)
+							currentFrame = sequence.mFrameMax;
 					}
 					if (!io.MouseDown[0])
 						MovingCurrentFrame = false;
@@ -282,22 +301,22 @@ namespace dmbrn
 
 				// draw item names in the legend rect on the left
 				size_t customHeight = 0;
-				for (int i = 0; i < sequenceCount; i++)
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 				{
-					ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
-					draw_list->AddText(tpos, 0xFFFFFFFF, sequence.getItemLabel(i).c_str());
+					ImVec2 tpos(contentMin.x + 3, contentMin.y + ent_it.ind * ItemHeight + 2 + customHeight);
+					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
 
 					if (sequenceOptions & SEQUENCER_DEL)
 					{
 						if (SequencerAddDelButton(
 							draw_list, ImVec2(contentMin.x + legendWidth - ItemHeight + 2 - 10, tpos.y + 2), false))
-							delEntry = i;
+							delEntry = ent_it.ind;
 
 						if (SequencerAddDelButton(
 							draw_list,
 							ImVec2(contentMin.x + legendWidth - ItemHeight - ItemHeight + 2 - 10, tpos.y + 2),
 							true))
-							dupEntry = i;
+							dupEntry = ent_it.ind;
 					}
 					// TODO CustomHeight
 					//customHeight += sequence.GetCustomHeight(i);
@@ -314,7 +333,7 @@ namespace dmbrn
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
 					ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
 					if (!popupOpened && mouse_y >= pos.y && mouse_y < pos.y + (ItemHeight + localCustomHeight) &&
-						(movingEntry.first == -1 || movingEntry.second == -1) &&
+						movingEntry.first!=sequence.end() &&
 						mouse_x > contentMin.x && mouse_x < contentMin.x + canvas_size.x)
 					{
 						col += 0x80201008;
@@ -337,7 +356,7 @@ namespace dmbrn
 
 				// TODO selection
 				// selection
-				bool selected = selectedEntry && (selectedEntry->first >= 0) && (selectedEntry->second >= 0);
+				bool selected = selectedEntity != sequence.end();
 				if (selected)
 				{
 					customHeight = 0;
@@ -345,20 +364,20 @@ namespace dmbrn
 					//for (int i = 0; i < *selectedEntry; i++)
 					//	customHeight += sequence.GetCustomHeight(i);
 					draw_list->AddRectFilled(
-						ImVec2(contentMin.x, contentMin.y + ItemHeight * selectedEntry->first + customHeight),
+						ImVec2(contentMin.x, contentMin.y + ItemHeight * selectedEntity.ind + customHeight),
 						ImVec2(contentMin.x + canvas_size.x,
-						       contentMin.y + ItemHeight * (selectedEntry->first + 1) + customHeight), 0x801080FF,
+						       contentMin.y + ItemHeight * (selectedEntity.ind + 1) + customHeight), 0x801080FF,
 						1.f);
 				}
 
 				// slots
 				customHeight = 0;
-				for (int i = 0; i < sequenceCount; i++)
+				int i = 0;
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					Enttity ent = sequence.getEnttity(i);
-					for (int j = 0; j < sequence.getClipCount(ent); ++j)
+					for (auto clip_it = ent_it.begin(); clip_it != ent_it.end(); ++clip_it)
 					{
-						auto [start, end] = sequence.getStartEnd(ent, j);
+						auto [start, end] = clip_it.getStartEnd();
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
@@ -383,7 +402,7 @@ namespace dmbrn
 						//}
 
 						// Ensure grabbable handles
-						if ((movingEntry.first == -1 || movingEntry.second == -1) && (sequenceOptions &
+						if (movingEntry.first==sequence.end() && (sequenceOptions &
 							SEQUENCER_EDIT_STARTEND))
 						// TODOFOCUS && backgroundRect.Contains(io.MousePos))
 						{
@@ -396,7 +415,7 @@ namespace dmbrn
 								{
 									if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
 									{
-										movingEntry = {i, j};
+										movingEntry = {ent_it, clip_it};
 										movingPos = mouse_x;
 										break;
 									}
@@ -406,7 +425,7 @@ namespace dmbrn
 
 						draw_list->PushClipRect(slotP1, slotP2, true);
 						draw_list->AddText({slotP1.x + text_offset, slotP1.y}, 0xFF000000,
-						                   sequence.getClipName(i, j).c_str());
+						                   clip_it->second->name.c_str());
 						draw_list->PopClipRect();
 
 						// custom draw
@@ -453,51 +472,47 @@ namespace dmbrn
 
 
 				// moving
-				if (/*backgroundRect.Contains(io.MousePos) && */movingEntry.first >= 0 && movingEntry.second >= 0)
+				if (movingEntry.first != sequence.end())///*backgroundRect.Contains(io.MousePos) && */
 				{
-#if IMGUI_VERSION_NUM >= 18723
 					ImGui::SetNextFrameWantCaptureMouse(true);
-#else
-            ImGui::CaptureMouseFromApp();
-#endif
 					int diffFrame = static_cast<int>((mouse_x - movingPos) / framePixelWidth);
 					if (std::abs(diffFrame) > 0)
 					{
-						auto [start, end] = sequence.getStartEnd(movingEntry.first, movingEntry.second);
-						if (selectedEntry)
-							*selectedEntry = movingEntry;
+						auto [start, end] = movingEntry.second->getStartEnd();
 
 						start += diffFrame;
 
-						sequence.updateStart(movingEntry.first, movingEntry.second, start);
+						selectedEntity=movingEntry.first;
 
 						movingPos += static_cast<int>(diffFrame * framePixelWidth);
+
+						movingEntry.second = sequence.updateStart(movingEntry.first,*movingEntry.second,start);
 					}
 					if (!io.MouseDown[0])
 					{
 						// single select
-						if (!diffFrame && selectedEntry)
+						if (!diffFrame)
 						{
-							*selectedEntry = movingEntry;
+							selectedEntity = movingEntry.first;
 							ret = true;
 						}
 
-						movingEntry = {-1, -1};
+						movingEntry = {sequence.end(),std::nullopt};
 					}
 				}
 
 				// cursor
-				if (currentFrame && firstFrame && *currentFrame >= *firstFrame && *currentFrame <= sequence.mFrameMax)
+				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
 				{
 					static const float cursorWidth = 8.f;
-					float cursorOffset = contentMin.x + legendWidth + (*currentFrame - firstFrameUsed) * framePixelWidth
+					float cursorOffset = contentMin.x + legendWidth + (currentFrame - firstFrameUsed) * framePixelWidth
 						+
 						framePixelWidth / 2 - cursorWidth * 0.5f;
 					draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y),
 					                   0xA02A2AFF,
 					                   cursorWidth);
 					char tmps[512];
-					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", *currentFrame);
+					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", currentFrame);
 					draw_list->AddText(ImVec2(cursorOffset + 10, canvas_pos.y + 2), 0xFF2A2AFF, tmps);
 				}
 
@@ -594,11 +609,11 @@ namespace dmbrn
 							float barRatio = barNewWidth / barWidthInPixels;
 							framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
 							int newVisibleFrameCount = int((canvas_size.x - legendWidth) / framePixelWidthTarget);
-							int lastFrame = *firstFrame + newVisibleFrameCount;
+							int lastFrame = firstFrame + newVisibleFrameCount;
 							if (lastFrame > sequence.mFrameMax)
 							{
 								framePixelWidthTarget = framePixelWidth = (canvas_size.x - legendWidth) / float(
-									sequence.mFrameMax - *firstFrame);
+									sequence.mFrameMax - firstFrame);
 							}
 						}
 					}
@@ -617,17 +632,17 @@ namespace dmbrn
 								float previousFramePixelWidthTarget = framePixelWidthTarget;
 								framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
 								int newVisibleFrameCount = int(visibleFrameCount / barRatio);
-								int newFirstFrame = *firstFrame + newVisibleFrameCount - visibleFrameCount;
+								int newFirstFrame = firstFrame + newVisibleFrameCount - visibleFrameCount;
 								newFirstFrame = ImClamp(newFirstFrame, sequence.mFrameMin,
 								                        ImMax(sequence.mFrameMax - visibleFrameCount,
 								                              sequence.mFrameMin));
-								if (newFirstFrame == *firstFrame)
+								if (newFirstFrame == firstFrame)
 								{
 									framePixelWidth = framePixelWidthTarget = previousFramePixelWidthTarget;
 								}
 								else
 								{
-									*firstFrame = newFirstFrame;
+									firstFrame = newFirstFrame;
 								}
 							}
 						}
@@ -643,21 +658,21 @@ namespace dmbrn
 							else
 							{
 								float framesPerPixelInBar = barWidthInPixels / (float)visibleFrameCount;
-								*firstFrame = int((io.MousePos.x - panningViewSource.x) / framesPerPixelInBar) -
+								firstFrame = int((io.MousePos.x - panningViewSource.x) / framesPerPixelInBar) -
 									panningViewFrame;
-								*firstFrame = ImClamp(*firstFrame, sequence.mFrameMin,
-								                      ImMax(sequence.mFrameMax - visibleFrameCount,
-								                            sequence.mFrameMin));
+								firstFrame = ImClamp(firstFrame, sequence.mFrameMin,
+								                     ImMax(sequence.mFrameMax - visibleFrameCount,
+								                           sequence.mFrameMin));
 							}
 						}
 						else
 						{
 							if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && firstFrame && !
-								MovingCurrentFrame && (movingEntry.first == -1 || movingEntry.second == -1))
+								MovingCurrentFrame && movingEntry.first!=sequence.end())
 							{
 								MovingScrollBar = true;
 								panningViewSource = io.MousePos;
-								panningViewFrame = -*firstFrame;
+								panningViewFrame = -firstFrame;
 							}
 							if (!sizingRBar && onRight && ImGui::IsMouseClicked(0))
 								sizingRBar = true;
@@ -670,11 +685,8 @@ namespace dmbrn
 
 			ImGui::EndGroup();
 
-			if (expanded)
-			{
-				if (SequencerAddDelButton(draw_list, ImVec2(canvas_pos.x + 2, canvas_pos.y + 2), !*expanded))
-					*expanded = !*expanded;
-			}
+			if (SequencerAddDelButton(draw_list, ImVec2(canvas_pos.x + 2, canvas_pos.y + 2), !expanded))
+				expanded = !expanded;
 
 			if (delEntry != -1)
 			{

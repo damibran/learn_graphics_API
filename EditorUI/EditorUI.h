@@ -32,7 +32,8 @@ namespace dmbrn
 			inspector_(scene_tree_),
 			viewport_(scene_, scene_tree_.getSelected()),
 			viewport2_(scene_, scene_tree_.getSelected()
-			           , "Viewport 2")
+			           , "Viewport 2"),
+		sequencer_(scene.getAnimationSequence())
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
@@ -54,7 +55,7 @@ namespace dmbrn
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
-			drawSequencer(scene_.getAnimationSequence());
+			drawSequencer();
 
 			endDockSpace();
 
@@ -221,25 +222,12 @@ namespace dmbrn
 			}
 		}
 
-		void drawSequencer(AnimationSequence& animation_sequence)
+		void drawSequencer()
 		{
 			if (ImGui::Begin("Sequencer"))
 			{
 				// let's create the sequencer
-				static std::pair<int,int> selectedEntry = {-1,-1};
-				static int firstFrame = 0;
-				static bool expanded = true;
-				static int currentFrame = 100;
-
-				ImGui::PushItemWidth(130);
-				ImGui::InputInt("Frame Min", &scene_.getAnimationSequence().mFrameMin);
-				ImGui::SameLine();
-				ImGui::InputInt("Frame ", &currentFrame);
-				ImGui::SameLine();
-				ImGui::InputInt("Frame Max", &scene_.getAnimationSequence().mFrameMax);
-				ImGui::PopItemWidth();
-				sequencer_.draw(animation_sequence, &currentFrame, &expanded, &selectedEntry, &firstFrame,
-				          Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
+				sequencer_.draw(Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
 				                       | Sequencer::SEQUENCER_COPYPASTE | Sequencer::SEQUENCER_CHANGE_FRAME);
 				// add a UI to edit that particular item
 				//if (selectedEntry != -1)
