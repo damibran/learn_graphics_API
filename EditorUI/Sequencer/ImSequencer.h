@@ -44,10 +44,9 @@ namespace dmbrn
 	{
 	public:
 		Sequencer(AnimationSequence& sequence):
-		sequence(sequence),
-		selectedEntity(sequence.end())
+			sequence(sequence),
+			selectedEntity(sequence.end())
 		{
-			
 		}
 
 		AnimationSequence& sequence;
@@ -85,7 +84,8 @@ namespace dmbrn
 			static float framePixelWidthTarget = 10.f;
 			int legendWidth = 200;
 
-			static std::pair<AnimationSequence::EntityIterator,std::optional<AnimationSequence::EntityIterator::ClipIterator>> movingEntry={sequence.end(),std::nullopt};
+			static std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
+				movingEntry = {sequence.end(), std::nullopt};
 			static int movingPos = -1;
 			int delEntry = -1;
 			int dupEntry = -1;
@@ -189,7 +189,7 @@ namespace dmbrn
 				ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
-				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first ==sequence.end() &&
+				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
 					sequenceOptions &
 					SEQUENCER_CHANGE_FRAME
 					&& currentFrame >= 0 && topRect.Contains(io.MousePos) && io.MouseDown[0])
@@ -301,22 +301,23 @@ namespace dmbrn
 
 				// draw item names in the legend rect on the left
 				size_t customHeight = 0;
-				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
+				int i = 0;
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					ImVec2 tpos(contentMin.x + 3, contentMin.y + ent_it.ind * ItemHeight + 2 + customHeight);
+					ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
 					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
 
 					if (sequenceOptions & SEQUENCER_DEL)
 					{
 						if (SequencerAddDelButton(
 							draw_list, ImVec2(contentMin.x + legendWidth - ItemHeight + 2 - 10, tpos.y + 2), false))
-							delEntry = ent_it.ind;
+							delEntry = i;
 
 						if (SequencerAddDelButton(
 							draw_list,
 							ImVec2(contentMin.x + legendWidth - ItemHeight - ItemHeight + 2 - 10, tpos.y + 2),
 							true))
-							dupEntry = ent_it.ind;
+							dupEntry = i;
 					}
 					// TODO CustomHeight
 					//customHeight += sequence.GetCustomHeight(i);
@@ -333,7 +334,7 @@ namespace dmbrn
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
 					ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
 					if (!popupOpened && mouse_y >= pos.y && mouse_y < pos.y + (ItemHeight + localCustomHeight) &&
-						movingEntry.first!=sequence.end() &&
+						movingEntry.first != sequence.end() &&
 						mouse_x > contentMin.x && mouse_x < contentMin.x + canvas_size.x)
 					{
 						col += 0x80201008;
@@ -354,30 +355,30 @@ namespace dmbrn
 				drawLineContent(sequence.mFrameMin, int(contentHeight));
 				drawLineContent(sequence.mFrameMax, int(contentHeight));
 
-				// TODO selection
-				// selection
-				bool selected = selectedEntity != sequence.end();
-				if (selected)
-				{
-					customHeight = 0;
-					// TODO CustomHeight
-					//for (int i = 0; i < *selectedEntry; i++)
-					//	customHeight += sequence.GetCustomHeight(i);
-					draw_list->AddRectFilled(
-						ImVec2(contentMin.x, contentMin.y + ItemHeight * selectedEntity.ind + customHeight),
-						ImVec2(contentMin.x + canvas_size.x,
-						       contentMin.y + ItemHeight * (selectedEntity.ind + 1) + customHeight), 0x801080FF,
-						1.f);
-				}
-
 				// slots
 				customHeight = 0;
-				int i = 0;
+				i = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					for (auto clip_it = ent_it.begin(); clip_it != ent_it.end(); ++clip_it)
+					// TODO selection
+					// selection
+					if (selectedEntity != sequence.end() && selectedEntity==ent_it)
 					{
-						auto [start, end] = clip_it.getStartEnd();
+						customHeight = 0;
+						// TODO CustomHeight
+						//for (int i = 0; i < *selectedEntry; i++)
+						//	customHeight += sequence.GetCustomHeight(i);
+						draw_list->AddRectFilled(
+							ImVec2(contentMin.x, contentMin.y + ItemHeight * i + customHeight),
+							ImVec2(contentMin.x + canvas_size.x,
+							       contentMin.y + ItemHeight * (i + 1) + customHeight), 0x801080FF,
+							1.f);
+					}
+
+					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
+					{
+						int start = clip_it->first;
+						int end = clip_it->first+clip_it->second->duration_;
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
@@ -402,7 +403,7 @@ namespace dmbrn
 						//}
 
 						// Ensure grabbable handles
-						if (movingEntry.first==sequence.end() && (sequenceOptions &
+						if (movingEntry.first == sequence.end() && (sequenceOptions &
 							SEQUENCER_EDIT_STARTEND))
 						// TODOFOCUS && backgroundRect.Contains(io.MousePos))
 						{
@@ -470,23 +471,22 @@ namespace dmbrn
 					}
 				}
 
-
 				// moving
-				if (movingEntry.first != sequence.end())///*backgroundRect.Contains(io.MousePos) && */
+				if (movingEntry.first != sequence.end()) ///*backgroundRect.Contains(io.MousePos) && */
 				{
 					ImGui::SetNextFrameWantCaptureMouse(true);
 					int diffFrame = static_cast<int>((mouse_x - movingPos) / framePixelWidth);
 					if (std::abs(diffFrame) > 0)
 					{
-						auto [start, end] = movingEntry.second->getStartEnd();
+						int start = movingEntry.second.value()->first;
 
 						start += diffFrame;
 
-						selectedEntity=movingEntry.first;
+						selectedEntity = movingEntry.first;
 
 						movingPos += static_cast<int>(diffFrame * framePixelWidth);
 
-						movingEntry.second = sequence.updateStart(movingEntry.first,*movingEntry.second,start);
+						movingEntry.second = sequence.updateStart(movingEntry.first, *movingEntry.second, start);
 					}
 					if (!io.MouseDown[0])
 					{
@@ -497,7 +497,7 @@ namespace dmbrn
 							ret = true;
 						}
 
-						movingEntry = {sequence.end(),std::nullopt};
+						movingEntry = {sequence.end(), std::nullopt};
 					}
 				}
 
@@ -668,7 +668,7 @@ namespace dmbrn
 						else
 						{
 							if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && firstFrame && !
-								MovingCurrentFrame && movingEntry.first!=sequence.end())
+								MovingCurrentFrame && movingEntry.first != sequence.end())
 							{
 								MovingScrollBar = true;
 								panningViewSource = io.MousePos;
