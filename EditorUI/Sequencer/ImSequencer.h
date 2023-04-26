@@ -60,8 +60,11 @@ namespace dmbrn
 		bool expanded = true;
 		int firstFrame = 0;
 
-		float framePixelWidth = 10.f;
-		float framePixelWidthTarget = 10.f;
+		//float framePixelWidth = 10.f;
+		//float framePixelWidthTarget = 10.f;
+
+		ImVec2 frameBarPixelOffsets = {0, 150};
+		ImVec2 frameBarPixelOffsetsTarget = {0, 150};
 
 		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
 		movingEntry = {sequence.end(), std::nullopt};
@@ -126,30 +129,17 @@ namespace dmbrn
 			int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
 			// zoom in/out
-			const int visibleFrameCount = (int)floorf((canvas_size.x - legendWidth) / framePixelWidth);
-			const float barWidthRatio = ImMin(visibleFrameCount / (float)frameCount, 1.f);
-			const float barWidthInPixels = barWidthRatio * (canvas_size.x - legendWidth);
+			frameBarPixelOffsets.x = ImLerp(frameBarPixelOffsets.x, frameBarPixelOffsetsTarget.x, 0.33f);
+			frameBarPixelOffsets.y = ImLerp(frameBarPixelOffsets.y, frameBarPixelOffsetsTarget.y, 0.33f);
+
+			firstFrame = frameBarPixelOffsets.x / (canvas_size.x - legendWidth) * frameCount;
+			int lastFrame = frameBarPixelOffsets.y / (canvas_size.x - legendWidth) * frameCount;
+
+			const int visibleFrameCount = lastFrame - firstFrame;
+			float framePixelWidth = (canvas_size.x - legendWidth) / visibleFrameCount;
 
 			ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
 
-			if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
-			{
-				if (!panningView)
-				{
-					panningViewSource = io.MousePos;
-					panningView = true;
-					panningViewFrame = firstFrame;
-				}
-				firstFrame = panningViewFrame - int((io.MousePos.x - panningViewSource.x) / framePixelWidth);
-				firstFrame = ImClamp(firstFrame, sequence.mFrameMin, sequence.mFrameMax - visibleFrameCount);
-			}
-			if (panningView && !io.MouseDown[2])
-			{
-				panningView = false;
-			}
-			framePixelWidthTarget = ImClamp(framePixelWidthTarget, 0.1f, 50.f);
-
-			framePixelWidth = ImLerp(framePixelWidth, framePixelWidthTarget, 0.33f);
 
 			frameCount = sequence.mFrameMax - sequence.mFrameMin;
 			if (visibleFrameCount >= frameCount && firstFrame)
@@ -567,10 +557,6 @@ namespace dmbrn
 					ImVec2 scrollBarMax = ImGui::GetItemRectMax();
 
 					// ratio = number of frames visible in control / number to total frames
-
-					float startFrameOffset = (static_cast<float>(firstFrameUsed - sequence.mFrameMin) / static_cast<
-						float>(frameCount)) * (
-						canvas_size.x - legendWidth);
 					ImVec2 scrollBarA(scrollBarMin.x + legendWidth, scrollBarMin.y - 2);
 					ImVec2 scrollBarB(scrollBarMin.x + canvas_size.x, scrollBarMax.y - 1);
 					draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF222222, 0);
@@ -580,9 +566,8 @@ namespace dmbrn
 
 					draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF101010, 8);
 
-
-					ImVec2 scrollBarC(scrollBarMin.x + legendWidth + startFrameOffset, scrollBarMin.y);
-					ImVec2 scrollBarD(scrollBarMin.x + legendWidth + barWidthInPixels + startFrameOffset,
+					ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
+					ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
 					                  scrollBarMax.y - 2);
 					draw_list->AddRectFilled(scrollBarC, scrollBarD,
 					                         (inScrollBar || MovingScrollBar) ? 0xFF606060 : 0xFF505050, 6);
@@ -598,6 +583,26 @@ namespace dmbrn
 					draw_list->AddRectFilled(barHandleRight.Min, barHandleRight.Max,
 					                         (onRight || sizingRBar) ? 0xFFAAAAAA : 0xFF666666, 6);
 
+					if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
+					{
+						if (!panningView)
+						{
+							panningView = true;
+						}
+
+						frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
+						frameBarPixelOffsetsTarget.y = std::clamp(
+							frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
+							scrollBarB.x - (scrollBarMin.x + legendWidth));
+						frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+						frameBarPixelOffsetsTarget.x = std::clamp(
+							frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
+					}
+					if (panningView && !io.MouseDown[2])
+					{
+						panningView = false;
+					}
+
 					ImRect scrollBarThumb(scrollBarC, scrollBarD);
 					if (sizingRBar)
 					{
@@ -607,16 +612,10 @@ namespace dmbrn
 						}
 						else
 						{
-							float barNewWidth = ImMax(barWidthInPixels + io.MouseDelta.x, MinBarWidth);
-							float barRatio = barNewWidth / barWidthInPixels;
-							framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
-							int newVisibleFrameCount = int((canvas_size.x - legendWidth) / framePixelWidthTarget);
-							int lastFrame = firstFrame + newVisibleFrameCount;
-							if (lastFrame > sequence.mFrameMax)
-							{
-								framePixelWidthTarget = framePixelWidth = (canvas_size.x - legendWidth) / float(
-									sequence.mFrameMax - firstFrame);
-							}
+							frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
+							frameBarPixelOffsetsTarget.y = std::clamp(frameBarPixelOffsetsTarget.y,
+							                                          frameBarPixelOffsetsTarget.x + MinBarWidth,
+							                                          scrollBarB.x - (scrollBarMin.x + legendWidth));
 						}
 					}
 					else if (sizingLBar)
@@ -629,23 +628,9 @@ namespace dmbrn
 						{
 							if (fabsf(io.MouseDelta.x) > FLT_EPSILON)
 							{
-								float barNewWidth = ImMax(barWidthInPixels - io.MouseDelta.x, MinBarWidth);
-								float barRatio = barNewWidth / barWidthInPixels;
-								float previousFramePixelWidthTarget = framePixelWidthTarget;
-								framePixelWidthTarget = framePixelWidth = framePixelWidth / barRatio;
-								int newVisibleFrameCount = int(visibleFrameCount / barRatio);
-								int newFirstFrame = firstFrame + newVisibleFrameCount - visibleFrameCount;
-								newFirstFrame = ImClamp(newFirstFrame, sequence.mFrameMin,
-								                        ImMax(sequence.mFrameMax - visibleFrameCount,
-								                              sequence.mFrameMin));
-								if (newFirstFrame == firstFrame)
-								{
-									framePixelWidth = framePixelWidthTarget = previousFramePixelWidthTarget;
-								}
-								else
-								{
-									firstFrame = newFirstFrame;
-								}
+								frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+								frameBarPixelOffsetsTarget.x = std::clamp(
+									frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
 							}
 						}
 					}
@@ -659,12 +644,13 @@ namespace dmbrn
 							}
 							else
 							{
-								float framesPerPixelInBar = barWidthInPixels / (float)visibleFrameCount;
-								firstFrame = int((io.MousePos.x - panningViewSource.x) / framesPerPixelInBar) -
-									panningViewFrame;
-								firstFrame = ImClamp(firstFrame, sequence.mFrameMin,
-								                     ImMax(sequence.mFrameMax - visibleFrameCount,
-								                           sequence.mFrameMin));
+								frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
+								frameBarPixelOffsetsTarget.y = std::clamp(
+									frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
+									scrollBarB.x - (scrollBarMin.x + legendWidth));
+								frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+								frameBarPixelOffsetsTarget.x = std::clamp(
+									frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
 							}
 						}
 						else
