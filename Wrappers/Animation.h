@@ -3,6 +3,7 @@
 #include<glm/glm.hpp>
 #include <set>
 #include <string>
+#include <algorithm>
 
 #include "Main/Enttity.h"
 
@@ -34,6 +35,11 @@ namespace dmbrn
 		
 				chnls.enttity.markTransformAsEdited(frame);
 			}
+		}
+
+		bool operator<(const AnimationClip& other)const
+		{
+			return std::lexicographical_compare(name.begin(),name.end(),other.name.begin(),other.name.end());
 		}
 
 	private:

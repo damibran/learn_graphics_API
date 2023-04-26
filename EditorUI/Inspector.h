@@ -113,10 +113,10 @@ namespace dmbrn
 					                      ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings |
 					                      ImGuiTableFlags_Borders))
 					{
-						for (unsigned i = 0; i < comp->animation_clips.size(); ++i)
+						for (const AnimationClip& clip: comp->animation_clips)
 						{
 							ImGui::TableNextColumn();
-							ImGui::Text(comp->animation_clips[i].name.c_str());
+							ImGui::Text(clip.name.c_str());
 						}
 						ImGui::EndTable();
 					}

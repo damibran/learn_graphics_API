@@ -18,11 +18,24 @@ namespace dmbrn
 
 		AnimationComponent() = default;
 
-		AnimationComponent(std::vector<AnimationClip>&& clips):
+		AnimationComponent(std::set<AnimationClip>&& clips):
 			animation_clips(clips)
 		{
 		}
 
-		std::vector<AnimationClip> animation_clips;
+		void insert(std::set<AnimationClip>&& new_clips)
+		{
+			// potentialy big copy!
+			for (AnimationClip new_clip : new_clips)
+			{
+				int i=1;
+				while(!animation_clips.insert(new_clip).second)
+				{
+					new_clip.name=new_clip.name+std::to_string(i);
+				}
+			}
+		}
+
+		std::set<AnimationClip> animation_clips;
 	};
 }

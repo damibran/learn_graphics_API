@@ -50,7 +50,9 @@ namespace dmbrn
 
 				for (int i = 1; i < 4; ++i)
 				{
-					animation_sequence_.entries_[Enttity{registry_, ent}].insert({i * 200, anim.animation_clips[0]});
+					animation_sequence_.entries_[Enttity{registry_, ent}].insert(std::pair<float, AnimationClip>{
+						i * 200, *anim.animation_clips.begin()
+					});
 				}
 			}
 
@@ -262,7 +264,7 @@ namespace dmbrn
 
 				if (with_anim_)
 				{
-					std::vector<AnimationClip> clips = importAnimations(ai_scene);
+					std::set<AnimationClip> clips = importAnimations(ai_scene);
 					root_ent.addComponent<AnimationComponent>(std::move(clips));
 				}
 
@@ -292,9 +294,8 @@ namespace dmbrn
 				collectAnimNodeToEnttity(root_ent, scene);
 				// TODO check if there is no empty anim node (that means, that user renamed entities)
 
-				std::vector<AnimationClip> clips = importAnimations(ai_scene);
-				std::vector<AnimationClip> root_ent_clips=root_ent.getComponent<AnimationComponent>().animation_clips;
-				root_ent_clips.insert(root_ent_clips.end(),clips.begin(),clips.end());
+				std::set<AnimationClip> clips = importAnimations(ai_scene);
+				root_ent.getComponent<AnimationComponent>().insert(std::move(clips));
 
 				Assimp::DefaultLogger::kill();
 				anim_node_name_to_enttity.clear();
@@ -306,14 +307,14 @@ namespace dmbrn
 			static inline bool with_bones_ = false;
 			static inline bool with_anim_ = false;
 
-			static std::vector<AnimationClip> importAnimations(const aiScene* ai_scene)
+			static std::set<AnimationClip> importAnimations(const aiScene* ai_scene)
 			{
-				std::vector<AnimationClip> animation_clips(ai_scene->mNumAnimations);
+				std::set<AnimationClip> animation_clips;
 
 				for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
 				{
 					aiAnimation* anim = ai_scene->mAnimations[i];
-					AnimationClip& clip = animation_clips[i];
+					AnimationClip clip;
 
 					// TODO make it parametarazible or deduced from file 
 					double sample_period = 1. / 30.;
@@ -371,6 +372,7 @@ namespace dmbrn
 
 						clip.channels.push_back(std::move(channels));
 					}
+					animation_clips.insert(std::move(clip));
 				}
 				return animation_clips;
 			}
