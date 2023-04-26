@@ -247,7 +247,7 @@ namespace dmbrn
 			im_gui_(render_pass_),
 			scene_(scene),
 			scene_tree_(scene_),
-			inspector_(scene_tree_),
+			inspector_(scene_,scene_tree_),
 			viewport_(scene_, scene_tree_.getSelected()),
 			viewport2_(scene_, scene_tree_.getSelected()
 			           , "Viewport 2"),

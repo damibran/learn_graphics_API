@@ -34,7 +34,7 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			ModelImporter::Import(*this, "Models\\Char\\Defeated.dae", true, true);
+			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
@@ -161,7 +161,6 @@ namespace dmbrn
 			}
 		}
 
-
 		void updateAnimations(float anim_frame, uint32_t frame)
 		{
 			auto view = registry_.view<AnimationComponent>();
@@ -171,14 +170,19 @@ namespace dmbrn
 				auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
 					anim_frame);
 
-				if(clip_it!=animation_sequence_.entries_[Enttity{registry_, ent}].begin())
+				if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 					--clip_it;
 
 				float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
 				                              clip_it->second.duration_);
 
-				clip_it->second.updateTransforms(local_time,frame);
+				clip_it->second.updateTransforms(local_time, frame);
 			}
+		}
+
+		void importAnimationTo(Enttity ent, const std::string& file_path)
+		{
+			ModelImporter::ImportAnimationTo(*this, ent, file_path);
 		}
 
 		// may perform culling
@@ -216,7 +220,8 @@ namespace dmbrn
 		class ModelImporter
 		{
 		public:
-			static void Import(Scene& scene, const std::string& path, bool with_anim = false, bool with_bones = false)
+			static void ImportModel(Scene& scene, const std::string& path, bool with_anim = false,
+			                        bool with_bones = false)
 			{
 				Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE, aiDefaultLogStream_STDOUT);
 
@@ -253,10 +258,13 @@ namespace dmbrn
 
 				populateTree(scene, ai_scene->mRootNode, root_ent);
 
-				// TODO check if there is no empty anim node 
+				// TODO check if there is no empty anim node
 
 				if (with_anim_)
-					importAnimations(root_ent, ai_scene);
+				{
+					std::vector<AnimationClip> clips = importAnimations(ai_scene);
+					root_ent.addComponent<AnimationComponent>(std::move(clips));
+				}
 
 				// process ASSIMP's root node recursively
 				processNodeData(scene, ai_scene->mRootNode, ai_scene, directory, model_name,
@@ -267,13 +275,38 @@ namespace dmbrn
 				anim_node_name_to_enttity.clear();
 			}
 
+			static void ImportAnimationTo(Scene& scene, Enttity root_ent, const std::string& path)
+			{
+				Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE, aiDefaultLogStream_STDOUT);
+
+				Assimp::Importer importer;
+				const aiScene* ai_scene = importer.ReadFile(
+					path, aiProcess_ValidateDataStructure | aiProcess_GlobalScale);
+
+				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
+				{
+					throw std::runtime_error(std::string("ERROR::ASSIMP:: ") + importer.GetErrorString());
+				}
+
+
+				collectAnimNodeToEnttity(root_ent, scene);
+				// TODO check if there is no empty anim node (that means, that user renamed entities)
+
+				std::vector<AnimationClip> clips = importAnimations(ai_scene);
+				std::vector<AnimationClip> root_ent_clips=root_ent.getComponent<AnimationComponent>().animation_clips;
+				root_ent_clips.insert(root_ent_clips.end(),clips.begin(),clips.end());
+
+				Assimp::DefaultLogger::kill();
+				anim_node_name_to_enttity.clear();
+			}
+
 		private:
 			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
 			static inline std::unordered_map<std::string, Enttity> anim_node_name_to_enttity;
 			static inline bool with_bones_ = false;
 			static inline bool with_anim_ = false;
 
-			static void importAnimations(Enttity root_ent, const aiScene* ai_scene)
+			static std::vector<AnimationClip> importAnimations(const aiScene* ai_scene)
 			{
 				std::vector<AnimationClip> animation_clips(ai_scene->mNumAnimations);
 
@@ -339,8 +372,7 @@ namespace dmbrn
 						clip.channels.push_back(std::move(channels));
 					}
 				}
-
-				root_ent.addComponent<AnimationComponent>(std::move(animation_clips));
+				return animation_clips;
 			}
 
 			static void populateAnimNodes(const aiScene* ai_scene)
@@ -359,6 +391,19 @@ namespace dmbrn
 								anim_node_name_to_enttity.insert({node_anim->mNodeName.C_Str(), Enttity{}});
 						}
 					}
+				}
+			}
+
+			static void collectAnimNodeToEnttity(Enttity root_ent, Scene& scene)
+			{
+				RelationshipComponent& root_rc = root_ent.getComponent<RelationshipComponent>();
+
+				Enttity cur_child = root_rc.first;
+				while (cur_child)
+				{
+					anim_node_name_to_enttity[cur_child.getComponent<TagComponent>().tag] = cur_child;
+					collectAnimNodeToEnttity(cur_child, scene);
+					cur_child = cur_child.getComponent<RelationshipComponent>().next;
 				}
 			}
 

@@ -7,7 +7,8 @@ namespace dmbrn
 	class Inspector
 	{
 	public:
-		Inspector(SceneTree& scene_tree):
+		Inspector(Scene& scene, SceneTree& scene_tree):
+		scene_(scene),
 			scene_tree_(scene_tree)
 		{
 		}
@@ -41,7 +42,9 @@ namespace dmbrn
 		}
 
 	private:
+		Scene& scene_;
 		SceneTree& scene_tree_;
+		std::string file_path;
 
 		void drawComponents(Enttity entity, uint32_t frame)
 		{
@@ -104,9 +107,42 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("AnimationComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					for (unsigned i = 0; i < comp->animation_clips.size(); ++i)
+					ImGui::Spacing();
+					ImGui::Text("Animation clips:");
+					if (ImGui::BeginTable("animation clips", 1,
+					                      ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings |
+					                      ImGuiTableFlags_Borders))
 					{
-						ImGui::Text(comp->animation_clips[i].name.c_str());
+						for (unsigned i = 0; i < comp->animation_clips.size(); ++i)
+						{
+							ImGui::TableNextColumn();
+							ImGui::Text(comp->animation_clips[i].name.c_str());
+						}
+						ImGui::EndTable();
+					}
+					ImGui::Spacing();
+					// TODO filedialog
+					if (ImGui::Button("Add animation from file"))
+						ImGui::OpenPopup("Import Animation");
+
+					if (ImGui::BeginPopupModal("Import Animation",NULL,ImGuiWindowFlags_AlwaysAutoResize))
+					{
+						char buf[256] = {0};
+
+						strcpy_s(buf, sizeof(buf), file_path.c_str());
+
+						if (ImGui::InputText("Model path", buf, sizeof(buf)))
+						{
+							file_path = std::string(buf);
+						}
+
+						if (ImGui::Button("Import"))
+						{
+							scene_.importAnimationTo(entity,file_path);
+							ImGui::CloseCurrentPopup();
+						}
+
+						ImGui::EndPopup();
 					}
 
 					ImGui::TreePop();
