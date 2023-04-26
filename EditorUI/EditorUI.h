@@ -284,7 +284,7 @@ namespace dmbrn
 			drawSequencer();
 
 			// example sequencer
-			{
+			/*{
 				if (ImGui::Begin("Sequencer Example"))
 				{
 					// let's create the sequencer
@@ -314,14 +314,14 @@ namespace dmbrn
 
 					ImGui::End();
 				}
-			}
+			}*/
 
 			endDockSpace();
 
 			if (show_model_import)
 				showImportWindow();
 
-			scene_.updateAnimations(g_time, current_frame_);
+			scene_.updateAnimations(sequencer_.getCurrentFrame(), current_frame_);
 			scene_.updateGlobalTransforms(current_frame_);
 			scene_.updatePerStaticModelData(current_frame_);
 			scene_.updatePerSkeletalData(current_frame_);

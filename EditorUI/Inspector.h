@@ -107,13 +107,6 @@ namespace dmbrn
 					for (unsigned i = 0; i < comp->animation_clips.size(); ++i)
 					{
 						ImGui::Text(comp->animation_clips[i].name.c_str());
-						ImGui::SameLine();
-						if (ImGui::Button("Play", {40, 20}))
-						{
-							comp->playing = true;
-							comp->playing_ind = i;
-							comp->start_time=std::chrono::time_point_cast<duration>(sys_clock::now());
-						}
 					}
 
 					ImGui::TreePop();

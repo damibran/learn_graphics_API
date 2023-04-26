@@ -162,21 +162,23 @@ namespace dmbrn
 		}
 
 
-		void updateAnimations(time_point g_time, uint32_t frame)
+		void updateAnimations(float anim_frame, uint32_t frame)
 		{
 			auto view = registry_.view<AnimationComponent>();
 
-			//for (auto ent : view)
-			//{
-			//	AnimationComponent& anim = view.get<AnimationComponent>(ent);
-			//
-			//	if (anim.playing)
-			//	{
-			//		AnimationClip& playing_clip = anim.animation_clips[anim.playing_ind];
-			//
-			//		playing_clip.updateTransforms(anim.getLocalTime(g_time), frame);
-			//	}
-			//}
+			for (auto ent : view)
+			{
+				auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
+					static_cast<uint32_t>(anim_frame));
+
+				if(clip_it!=animation_sequence_.entries_[Enttity{registry_, ent}].begin())
+					--clip_it;
+
+				float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
+				                              static_cast<float>(clip_it->second.duration_));
+
+				clip_it->second.updateTransforms(local_time,frame);
+			}
 		}
 
 		// may perform culling
@@ -324,13 +326,15 @@ namespace dmbrn
 							});
 						}
 
-						uint32_t min = std::min(channels.positions.begin()->first,std::min(channels.rotations.begin()->first,channels.scales.begin()->first));
+						uint32_t min = std::min(channels.positions.begin()->first,
+						                        std::min(channels.rotations.begin()->first,
+						                                 channels.scales.begin()->first));
 
 						uint32_t max = std::max((--channels.positions.end())->first,
-						                             std::max((--channels.rotations.end())->first,
-						                                      (--channels.scales.end())->first));
+						                        std::max((--channels.rotations.end())->first,
+						                                 (--channels.scales.end())->first));
 
-						clip.duration_ = max-min;
+						clip.duration_ = max - min;
 
 						clip.channels.push_back(std::move(channels));
 					}

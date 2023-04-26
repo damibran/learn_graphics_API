@@ -55,9 +55,14 @@ namespace dmbrn
 		{
 		}
 
+		float getCurrentFrame()
+		{
+			return currentFrame;
+		}
+
 		AnimationSequence& sequence;
 		AnimationSequence::EntityIterator selectedEntity;
-		int currentFrame = 100;
+		float currentFrame = 100.f;
 		bool expanded = true;
 		int firstFrame = 0;
 
@@ -98,7 +103,9 @@ namespace dmbrn
 			ImGui::PushItemWidth(130);
 			ImGui::InputInt("Frame Min", &sequence.mFrameMin);
 			ImGui::SameLine();
-			ImGui::InputInt("Frame ", &currentFrame);
+			int t_current_frame = static_cast<int>(currentFrame);
+			ImGui::InputInt("Frame ", &t_current_frame);
+			currentFrame = static_cast<float>(t_current_frame);
 			ImGui::SameLine();
 			ImGui::InputInt("Frame Max", &sequence.mFrameMax);
 			ImGui::PopItemWidth();
@@ -456,9 +463,11 @@ namespace dmbrn
 				// draw cursor
 				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
 				{
-					float cursorOffset = contentMin.x + legendWidth + (currentFrame - firstFrame) * framePixelWidth
-						+
-						framePixelWidth / 2 - cursorWidth * 0.5f;
+					float cursorOffset = contentMin.x +
+						legendWidth + 
+						(currentFrame - firstFrame) * framePixelWidth +
+						framePixelWidth / 2 - 
+						cursorWidth * 0.5f;
 					draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y),
 					                   0xA02A2AFF,
 					                   cursorWidth);
