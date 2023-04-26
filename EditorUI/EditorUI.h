@@ -281,7 +281,7 @@ namespace dmbrn
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
-			drawSequencer();
+			drawSequencer(delta_time);
 
 			// example sequencer
 			/*{
@@ -482,20 +482,12 @@ namespace dmbrn
 			}
 		}
 
-		void drawSequencer()
+		void drawSequencer(float d_time)
 		{
 			if (ImGui::Begin("Sequencer"))
 			{
-				// let's create the sequencer
-				sequencer_.draw(Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
+				sequencer_.draw(d_time,Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
 					| Sequencer::SEQUENCER_COPYPASTE | Sequencer::SEQUENCER_CHANGE_FRAME);
-				// add a UI to edit that particular item
-				//if (selectedEntry != -1)
-				//{
-				//	const MySequence::MySequenceItem& item = mySequence.myItems[selectedEntry];
-				//	ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
-				//	// switch (type) ....
-				//}
 
 				ImGui::End();
 			}

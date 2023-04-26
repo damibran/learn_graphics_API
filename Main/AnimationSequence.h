@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Componenets/AnimationComponent.h"
-
 namespace dmbrn
 {
 	struct AnimationSequence
 	{
 		int mFrameMin, mFrameMax;
-		std::unordered_map<Enttity, std::multimap<uint32_t, AnimationClip>, Enttity::hash> entries_;
+		std::unordered_map<Enttity, std::multimap<float, AnimationClip>, Enttity::hash> entries_;
 
 		using EntityIterator = decltype(entries_)::iterator;
 		using ClipIterator = decltype(entries_)::mapped_type::iterator;

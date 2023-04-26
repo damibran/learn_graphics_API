@@ -169,13 +169,13 @@ namespace dmbrn
 			for (auto ent : view)
 			{
 				auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
-					static_cast<uint32_t>(anim_frame));
+					anim_frame);
 
 				if(clip_it!=animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 					--clip_it;
 
 				float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
-				                              static_cast<float>(clip_it->second.duration_));
+				                              clip_it->second.duration_);
 
 				clip_it->second.updateTransforms(local_time,frame);
 			}

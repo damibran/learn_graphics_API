@@ -60,14 +60,13 @@ namespace dmbrn
 			return currentFrame;
 		}
 
+		bool playing = false;
+
 		AnimationSequence& sequence;
 		AnimationSequence::EntityIterator selectedEntity;
 		float currentFrame = 100.f;
 		bool expanded = true;
 		int firstFrame = 0;
-
-		//float framePixelWidth = 10.f;
-		//float framePixelWidthTarget = 10.f;
 
 		ImVec2 frameBarPixelOffsets = {0, 150};
 		ImVec2 frameBarPixelOffsetsTarget = {0, 150};
@@ -101,17 +100,31 @@ namespace dmbrn
 		void drawControls()
 		{
 			ImGui::PushItemWidth(130);
+
 			ImGui::InputInt("Frame Min", &sequence.mFrameMin);
 			ImGui::SameLine();
-			int t_current_frame = static_cast<int>(currentFrame);
-			ImGui::InputInt("Frame ", &t_current_frame);
-			currentFrame = static_cast<float>(t_current_frame);
-			ImGui::SameLine();
+
 			ImGui::InputInt("Frame Max", &sequence.mFrameMax);
+			ImGui::SameLine();
+
+			int t_current_frame = static_cast<int>(currentFrame);
+			if(ImGui::InputInt("Frame ", &t_current_frame))
+				currentFrame = static_cast<float>(t_current_frame);
+			ImGui::SameLine();
+
+
+			if (!playing)
+				playing = ImGui::Button("Play");
+			if (playing)
+			{
+				ImGui::SameLine();
+				playing = !ImGui::Button("Stop");
+			}
+
 			ImGui::PopItemWidth();
 		}
 
-		bool draw(int sequenceOptions)
+		bool draw(float d_time, int sequenceOptions)
 		{
 			drawControls();
 
@@ -186,25 +199,31 @@ namespace dmbrn
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
 				// current frame  change
-				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
+				if (!MovingCurrentFrame && !playing && !MovingScrollBar && movingEntry.first == sequence.end() &&
 					sequenceOptions &
 					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])
 				{
 					MovingCurrentFrame = true;
 				}
+
 				if (MovingCurrentFrame)
 				{
 					if (frameCount)
 					{
 						currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrame;
-						if (currentFrame < sequence.mFrameMin)
-							currentFrame = sequence.mFrameMin;
-						if (currentFrame >= sequence.mFrameMax)
-							currentFrame = sequence.mFrameMax;
 					}
 					if (!io.MouseDown[0])
 						MovingCurrentFrame = false;
 				}
+
+				if (playing)
+					currentFrame = currentFrame + 30*d_time;
+
+				// looping ?
+				if (currentFrame < sequence.mFrameMin)
+					currentFrame = sequence.mFrameMin;
+				if (currentFrame >= sequence.mFrameMax)
+					currentFrame = sequence.mFrameMax;
 
 				//header
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
@@ -464,9 +483,9 @@ namespace dmbrn
 				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
 				{
 					float cursorOffset = contentMin.x +
-						legendWidth + 
+						legendWidth +
 						(currentFrame - firstFrame) * framePixelWidth +
-						framePixelWidth / 2 - 
+						framePixelWidth / 2 -
 						cursorWidth * 0.5f;
 					draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y),
 					                   0xA02A2AFF,

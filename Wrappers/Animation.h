@@ -11,15 +11,15 @@ namespace dmbrn
 	struct AnimationChannels
 	{
 		Enttity enttity;
-		std::map<uint32_t, glm::vec3> positions;
-		std::map<uint32_t, glm::quat> rotations;
-		std::map<uint32_t, glm::vec3> scales;
+		std::map<float, glm::vec3> positions;
+		std::map<float, glm::quat> rotations;
+		std::map<float, glm::vec3> scales;
 	};
 
 	struct AnimationClip
 	{
 		std::string name;
-		uint32_t duration_; // in frames
+		float duration_; // in frames
 		std::vector<AnimationChannels> channels;
 
 		void updateTransforms(float cur_local_frame, uint32_t frame)
