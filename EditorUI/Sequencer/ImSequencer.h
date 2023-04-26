@@ -26,6 +26,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cmath>
 #include "Main/AnimationSequence.h"
 
 struct ImDrawList;
@@ -119,8 +120,6 @@ namespace dmbrn
 			ImDrawList* draw_list = ImGui::GetWindowDrawList();
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
-			int firstFrameUsed = firstFrame;
-
 
 			int controlHeight = sequenceCount * ItemHeight;
 			// TODO add expanded height
@@ -132,8 +131,10 @@ namespace dmbrn
 			frameBarPixelOffsets.x = ImLerp(frameBarPixelOffsets.x, frameBarPixelOffsetsTarget.x, 0.33f);
 			frameBarPixelOffsets.y = ImLerp(frameBarPixelOffsets.y, frameBarPixelOffsetsTarget.y, 0.33f);
 
-			firstFrame = frameBarPixelOffsets.x / (canvas_size.x - legendWidth) * frameCount;
-			int lastFrame = frameBarPixelOffsets.y / (canvas_size.x - legendWidth) * frameCount;
+			firstFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
+			                    frameBarPixelOffsets.x / (canvas_size.x - legendWidth));
+			int lastFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
+			                       frameBarPixelOffsets.y / (canvas_size.x - legendWidth));
 
 			const int visibleFrameCount = lastFrame - firstFrame;
 			float framePixelWidth = (canvas_size.x - legendWidth) / visibleFrameCount;
@@ -145,6 +146,7 @@ namespace dmbrn
 			if (visibleFrameCount >= frameCount && firstFrame)
 				firstFrame = sequence.mFrameMin;
 
+			int firstFrameUsed = firstFrame;
 
 			// --
 			if (!expanded)
@@ -192,8 +194,7 @@ namespace dmbrn
 
 				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
 					sequenceOptions &
-					SEQUENCER_CHANGE_FRAME
-					&& currentFrame >= 0 && topRect.Contains(io.MousePos) && io.MouseDown[0])
+					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])//&& currentFrame >= 0
 				{
 					MovingCurrentFrame = true;
 				}
