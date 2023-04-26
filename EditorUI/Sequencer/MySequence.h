@@ -4,6 +4,7 @@
 #include <vector>
 #include <ImCurveEdit.h>
 #include <imgui_internal.h>
+#include <ImSequencer.h>
 
 #include "ImSequencer.h"
 

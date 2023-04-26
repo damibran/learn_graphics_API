@@ -45,8 +45,8 @@ namespace dmbrn
 	{
 	public:
 		const float cursorWidth = 8.f;
-		const float MinBarWidth = 44.f;
-		const int ItemHeight = 20;
+		const float MinBarWidth = 80.f;
+		const float ItemHeight = 20.;
 		const int legendWidth = 200;
 
 		Sequencer(AnimationSequence& sequence):
@@ -93,7 +93,7 @@ namespace dmbrn
 			SEQUENCER_EDIT_ALL = SEQUENCER_EDIT_STARTEND | SEQUENCER_CHANGE_FRAME
 		};
 
-		bool draw(int sequenceOptions)
+		void drawControls()
 		{
 			ImGui::PushItemWidth(130);
 			ImGui::InputInt("Frame Min", &sequence.mFrameMin);
@@ -102,14 +102,16 @@ namespace dmbrn
 			ImGui::SameLine();
 			ImGui::InputInt("Frame Max", &sequence.mFrameMax);
 			ImGui::PopItemWidth();
+		}
+
+		bool draw(int sequenceOptions)
+		{
+			drawControls();
 
 			bool ret = false;
 			ImGuiIO& io = ImGui::GetIO();
 			int mouse_x = (int)(io.MousePos.x);
 			int mouse_y = (int)(io.MousePos.y);
-
-			int delEntry = -1;
-			int dupEntry = -1;
 
 			bool popupOpened = false;
 			int sequenceCount = sequence.getAnimationComponentCount();
@@ -136,22 +138,12 @@ namespace dmbrn
 			int lastFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
 			                       frameBarPixelOffsets.y / (canvas_size.x - legendWidth));
 
-			const int visibleFrameCount = lastFrame - firstFrame;
-			float framePixelWidth = (canvas_size.x - legendWidth) / visibleFrameCount;
-
-			ImRect regionRect(canvas_pos, canvas_pos + canvas_size);
-
-
-			frameCount = sequence.mFrameMax - sequence.mFrameMin;
-			if (visibleFrameCount >= frameCount && firstFrame)
-				firstFrame = sequence.mFrameMin;
-
-			int firstFrameUsed = firstFrame;
+			float framePixelWidth = (canvas_size.x - legendWidth) / (lastFrame - firstFrame);
 
 			// --
 			if (!expanded)
 			{
-				ImGui::InvisibleButton("canvas", ImVec2(canvas_size.x - canvas_pos.x, (float)ItemHeight));
+				ImGui::InvisibleButton("canvas", ImVec2(canvas_size.x - canvas_pos.x, ItemHeight));
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
 				                         0xFF3D3837, 0);
 				char tmps[512];
@@ -160,29 +152,23 @@ namespace dmbrn
 			}
 			else
 			{
-				bool hasScrollBar(true);
-				/*
-				int framesPixelWidth = int(frameCount * framePixelWidth);
-				if ((framesPixelWidth + legendWidth) >= canvas_size.x)
-				{
-				    hasScrollBar = true;
-				}
-				*/
 				// test scroll area
-				ImVec2 headerSize(canvas_size.x, (float)ItemHeight);
+				ImVec2 headerSize(canvas_size.x, ItemHeight);
 				ImVec2 scrollBarSize(canvas_size.x, 14.f);
+
 				ImGui::InvisibleButton("topBar", headerSize);
 				draw_list->AddRectFilled(canvas_pos, canvas_pos + headerSize, 0xFFFF0000, 0);
+
 				ImVec2 childFramePos = ImGui::GetCursorScreenPos();
 				ImVec2 childFrameSize(canvas_size.x,
-				                      canvas_size.y - 8.f - headerSize.y - (hasScrollBar ? scrollBarSize.y : 0));
+				                      canvas_size.y - 8.f - headerSize.y - scrollBarSize.y);
+
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
 				ImGui::BeginChildFrame(889, childFrameSize);
-				//sequence.focused = ImGui::IsWindowFocused();
 				ImGui::InvisibleButton("contentBar", ImVec2(canvas_size.x, float(controlHeight)));
+
 				const ImVec2 contentMin = ImGui::GetItemRectMin();
 				const ImVec2 contentMax = ImGui::GetItemRectMax();
-				const ImRect contentRect(contentMin, contentMax);
 				const float contentHeight = contentMax.y - contentMin.y;
 
 				// full background
@@ -192,9 +178,10 @@ namespace dmbrn
 				ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
+				// current frame  change
 				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
 					sequenceOptions &
-					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])//&& currentFrame >= 0
+					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])
 				{
 					MovingCurrentFrame = true;
 				}
@@ -202,7 +189,7 @@ namespace dmbrn
 				{
 					if (frameCount)
 					{
-						currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrameUsed;
+						currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrame;
 						if (currentFrame < sequence.mFrameMin)
 							currentFrame = sequence.mFrameMin;
 						if (currentFrame >= sequence.mFrameMax)
@@ -215,26 +202,6 @@ namespace dmbrn
 				//header
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
 				                         0xFF3D3837, 0);
-				//if (sequenceOptions & SEQUENCER_ADD)
-				//{
-				//	if (SequencerAddDelButton(
-				//		draw_list, ImVec2(canvas_pos.x + legendWidth - ItemHeight, canvas_pos.y + 2),
-				//		true))
-				//		ImGui::OpenPopup("addEntry");
-				//
-				//	if (ImGui::BeginPopup("addEntry"))
-				//	{
-				//		for (int i = 0; i < sequence.GetItemTypeCount(); i++)
-				//			if (ImGui::Selectable(sequence.GetItemTypeName(i)))
-				//			{
-				//				sequence.Add(i);
-				//				*selectedEntry = sequence.GetItemCount() - 1;
-				//			}
-				//
-				//		ImGui::EndPopup();
-				//		popupOpened = true;
-				//	}
-				//}
 
 				//header frame number and lines
 				int modFrameCount = 10;
@@ -251,7 +218,7 @@ namespace dmbrn
 					bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
 					bool halfIndex = (i % halfModFrameCount) == 0;
 					int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
-						firstFrameUsed * framePixelWidth);
+						firstFrame * framePixelWidth);
 					int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
 					int tiretEnd = baseIndex ? regionHeight : ItemHeight;
 
@@ -272,10 +239,10 @@ namespace dmbrn
 					}
 				};
 
-				auto drawLineContent = [&](int i, int /*regionHeight*/)
+				auto drawLineInContentRect = [&](int i, int /*regionHeight*/)
 				{
 					int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
-						firstFrameUsed * framePixelWidth);
+						firstFrame * framePixelWidth);
 					int tiretStart = int(contentMin.y);
 					int tiretEnd = int(contentMax.y);
 
@@ -303,19 +270,6 @@ namespace dmbrn
 				{
 					ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
 					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
-
-					if (sequenceOptions & SEQUENCER_DEL)
-					{
-						if (SequencerAddDelButton(
-							draw_list, ImVec2(contentMin.x + legendWidth - ItemHeight + 2 - 10, tpos.y + 2), false))
-							delEntry = i;
-
-						if (SequencerAddDelButton(
-							draw_list,
-							ImVec2(contentMin.x + legendWidth - ItemHeight - ItemHeight + 2 - 10, tpos.y + 2),
-							true))
-							dupEntry = i;
-					}
 					// TODO CustomHeight
 					//customHeight += sequence.GetCustomHeight(i);
 				}
@@ -331,7 +285,7 @@ namespace dmbrn
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
 					ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
 					if (!popupOpened && mouse_y >= pos.y && mouse_y < pos.y + (ItemHeight + localCustomHeight) &&
-						movingEntry.first != sequence.end() &&
+						movingEntry.first == sequence.end() &&
 						mouse_x > contentMin.x && mouse_x < contentMin.x + canvas_size.x)
 					{
 						col += 0x80201008;
@@ -347,17 +301,16 @@ namespace dmbrn
 				// vertical frame lines in content area
 				for (int i = sequence.mFrameMin; i <= sequence.mFrameMax; i += frameStep)
 				{
-					drawLineContent(i, int(contentHeight));
+					drawLineInContentRect(i, int(contentHeight));
 				}
-				drawLineContent(sequence.mFrameMin, int(contentHeight));
-				drawLineContent(sequence.mFrameMax, int(contentHeight));
+				drawLineInContentRect(sequence.mFrameMin, int(contentHeight));
+				drawLineInContentRect(sequence.mFrameMax, int(contentHeight));
 
-				// slots
+				// for every entity
 				customHeight = 0;
 				i = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					// TODO selection
 					// selection
 					if (selectedEntity != sequence.end() && selectedEntity == ent_it)
 					{
@@ -372,6 +325,7 @@ namespace dmbrn
 							1.f);
 					}
 
+					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
 						int start = clip_it->first;
@@ -380,7 +334,7 @@ namespace dmbrn
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
 
-						ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrameUsed * framePixelWidth,
+						ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrame * framePixelWidth,
 						                    contentMin.y + ItemHeight * i + 1 + customHeight);
 						ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 						ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
@@ -499,10 +453,10 @@ namespace dmbrn
 					}
 				}
 
-				// cursor
+				// draw cursor
 				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
 				{
-					float cursorOffset = contentMin.x + legendWidth + (currentFrame - firstFrameUsed) * framePixelWidth
+					float cursorOffset = contentMin.x + legendWidth + (currentFrame - firstFrame) * framePixelWidth
 						+
 						framePixelWidth / 2 - cursorWidth * 0.5f;
 					draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y),
@@ -523,230 +477,134 @@ namespace dmbrn
 				//	sequence.CustomDrawCompact(customDraw.index, draw_list, customDraw.customRect,
 				//	                           customDraw.clippingRect);
 
-				// copy paste
-				if (sequenceOptions & SEQUENCER_COPYPASTE)
-				{
-					ImRect rectCopy(ImVec2(contentMin.x + 100, canvas_pos.y + 2)
-					                , ImVec2(contentMin.x + 100 + 30, canvas_pos.y + ItemHeight - 2));
-					bool inRectCopy = rectCopy.Contains(io.MousePos);
-					unsigned int copyColor = inRectCopy ? 0xFF1080FF : 0xFF000000;
-					draw_list->AddText(rectCopy.Min, copyColor, "Copy");
-
-					ImRect rectPaste(ImVec2(contentMin.x + 140, canvas_pos.y + 2)
-					                 , ImVec2(contentMin.x + 140 + 30, canvas_pos.y + ItemHeight - 2));
-					bool inRectPaste = rectPaste.Contains(io.MousePos);
-					unsigned int pasteColor = inRectPaste ? 0xFF1080FF : 0xFF000000;
-					draw_list->AddText(rectPaste.Min, pasteColor, "Paste");
-
-					if (inRectCopy && io.MouseReleased[0])
-					{
-						//sequence.Copy();
-					}
-					if (inRectPaste && io.MouseReleased[0])
-					{
-						//sequence.Paste();
-					}
-				}
-				//
-
 				ImGui::EndChildFrame();
 				ImGui::PopStyleColor();
-				if (hasScrollBar)
+
+				// draw scroll bar
+				ImGui::InvisibleButton("scrollBar", scrollBarSize);
+				ImVec2 scrollBarMin = ImGui::GetItemRectMin();
+				ImVec2 scrollBarMax = ImGui::GetItemRectMax();
+
+				// ratio = number of frames visible in control / number to total frames
+				ImVec2 scrollBarA(scrollBarMin.x + legendWidth, scrollBarMin.y - 2);
+				ImVec2 scrollBarB(scrollBarMin.x + canvas_size.x, scrollBarMax.y - 1);
+				draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF222222, 0);
+
+				ImRect scrollBarRect(scrollBarA, scrollBarB);
+				bool inScrollBar = scrollBarRect.Contains(io.MousePos);
+
+				draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF101010, 8);
+
+				ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
+				ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
+				                  scrollBarMax.y - 2);
+				draw_list->AddRectFilled(scrollBarC, scrollBarD,
+				                         (inScrollBar || MovingScrollBar) ? 0xFF606060 : 0xFF505050, 6);
+
+				ImRect barHandleLeft(scrollBarC, ImVec2(scrollBarC.x + 14, scrollBarD.y));
+				ImRect barHandleRight(ImVec2(scrollBarD.x - 14, scrollBarC.y), scrollBarD);
+
+				bool onLeft = barHandleLeft.Contains(io.MousePos);
+				bool onRight = barHandleRight.Contains(io.MousePos);
+
+				draw_list->AddRectFilled(barHandleLeft.Min, barHandleLeft.Max,
+				                         (onLeft || sizingLBar) ? 0xFFAAAAAA : 0xFF666666, 6);
+				draw_list->AddRectFilled(barHandleRight.Min, barHandleRight.Max,
+				                         (onRight || sizingRBar) ? 0xFFAAAAAA : 0xFF666666, 6);
+
+				if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
 				{
-					ImGui::InvisibleButton("scrollBar", scrollBarSize);
-					ImVec2 scrollBarMin = ImGui::GetItemRectMin();
-					ImVec2 scrollBarMax = ImGui::GetItemRectMax();
-
-					// ratio = number of frames visible in control / number to total frames
-					ImVec2 scrollBarA(scrollBarMin.x + legendWidth, scrollBarMin.y - 2);
-					ImVec2 scrollBarB(scrollBarMin.x + canvas_size.x, scrollBarMax.y - 1);
-					draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF222222, 0);
-
-					ImRect scrollBarRect(scrollBarA, scrollBarB);
-					bool inScrollBar = scrollBarRect.Contains(io.MousePos);
-
-					draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF101010, 8);
-
-					ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
-					ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
-					                  scrollBarMax.y - 2);
-					draw_list->AddRectFilled(scrollBarC, scrollBarD,
-					                         (inScrollBar || MovingScrollBar) ? 0xFF606060 : 0xFF505050, 6);
-
-					ImRect barHandleLeft(scrollBarC, ImVec2(scrollBarC.x + 14, scrollBarD.y));
-					ImRect barHandleRight(ImVec2(scrollBarD.x - 14, scrollBarC.y), scrollBarD);
-
-					bool onLeft = barHandleLeft.Contains(io.MousePos);
-					bool onRight = barHandleRight.Contains(io.MousePos);
-
-					draw_list->AddRectFilled(barHandleLeft.Min, barHandleLeft.Max,
-					                         (onLeft || sizingLBar) ? 0xFFAAAAAA : 0xFF666666, 6);
-					draw_list->AddRectFilled(barHandleRight.Min, barHandleRight.Max,
-					                         (onRight || sizingRBar) ? 0xFFAAAAAA : 0xFF666666, 6);
-
-					if (ImGui::IsWindowFocused() && io.KeyAlt && io.MouseDown[2])
+					if (!panningView)
 					{
-						if (!panningView)
-						{
-							panningView = true;
-						}
+						panningView = true;
+					}
 
+					frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
+					frameBarPixelOffsetsTarget.y = std::clamp(
+						frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
+						scrollBarB.x - (scrollBarMin.x + legendWidth));
+					frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+					frameBarPixelOffsetsTarget.x = std::clamp(
+						frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
+				}
+				if (panningView && !io.MouseDown[2])
+				{
+					panningView = false;
+				}
+
+				ImRect scrollBarThumb(scrollBarC, scrollBarD);
+				if (sizingRBar)
+				{
+					if (!io.MouseDown[0])
+					{
+						sizingRBar = false;
+					}
+					else
+					{
 						frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
-						frameBarPixelOffsetsTarget.y = std::clamp(
-							frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
-							scrollBarB.x - (scrollBarMin.x + legendWidth));
-						frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
-						frameBarPixelOffsetsTarget.x = std::clamp(
-							frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
+						frameBarPixelOffsetsTarget.y = std::clamp(frameBarPixelOffsetsTarget.y,
+						                                          frameBarPixelOffsetsTarget.x + MinBarWidth,
+						                                          scrollBarB.x - (scrollBarMin.x + legendWidth));
 					}
-					if (panningView && !io.MouseDown[2])
+				}
+				else if (sizingLBar)
+				{
+					if (!io.MouseDown[0])
 					{
-						panningView = false;
+						sizingLBar = false;
 					}
-
-					ImRect scrollBarThumb(scrollBarC, scrollBarD);
-					if (sizingRBar)
+					else
+					{
+						if (fabsf(io.MouseDelta.x) > FLT_EPSILON)
+						{
+							frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+							frameBarPixelOffsetsTarget.x = std::clamp(
+								frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
+						}
+					}
+				}
+				else
+				{
+					if (MovingScrollBar)
 					{
 						if (!io.MouseDown[0])
 						{
-							sizingRBar = false;
+							MovingScrollBar = false;
 						}
 						else
 						{
 							frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
-							frameBarPixelOffsetsTarget.y = std::clamp(frameBarPixelOffsetsTarget.y,
-							                                          frameBarPixelOffsetsTarget.x + MinBarWidth,
-							                                          scrollBarB.x - (scrollBarMin.x + legendWidth));
-						}
-					}
-					else if (sizingLBar)
-					{
-						if (!io.MouseDown[0])
-						{
-							sizingLBar = false;
-						}
-						else
-						{
-							if (fabsf(io.MouseDelta.x) > FLT_EPSILON)
-							{
-								frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
-								frameBarPixelOffsetsTarget.x = std::clamp(
-									frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
-							}
+							frameBarPixelOffsetsTarget.y = std::clamp(
+								frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
+								scrollBarB.x - (scrollBarMin.x + legendWidth));
+							frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
+							frameBarPixelOffsetsTarget.x = std::clamp(
+								frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
 						}
 					}
 					else
 					{
-						if (MovingScrollBar)
+						if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && !
+							MovingCurrentFrame && movingEntry.first == sequence.end())
 						{
-							if (!io.MouseDown[0])
-							{
-								MovingScrollBar = false;
-							}
-							else
-							{
-								frameBarPixelOffsetsTarget.y += io.MouseDelta.x;
-								frameBarPixelOffsetsTarget.y = std::clamp(
-									frameBarPixelOffsetsTarget.y, frameBarPixelOffsetsTarget.x + MinBarWidth,
-									scrollBarB.x - (scrollBarMin.x + legendWidth));
-								frameBarPixelOffsetsTarget.x += io.MouseDelta.x;
-								frameBarPixelOffsetsTarget.x = std::clamp(
-									frameBarPixelOffsetsTarget.x, 0.f, frameBarPixelOffsetsTarget.y - MinBarWidth);
-							}
+							MovingScrollBar = true;
+							panningViewSource = io.MousePos;
+							panningViewFrame = -firstFrame;
 						}
-						else
-						{
-							if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && !
-								MovingCurrentFrame && movingEntry.first == sequence.end())
-							{
-								MovingScrollBar = true;
-								panningViewSource = io.MousePos;
-								panningViewFrame = -firstFrame;
-							}
-							if (!sizingRBar && onRight && ImGui::IsMouseClicked(0))
-								sizingRBar = true;
-							if (!sizingLBar && onLeft && ImGui::IsMouseClicked(0))
-								sizingLBar = true;
-						}
+						if (!sizingRBar && onRight && ImGui::IsMouseClicked(0))
+							sizingRBar = true;
+						if (!sizingLBar && onLeft && ImGui::IsMouseClicked(0))
+							sizingLBar = true;
 					}
 				}
 			}
 
 			ImGui::EndGroup();
 
-			if (SequencerAddDelButton(draw_list, ImVec2(canvas_pos.x + 2, canvas_pos.y + 2), !expanded))
-				expanded = !expanded;
-
-			if (delEntry != -1)
-			{
-				//sequence.Del(delEntry);
-				//if (selectedEntry && (*selectedEntry == delEntry || *selectedEntry >= sequence.getClipCount()))
-				//	*selectedEntry = -1;
-			}
-
-			if (dupEntry != -1)
-			{
-				//sequence.Duplicate(dupEntry);
-			}
 			return ret;
 		}
 
 	private:
 		const char* GetCollapseFmt() { return "%d Frames / %d entries"; }
-
-		static bool SequencerAddDelButton(ImDrawList* draw_list, ImVec2 pos, bool add = true)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			ImRect btnRect(pos, ImVec2(pos.x + 16, pos.y + 16));
-			bool overBtn = btnRect.Contains(io.MousePos);
-			bool containedClick = overBtn && btnRect.Contains(io.MouseClickedPos[0]);
-			bool clickedBtn = containedClick && io.MouseReleased[0];
-			int btnColor = overBtn ? 0xAAEAFFAA : 0x77A3B2AA;
-			if (containedClick && io.MouseDownDuration[0] > 0)
-				btnRect.Expand(2.0f);
-
-			float midy = pos.y + 16 / 2 - 0.5f;
-			float midx = pos.x + 16 / 2 - 0.5f;
-			draw_list->AddRect(btnRect.Min, btnRect.Max, btnColor, 4);
-			draw_list->AddLine(ImVec2(btnRect.Min.x + 3, midy), ImVec2(btnRect.Max.x - 3, midy), btnColor, 2);
-			if (add)
-				draw_list->AddLine(ImVec2(midx, btnRect.Min.y + 3), ImVec2(midx, btnRect.Max.y - 3), btnColor, 2);
-			return clickedBtn;
-		}
-
-		//void drawLine(int i, int regionHeight)
-		//{
-		//	int modFrameCount = 10;
-		//	int frameStep = 1;
-		//	while ((modFrameCount * framePixelWidth) < 150)
-		//	{
-		//		modFrameCount *= 2;
-		//		frameStep *= 2;
-		//	};
-		//	int halfModFrameCount = modFrameCount / 2;
-		//
-		//	bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
-		//	bool halfIndex = (i % halfModFrameCount) == 0;
-		//	int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
-		//		firstFrameUsed * framePixelWidth);
-		//	int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
-		//	int tiretEnd = baseIndex ? regionHeight : ItemHeight;
-		//
-		//	if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
-		//	{
-		//		draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart),
-		//		                   ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
-		//
-		//		draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)ItemHeight),
-		//		                   ImVec2((float)px, canvas_pos.y + (float)regionHeight - 1), 0x30606060, 1);
-		//	}
-		//
-		//	if (baseIndex && px > (canvas_pos.x + legendWidth))
-		//	{
-		//		char tmps[512];
-		//		ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", i);
-		//		draw_list->AddText(ImVec2((float)px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
-		//	}
-		//};
 	}; //
 }
