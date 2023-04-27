@@ -35,6 +35,7 @@ namespace dmbrn
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
 			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
+			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
@@ -43,18 +44,18 @@ namespace dmbrn
 			animation_sequence_.mFrameMin = 0;
 			animation_sequence_.mFrameMax = 800;
 
-			auto view = registry_.view<AnimationComponent>();
-			for (auto ent : view)
-			{
-				AnimationComponent& anim = view.get<AnimationComponent>(ent);
-
-				for (int i = 1; i < 4; ++i)
-				{
-					animation_sequence_.entries_[Enttity{registry_, ent}].insert(std::pair<float, AnimationClip>{
-						i * 200, *anim.animation_clips.begin()
-					});
-				}
-			}
+			//auto view = registry_.view<AnimationComponent>();
+			//for (auto ent : view)
+			//{
+			//	AnimationComponent& anim = view.get<AnimationComponent>(ent);
+			//
+			//	for (int i = 1; i < 4; ++i)
+			//	{
+			//		animation_sequence_.entries_[Enttity{registry_, ent}].insert(std::pair<float, AnimationClip>{
+			//			i * 200, *anim.animation_clips.begin()
+			//		});
+			//	}
+			//}
 
 			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
 			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
@@ -169,16 +170,19 @@ namespace dmbrn
 
 			for (auto ent : view)
 			{
-				auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
-					anim_frame);
+				if (!animation_sequence_.entries_[Enttity{registry_, ent}].empty())
+				{
+					auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
+						anim_frame);
 
-				if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
-					--clip_it;
+					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
+						--clip_it;
 
-				float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
-				                              clip_it->second.duration_);
+					float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
+					                              clip_it->second.duration_);
 
-				clip_it->second.updateTransforms(local_time, frame);
+					clip_it->second.updateTransforms(local_time, frame);
+				}
 			}
 		}
 
@@ -285,7 +289,7 @@ namespace dmbrn
 				const aiScene* ai_scene = importer.ReadFile(
 					path, aiProcess_ValidateDataStructure | aiProcess_GlobalScale);
 
-				if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode)
+				if (!ai_scene || !ai_scene->mRootNode)
 				{
 					throw std::runtime_error(std::string("ERROR::ASSIMP:: ") + importer.GetErrorString());
 				}

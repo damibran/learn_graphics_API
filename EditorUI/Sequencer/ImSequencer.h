@@ -27,6 +27,7 @@
 
 #include <cstddef>
 #include <cmath>
+#include "Main/Enttity.h"
 #include "Main/AnimationSequence.h"
 
 struct ImDrawList;
@@ -47,7 +48,8 @@ namespace dmbrn
 		const float cursorWidth = 8.f;
 		const float MinBarWidth = 80.f;
 		const float ItemHeight = 20.;
-		const int legendWidth = 200;
+		const float legendWidth = 200.f;
+		const float text_offset = 2.f;
 
 		Sequencer(AnimationSequence& sequence):
 			sequence(sequence),
@@ -108,7 +110,7 @@ namespace dmbrn
 			ImGui::SameLine();
 
 			int t_current_frame = static_cast<int>(currentFrame);
-			if(ImGui::InputInt("Frame ", &t_current_frame))
+			if (ImGui::InputInt("Frame ", &t_current_frame))
 				currentFrame = static_cast<float>(t_current_frame);
 			ImGui::SameLine();
 
@@ -217,7 +219,7 @@ namespace dmbrn
 				}
 
 				if (playing)
-					currentFrame = currentFrame + 30*d_time;
+					currentFrame = currentFrame + 30 * d_time;
 
 				// looping ?
 				if (currentFrame < sequence.mFrameMin)
@@ -368,7 +370,6 @@ namespace dmbrn
 						              pos.y + ItemHeight - 2 + localCustomHeight);
 						unsigned int slotColor = color | 0xFF000000;
 						unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
-						float text_offset = 2;
 						if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth))
 						{
 							draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
@@ -446,6 +447,50 @@ namespace dmbrn
 						//}
 						customHeight += localCustomHeight;
 					}
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					i = 0;
+					for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
+							"Animation_clip_DnD", ImGuiDragDropFlags_AcceptBeforeDelivery))
+						{
+							IM_ASSERT(payload->DataSize == sizeof(std::pair<Enttity, const AnimationClip*>));
+							auto payload_data = static_cast<std::pair<Enttity, const AnimationClip*>*>(payload->Data);
+
+							if (ent_it->first == payload_data->first)
+							{
+								if (payload->IsPreview())
+								{
+									int start = currentFrame;
+									int end = currentFrame + payload_data->second->duration_;
+
+									ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrame * framePixelWidth,
+									                    contentMin.y + ItemHeight * i + 1 + customHeight);
+									ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
+									ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
+									              pos.y + ItemHeight - 2);
+
+									draw_list->AddRectFilled(slotP1, slotP2, 0xFF885050, 2);
+
+									draw_list->PushClipRect(slotP1, slotP2, true);
+									draw_list->AddText({slotP1.x + text_offset, slotP1.y}, 0xFF303030,
+									                   payload_data->second->name.c_str());
+									draw_list->PopClipRect();
+								}
+
+								if (payload->IsDelivery())
+								{
+									sequence.add(ent_it->first, currentFrame, *payload_data->second);
+								}
+							}
+						}
+					}
+					if (!MovingCurrentFrame)
+						MovingCurrentFrame = true;
+					ImGui::EndDragDropTarget();
 				}
 
 				// moving

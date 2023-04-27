@@ -109,7 +109,7 @@ namespace dmbrn
 				{
 					ImGui::Spacing();
 					ImGui::Text("Animation clips:");
-					if (ImGui::BeginTable("animation clips", 1,
+					if (ImGui::BeginTable("Animation_clips_table", 1,
 					                      ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings |
 					                      ImGuiTableFlags_Borders))
 					{
@@ -117,15 +117,23 @@ namespace dmbrn
 						{
 							ImGui::TableNextColumn();
 							ImGui::Text(clip.name.c_str());
+							if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID|ImGuiDragDropFlags_AcceptBeforeDelivery))
+							{
+								auto payload_data = std::make_pair(entity,&clip);
+								ImGui::SetDragDropPayload("Animation_clip_DnD",&payload_data,sizeof(payload_data));
+
+								ImGui::Text(clip.name.c_str());
+								ImGui::EndDragDropSource();
+							}
 						}
 						ImGui::EndTable();
 					}
 					ImGui::Spacing();
 					// TODO filedialog
 					if (ImGui::Button("Add animation from file"))
-						ImGui::OpenPopup("Import Animation");
+						ImGui::OpenPopup("Import_Animation_Modal");
 
-					if (ImGui::BeginPopupModal("Import Animation",NULL,ImGuiWindowFlags_AlwaysAutoResize))
+					if (ImGui::BeginPopupModal("Import_Animation_Modal",NULL,ImGuiWindowFlags_AlwaysAutoResize))
 					{
 						char buf[256] = {0};
 
