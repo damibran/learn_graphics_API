@@ -281,7 +281,7 @@ namespace dmbrn
 			scene_tree_.newImGuiFrame();
 			inspector_.newImGuiFrame(current_frame_);
 			drawStatsWindow();
-			drawSequencer(delta_time);
+			drawSequencer(static_cast<float>(delta_time));
 
 			// example sequencer
 			/*{

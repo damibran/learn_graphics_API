@@ -340,7 +340,7 @@ namespace dmbrn
 						{
 							aiVectorKey pos_k = node_anim->mPositionKeys[k];
 							channels.positions.insert({
-								static_cast<uint32_t>(std::round(pos_k.mTime / anim->mTicksPerSecond / sample_period)),
+								static_cast<float>(std::round(pos_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(pos_k.mValue)
 							});
 						}
@@ -349,7 +349,7 @@ namespace dmbrn
 						{
 							aiQuatKey rot_k = node_anim->mRotationKeys[k];
 							channels.rotations.insert({
-								static_cast<uint32_t>(std::round(rot_k.mTime / anim->mTicksPerSecond / sample_period)),
+								static_cast<float>(std::round(rot_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(rot_k.mValue)
 							});
 						}
@@ -358,17 +358,16 @@ namespace dmbrn
 						{
 							aiVectorKey scale_k = node_anim->mScalingKeys[k];
 							channels.scales.insert({
-								static_cast<uint32_t>(
-									std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
+									static_cast<float>(std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(scale_k.mValue)
 							});
 						}
 
-						uint32_t min = std::min(channels.positions.begin()->first,
+						float min = std::min(channels.positions.begin()->first,
 						                        std::min(channels.rotations.begin()->first,
 						                                 channels.scales.begin()->first));
 
-						uint32_t max = std::max((--channels.positions.end())->first,
+						float max = std::max((--channels.positions.end())->first,
 						                        std::max((--channels.rotations.end())->first,
 						                                 (--channels.scales.end())->first));
 

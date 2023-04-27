@@ -14,7 +14,7 @@ namespace dmbrn
 
 		int getAnimationComponentCount()
 		{
-			return entries_.size();
+			return static_cast<int>(entries_.size());
 		}
 
 		EntityIterator begin()
@@ -33,7 +33,7 @@ namespace dmbrn
 			entries_[ent].insert({start, clip});
 		}
 
-		ClipIterator updateStart(const EntityIterator& ent_it, ClipIterator&& clip_it, uint32_t new_start)
+		ClipIterator updateStart(const EntityIterator& ent_it, ClipIterator&& clip_it, float new_start)
 		{
 			AnimationClip animation_clip = std::move(clip_it->second);
 			ent_it->second.erase(clip_it);

@@ -76,7 +76,7 @@ namespace dmbrn
 		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
 		movingEntry = {sequence.end(), std::nullopt};
 
-		int movingPos = -1;
+		float movingPos = -1.f;
 
 		bool MovingScrollBar = false;
 		bool MovingCurrentFrame = false;
@@ -132,8 +132,8 @@ namespace dmbrn
 
 			bool ret = false;
 			ImGuiIO& io = ImGui::GetIO();
-			int mouse_x = (int)(io.MousePos.x);
-			int mouse_y = (int)(io.MousePos.y);
+			float mouse_x = io.MousePos.x;
+			float mouse_y = io.MousePos.y;
 
 			bool popupOpened = false;
 			int sequenceCount = sequence.getAnimationComponentCount();
@@ -145,7 +145,7 @@ namespace dmbrn
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
-			int controlHeight = sequenceCount * ItemHeight;
+			float controlHeight = sequenceCount * ItemHeight;
 			// TODO add expanded height
 			//for (int i = 0; i < sequenceCount; i++)
 			//	controlHeight += int(sequence.GetCustomHeight(i));
@@ -212,7 +212,8 @@ namespace dmbrn
 				{
 					if (frameCount)
 					{
-						currentFrame = (int)((io.MousePos.x - topRect.Min.x) / framePixelWidth) + firstFrame;
+						currentFrame = std::round((io.MousePos.x - topRect.Min.x) /
+							framePixelWidth) + firstFrame;
 					}
 					if (!io.MouseDown[0])
 						MovingCurrentFrame = false;
@@ -241,22 +242,22 @@ namespace dmbrn
 				}
 				int halfModFrameCount = modFrameCount / 2;
 
-				auto drawLine = [&](int i, int regionHeight)
+				auto drawLine = [&](int i, float regionHeight)
 				{
 					bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
 					bool halfIndex = (i % halfModFrameCount) == 0;
-					int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
-						firstFrame * framePixelWidth);
-					int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
-					int tiretEnd = baseIndex ? regionHeight : ItemHeight;
+					float px = canvas_pos.x + i * framePixelWidth + legendWidth -
+						static_cast<float>(firstFrame) * framePixelWidth;
+					float tiretStart = baseIndex ? 4.f : (halfIndex ? 10.f : 14.f);
+					float tiretEnd = baseIndex ? regionHeight : ItemHeight;
 
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
-						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)tiretStart),
-						                   ImVec2((float)px, canvas_pos.y + (float)tiretEnd - 1), 0xFF606060, 1);
+						draw_list->AddLine(ImVec2(px, canvas_pos.y + tiretStart),
+						                   ImVec2(px, canvas_pos.y + tiretEnd - 1), 0xFF606060, 1);
 
-						draw_list->AddLine(ImVec2((float)px, canvas_pos.y + (float)ItemHeight),
-						                   ImVec2((float)px, canvas_pos.y + (float)regionHeight - 1), 0x30606060, 1);
+						draw_list->AddLine(ImVec2(px, canvas_pos.y + ItemHeight),
+						                   ImVec2(px, canvas_pos.y + regionHeight - 1), 0x30606060, 1);
 					}
 
 					if (baseIndex && px > (canvas_pos.x + legendWidth))
@@ -269,14 +270,14 @@ namespace dmbrn
 
 				auto drawLineInContentRect = [&](int i, int /*regionHeight*/)
 				{
-					int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(
-						firstFrame * framePixelWidth);
-					int tiretStart = int(contentMin.y);
-					int tiretEnd = int(contentMax.y);
+					float px = canvas_pos.x + i * framePixelWidth + legendWidth - 
+						static_cast<float>(firstFrame) * framePixelWidth;
+					float tiretStart = contentMin.y;
+					float tiretEnd = contentMax.y;
 
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
-						draw_list->AddLine(ImVec2(float(px), float(tiretStart)), ImVec2(float(px), float(tiretEnd)),
+						draw_list->AddLine(ImVec2(px, tiretStart), ImVec2(px, tiretEnd),
 						                   0x30606060, 1);
 					}
 				};
@@ -356,8 +357,8 @@ namespace dmbrn
 					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
-						int start = clip_it->first;
-						int end = clip_it->first + clip_it->second.duration_;
+						float start = clip_it->first;
+						float end = clip_it->first + clip_it->second.duration_;
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
@@ -464,8 +465,8 @@ namespace dmbrn
 							{
 								if (payload->IsPreview())
 								{
-									int start = currentFrame;
-									int end = currentFrame + payload_data->second->duration_;
+									float start = currentFrame;
+									float end = currentFrame + payload_data->second->duration_;
 
 									ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrame * framePixelWidth,
 									                    contentMin.y + ItemHeight * i + 1 + customHeight);
@@ -497,16 +498,16 @@ namespace dmbrn
 				if (movingEntry.first != sequence.end()) ///*backgroundRect.Contains(io.MousePos) && */
 				{
 					ImGui::SetNextFrameWantCaptureMouse(true);
-					int diffFrame = static_cast<int>((mouse_x - movingPos) / framePixelWidth);
+					float diffFrame = std::round((mouse_x - movingPos) / framePixelWidth);
 					if (std::abs(diffFrame) > 0)
 					{
-						int start = movingEntry.second.value()->first;
+						float start = movingEntry.second.value()->first;
 
 						start += diffFrame;
 
 						selectedEntity = movingEntry.first;
 
-						movingPos += static_cast<int>(diffFrame * framePixelWidth);
+						movingPos += diffFrame * framePixelWidth;
 
 						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second),
 						                                          start);
