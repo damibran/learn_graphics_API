@@ -107,22 +107,34 @@ namespace dmbrn
 			{
 				if (ImGui::TreeNodeEx("AnimationComponent", ImGuiTreeNodeFlags_DefaultOpen))
 				{
+					char buf[256] = {0};
 					ImGui::Spacing();
 					ImGui::Text("Animation clips:");
 					if (ImGui::BeginTable("Animation_clips_table", 1,
 					                      ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings |
 					                      ImGuiTableFlags_Borders))
 					{
-						for (const AnimationClip& clip: comp->animation_clips)
+						int i=1;
+						for (decltype(comp->animation_clips)::iterator clip_it = comp->animation_clips.begin();clip_it!=comp->animation_clips.end();++clip_it,++i)
 						{
 							ImGui::TableNextColumn();
-							ImGui::Text(clip.name.c_str());
+
+							strcpy_s(buf, sizeof(buf), clip_it->name.data());
+
+							std::string label = "Clip "+std::to_string(i);
+
+							if(ImGui::InputText(label.c_str(),buf,sizeof(buf),ImGuiInputTextFlags_EnterReturnsTrue))
+							{
+								comp->updateClipName(std::make_move_iterator(clip_it),std::string(buf));
+								break;
+							}
+
 							if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID|ImGuiDragDropFlags_AcceptBeforeDelivery))
 							{
-								auto payload_data = std::make_pair(entity,&clip);
+								auto payload_data = std::make_pair(entity,&*clip_it);
 								ImGui::SetDragDropPayload("Animation_clip_DnD",&payload_data,sizeof(payload_data));
 
-								ImGui::Text(clip.name.c_str());
+								ImGui::Text(clip_it->name.c_str());
 								ImGui::EndDragDropSource();
 							}
 						}
@@ -135,8 +147,6 @@ namespace dmbrn
 
 					if (ImGui::BeginPopupModal("Import_Animation_Modal",NULL,ImGuiWindowFlags_AlwaysAutoResize))
 					{
-						char buf[256] = {0};
-
 						strcpy_s(buf, sizeof(buf), file_path.c_str());
 
 						if (ImGui::InputText("Model path", buf, sizeof(buf)))
