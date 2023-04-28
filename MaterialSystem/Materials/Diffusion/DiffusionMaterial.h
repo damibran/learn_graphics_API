@@ -17,15 +17,15 @@ namespace dmbrn
 		struct MaterialRegistryHandle
 		{
 			image_data diffuse_texture;
-			glm::vec4 base_color;
+			glm::vec4 base_color={0.f,0.f,0.f,0.f};
 
 			struct hash
 			{
-				size_t operator()(const MaterialRegistryHandle& handle) const noexcept
+				size_t operator()(const MaterialRegistryHandle& handle) const
 				{
 					std::hash<image_data> img_hasher;
 					std::hash<glm::vec4> vec_hasher;
-					size_t res = img_hasher(handle.diffuse_texture) ^ vec_hasher(handle.base_color);
+					const size_t res = img_hasher(handle.diffuse_texture) ^ vec_hasher(handle.base_color);
 					std::cout << "Hash: " << res << std::endl;
 					return res;
 				}
@@ -37,8 +37,18 @@ namespace dmbrn
 			}
 		};
 
+
 	public:
 		DiffusionMaterial() = delete;
+
+		DiffusionMaterial(const DiffusionMaterial&)=delete;
+		DiffusionMaterial& operator=(const DiffusionMaterial&)=delete;
+
+		DiffusionMaterial(DiffusionMaterial&&)=default;
+		DiffusionMaterial& operator=(DiffusionMaterial&&)=default;
+
+		// TODO actually some where it should delete it self from registry but reference counting needed so shred pointer to the rescue
+		~DiffusionMaterial()override=default;
 
 		void bindMaterialData(int frame, const vk::raii::CommandBuffer& command_buffer,
 		                      vk::PipelineLayout layout) const override
@@ -126,7 +136,7 @@ namespace dmbrn
 			{
 				if (dif_texture->mHeight == 0)
 				{
-					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
+					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char const* const>(dif_texture->pcData),
 					                                      dif_texture->mWidth, &res.width, &res.height,
 					                                      &res.comp_per_pix,
 					                                      STBI_rgb_alpha);
@@ -142,7 +152,7 @@ namespace dmbrn
 				}
 				else
 				{
-					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char*>(dif_texture->pcData),
+					stbi_uc* temp = stbi_load_from_memory(reinterpret_cast<unsigned char const*>(dif_texture->pcData),
 					                                      dif_texture->mWidth * dif_texture->mHeight, &res.width,
 					                                      &res.height,
 					                                      &res.comp_per_pix, STBI_rgb_alpha);

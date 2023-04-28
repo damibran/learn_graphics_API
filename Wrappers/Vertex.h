@@ -6,9 +6,9 @@ namespace dmbrn
 {
 	struct Vertex
 	{
-		glm::vec3 pos;
-		glm::vec3 normal;
-		glm::vec2 texCoord;
+		glm::vec3 pos={0.f,0.f,0.f};
+		glm::vec3 normal={0.f,0.f,0.f};
+		glm::vec2 texCoord={0.f,0.f};
 
 		static vk::VertexInputBindingDescription getBindingDescription()
 		{
@@ -20,7 +20,7 @@ namespace dmbrn
 			return bindingDescription;
 		}
 
-		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
+		constexpr static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
 		{
 			std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions{};
 

@@ -24,7 +24,7 @@ namespace dmbrn
 			return shader_;
 		}
 
-		uint32_t in_GPU_mtxs_offset;
+		uint32_t in_GPU_mtxs_offset=0;
 		SkeletalMesh mesh;
 		std::vector<Enttity> bone_enttities;
 		ShaderEffect* shader_ = nullptr;

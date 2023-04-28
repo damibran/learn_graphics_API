@@ -12,6 +12,12 @@ namespace dmbrn
 	class Texture // need to cache current layout it makes transitioning clearer 
 	{
 	public:
+		Texture(const Texture&)=delete;
+		Texture& operator=(const Texture&)=delete;
+
+		Texture(Texture&&)=default;
+		Texture& operator=(Texture&&)=default;
+
 		Texture() :
 			texture_image(nullptr),
 			texture_image_memory_(nullptr),
@@ -40,7 +46,7 @@ namespace dmbrn
 		{
 			if (gen_mip_maps)
 			{
-				uint32_t mipLevels = static_cast<uint32_t>(std::floor(
+				const uint32_t mipLevels = static_cast<uint32_t>(std::floor(
 					std::log2(std::max(image_data.width, image_data.height)))) + 1;
 				createTextureImageMipMap(image_data, Singletons::physical_device, Singletons::device,
 				                         Singletons::command_pool, Singletons::graphics_queue, mipLevels);
@@ -315,11 +321,11 @@ namespace dmbrn
 			}
 		}
 
-		void generateMipmaps(vk::raii::Image& image, int32_t texWidth, int32_t texHeight,
+		void generateMipmaps(const vk::raii::Image& image, int32_t texWidth, int32_t texHeight,
 		                     uint32_t mipLevels)
 		{
 			// Check if image format supports linear blitting
-			vk::FormatProperties formatProperties = Singletons::physical_device->getFormatProperties(
+			const vk::FormatProperties formatProperties = Singletons::physical_device->getFormatProperties(
 				vk::Format::eR8G8B8A8Srgb);
 
 			if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear))
@@ -398,11 +404,11 @@ namespace dmbrn
 
 		void copyBufferToImage(const LogicalDevice& device, const CommandPool& command_pool,
 		                       vk::raii::Queue graphics_queue,
-		                       vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
+		                       const vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height)
 		{
 			vk::raii::CommandBuffer commandBuffer = command_pool.beginSingleTimeCommands(device);
 
-			vk::BufferImageCopy region
+			const vk::BufferImageCopy region
 			{
 				0, 0, 0,
 				vk::ImageSubresourceLayers{vk::ImageAspectFlagBits::eColor, 0, 0, 1},

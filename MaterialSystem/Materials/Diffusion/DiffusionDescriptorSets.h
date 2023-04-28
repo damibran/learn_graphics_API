@@ -61,7 +61,7 @@ namespace dmbrn
 			const vk::DescriptorSetAllocateInfo allocInfo
 			{
 				**Singletons::descriptor_pool,
-				static_cast<uint32_t>(device.MAX_FRAMES_IN_FLIGHT),
+				device.MAX_FRAMES_IN_FLIGHT,
 				layouts.data()
 			};
 
@@ -69,12 +69,12 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				vk::DescriptorImageInfo imageInfo
+				const vk::DescriptorImageInfo imageInfo
 				{
 					*texture.getSampler(), *texture.getImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
 				};
 
-				vk::DescriptorBufferInfo buffer_info
+				const vk::DescriptorBufferInfo buffer_info
 				{
 					*uniform_buffer[i],0,sizeof(DiffusionUniformBuffer::UniformBufferObject)
 				};

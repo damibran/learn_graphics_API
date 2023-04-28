@@ -51,7 +51,7 @@ namespace dmbrn
 			if (ImGui::IsWindowFocused())
 				last_used_focused = this;
 
-			auto pos = ImGui::GetCursorPos();
+			const auto pos = ImGui::GetCursorPos();
 
 			ImGui::Image(images_[imageIndex], size_);
 
@@ -78,12 +78,12 @@ namespace dmbrn
 					float size_clip_space = 0.1f;
 					ImGuizmo::SetOrthographic(false);
 					ImGuizmo::SetDrawlist();
-					float windowWidth = (float)ImGui::GetWindowWidth();
-					float windowHeight = (float)ImGui::GetWindowHeight();
+					const float windowWidth = ImGui::GetWindowWidth();
+					const float windowHeight = ImGui::GetWindowHeight();
 					ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
 					glm::mat4 cameraProj = camera_.camera_comp.getMatrix();
-					glm::mat4 cameraView = camera_.getViewMat();
+					const glm::mat4 cameraView = camera_.getViewMat();
 
 					cameraProj[1][1] *= -1;
 
@@ -94,9 +94,9 @@ namespace dmbrn
 
 					glm::mat4 local_trans = t_c.getMatrix();
 
-					glm::vec3 parent_glob_scale = getScale(parent_trans);
+					const glm::vec3 parent_glob_scale = getScale(parent_trans);
 
-					float avg_scale = (parent_glob_scale.x + parent_glob_scale.y+ parent_glob_scale.z)/3;
+					const float avg_scale = (parent_glob_scale.x + parent_glob_scale.y+ parent_glob_scale.z)/3;
 
 					size_clip_space = size_clip_space / avg_scale;
 
@@ -208,7 +208,7 @@ namespace dmbrn
 
 		bool HandleWindowResize()
 		{
-			ImVec2 view = ImGui::GetContentRegionAvail();
+			const ImVec2 view = ImGui::GetContentRegionAvail();
 
 			if (view.x != size_.x || view.y != size_.y)
 			{

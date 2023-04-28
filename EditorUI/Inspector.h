@@ -131,7 +131,7 @@ namespace dmbrn
 
 							if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID|ImGuiDragDropFlags_AcceptBeforeDelivery))
 							{
-								auto payload_data = std::make_pair(entity,&*clip_it);
+								const std::pair<Enttity,const AnimationClip*> payload_data = std::make_pair(entity,&*clip_it);
 								ImGui::SetDragDropPayload("Animation_clip_DnD",&payload_data,sizeof(payload_data));
 
 								ImGui::Text(clip_it->name.c_str());
@@ -185,8 +185,8 @@ namespace dmbrn
 			ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
 
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			ImVec2 buttonSize = {lineHeight + 3.0f, lineHeight};
+			const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			const ImVec2 buttonSize = {lineHeight + 3.0f, lineHeight};
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.9f, 0.2f, 0.2f, 1.0f});

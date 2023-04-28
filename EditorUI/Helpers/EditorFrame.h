@@ -42,7 +42,7 @@ namespace dmbrn
 		{
 			const vk::CommandBufferAllocateInfo allocInfo
 			{
-				**command_pool, vk::CommandBufferLevel::ePrimary,static_cast<uint32_t>(1)
+				**command_pool, vk::CommandBufferLevel::ePrimary,1u
 			};
 
 			return device->allocateCommandBuffers(allocInfo);

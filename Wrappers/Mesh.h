@@ -79,7 +79,7 @@ namespace dmbrn
 			MeshRenderData(const std::string& mesh_name,const aiMesh* mesh):
 				use_this_mesh_({mesh_name})
 			{
-				auto [vertices,indices] = getDataFromMesh(mesh);
+				const auto&& [vertices,indices] = getDataFromMesh(mesh);
 				indices_count = static_cast<uint32_t>(indices.size());
 
 				vertex_buffer_ = HostLocalBuffer(vertices, vk::BufferUsageFlagBits::eVertexBuffer);

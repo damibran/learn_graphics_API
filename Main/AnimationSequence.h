@@ -8,7 +8,7 @@ namespace dmbrn
 	public:
 		std::unordered_map<Enttity, std::multimap<float, AnimationClip>, Enttity::hash> entries_;
 	public:
-		int mFrameMin, mFrameMax;
+		int mFrameMin=0, mFrameMax=0;
 		using EntityIterator = decltype(entries_)::iterator;
 		using ClipIterator = decltype(entries_)::mapped_type::iterator;
 

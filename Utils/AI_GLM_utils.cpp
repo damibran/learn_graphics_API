@@ -59,7 +59,7 @@ namespace dmbrn
 		Scale.z = length(Row[2]);
 		Row[2] = glm::detail::scale(Row[2], static_cast<float>(1));
 
-		glm::vec3 Pdum3 = cross(Row[1], Row[2]); // v3Cross(row[1], row[2], Pdum3);
+		const glm::vec3 Pdum3 = cross(Row[1], Row[2]); // v3Cross(row[1], row[2], Pdum3);
 		if(dot(Row[0], Pdum3) < 0)
 		{
 			for(glm::length_t i = 0; i < 3; i++)
@@ -88,7 +88,7 @@ namespace dmbrn
 		std::cout << "Scene hierarchy\n";
 		while (!stack.empty())
 		{
-			auto [intend, node] = stack.top();
+			const auto [intend, node] = stack.top();
 			stack.pop();
 
 			std::cout << intend + "Node name:" << node->mName.C_Str() << std::endl;
@@ -104,7 +104,7 @@ namespace dmbrn
 	{
 		for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
 		{
-			aiAnimation* ai_animation = ai_scene->mAnimations[i];
+			const aiAnimation* ai_animation = ai_scene->mAnimations[i];
 
 			std::cout << "Animation name:" << ai_animation->mName.C_Str() << std::endl;
 

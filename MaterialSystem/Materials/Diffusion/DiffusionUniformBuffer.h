@@ -27,7 +27,7 @@ namespace dmbrn
 
 		DiffusionUniformBuffer(const PhysicalDevice& physical_device, const LogicalDevice& device, const glm::vec4& base_color)
 		{
-			const vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+			constexpr vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
 			for (size_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{

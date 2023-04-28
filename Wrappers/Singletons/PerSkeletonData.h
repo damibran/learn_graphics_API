@@ -20,10 +20,10 @@ namespace dmbrn
 
 		PerSkeletonData(const LogicalDevice& device, const PhysicalDevice& physical_device)
 		{
-			uint32_t minUboAlignment = static_cast<uint32_t>(physical_device->getProperties().limits.minUniformBufferOffsetAlignment);
+			const uint32_t minUboAlignment = static_cast<uint32_t>(physical_device->getProperties().limits.minUniformBufferOffsetAlignment);
 			if (minUboAlignment > 0)
 			{
-				uint32_t dynamicAlignment = sizeof(UBODynamicData);
+				constexpr uint32_t dynamicAlignment = sizeof(UBODynamicData);
 				dynamic_aligned_size_ = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
 			}
 
@@ -76,7 +76,7 @@ namespace dmbrn
 
 		uint32_t registerObject()
 		{
-			uint32_t res = current_obj_offset_handle;
+			const uint32_t res = current_obj_offset_handle;
 			current_obj_count++;
 			current_obj_offset_handle += dynamic_aligned_size_;
 			return res;
@@ -127,7 +127,7 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				vk::DescriptorBufferInfo FinalBoneMtxs
+				const vk::DescriptorBufferInfo FinalBoneMtxs
 				{
 					*uniform_buffers_[i], 0, sizeof(UBODynamicData)
 				};

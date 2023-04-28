@@ -23,7 +23,7 @@ namespace dmbrn
 
 		Mesh mesh;
 		ShaderEffect* shader_ = nullptr;
-		uint32_t inGPU_transform_offset;
+		uint32_t inGPU_transform_offset=0;
 		bool need_GPU_state_update = true;
 	};
 }

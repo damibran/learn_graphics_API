@@ -14,7 +14,7 @@ namespace dmbrn
 		DepthBuffer(const vk::Extent2D& extent,
 		            const PhysicalDevice& physical_device, const LogicalDevice& device)
 		{
-			vk::Format depth_format = utils::findDepthFormat(physical_device);
+			const vk::Format depth_format = utils::findDepthFormat(physical_device);
 
 			createImage(device, physical_device, extent.width, extent.height, depth_format,
 			            vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment,

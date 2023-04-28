@@ -6,5 +6,6 @@ namespace dmbrn
 	{
 	public:
 		virtual void bindMaterialData(int frame, const vk::raii::CommandBuffer& command_buffer, vk::PipelineLayout layout)const = 0;
+		virtual ~Material()=default;
 	};
 }

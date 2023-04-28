@@ -269,7 +269,7 @@ namespace dmbrn
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
-			uint32_t imageIndex = newFrame(Singletons::device, frame);
+			const uint32_t imageIndex = newFrame(Singletons::device, frame);
 
 			beginDockSpace();
 
@@ -441,10 +441,10 @@ namespace dmbrn
 				ImGui::PopStyleVar(2);
 
 			// Submit the DockSpace
-			ImGuiIO& io = ImGui::GetIO();
+			const ImGuiIO& io = ImGui::GetIO();
 			if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
-				ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+				const ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 			}
 			else
@@ -497,7 +497,7 @@ namespace dmbrn
 		{
 			device->waitForFences(*frame.in_flight_fence, true, UINT64_MAX);
 
-			auto result = swap_chain_->acquireNextImage(UINT64_MAX, *frame.image_available_semaphore);
+			const auto result = swap_chain_->acquireNextImage(UINT64_MAX, *frame.image_available_semaphore);
 
 			device->resetFences(*frame.in_flight_fence);
 
@@ -516,7 +516,7 @@ namespace dmbrn
 		*/
 		void render(const LogicalDevice& device, const EditorFrame& frame, uint32_t imageIndex)
 		{
-			ImGuiIO& io = ImGui::GetIO();
+			const ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
 			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{

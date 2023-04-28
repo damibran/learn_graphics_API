@@ -45,8 +45,8 @@ namespace dmbrn
 	private:
 		double GetScaleFactor(double lastTimeStamp, double nextTimeStamp, double animationTime)
 		{
-			double midWayLength = animationTime - lastTimeStamp;
-			double framesDiff = nextTimeStamp - lastTimeStamp;
+			const double midWayLength = animationTime - lastTimeStamp;
+			const double framesDiff = nextTimeStamp - lastTimeStamp;
 			return midWayLength / framesDiff;
 		}
 
@@ -60,7 +60,7 @@ namespace dmbrn
 			if(ub == chnls.positions.end())
 				--ub;
 
-			double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
 			return glm::mix(lb->second, ub->second, factor);
 		}
 		
@@ -74,7 +74,7 @@ namespace dmbrn
 			if(ub == chnls.rotations.end())
 				--ub;
 		
-			double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
 		
 			return glm::slerp(lb->second, ub->second, static_cast<float>(factor));
 		}
@@ -89,7 +89,7 @@ namespace dmbrn
 			if(ub == chnls.scales.end())
 				--ub;
 		
-			double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
 		
 			return glm::mix(lb->second, ub->second, factor);
 		}

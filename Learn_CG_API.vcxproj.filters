@@ -27,9 +27,6 @@
     <ClCompile Include="Utils\AI_GLM_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditorUI\Sequencer\ImSequencer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader_push_const.vert" />

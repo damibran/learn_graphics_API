@@ -131,12 +131,12 @@ namespace dmbrn
 			drawControls();
 
 			bool ret = false;
-			ImGuiIO& io = ImGui::GetIO();
-			float mouse_x = io.MousePos.x;
-			float mouse_y = io.MousePos.y;
+			const ImGuiIO& io = ImGui::GetIO();
+			const float mouse_x = io.MousePos.x;
+			const float mouse_y = io.MousePos.y;
 
-			bool popupOpened = false;
-			int sequenceCount = sequence.getAnimationComponentCount();
+			const bool popupOpened = false;
+			const int sequenceCount = sequence.getAnimationComponentCount();
 			if (!sequenceCount)
 				return false;
 			ImGui::BeginGroup();
@@ -145,11 +145,11 @@ namespace dmbrn
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
-			float controlHeight = sequenceCount * ItemHeight;
+			const float controlHeight = sequenceCount * ItemHeight;
 			// TODO add expanded height
 			//for (int i = 0; i < sequenceCount; i++)
 			//	controlHeight += int(sequence.GetCustomHeight(i));
-			int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
+			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
 			// zoom in/out
 			frameBarPixelOffsets.x = ImLerp(frameBarPixelOffsets.x, frameBarPixelOffsetsTarget.x, 0.33f);
@@ -157,7 +157,7 @@ namespace dmbrn
 
 			firstFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
 			                    frameBarPixelOffsets.x / (canvas_size.x - legendWidth));
-			int lastFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
+			const int lastFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
 			                       frameBarPixelOffsets.y / (canvas_size.x - legendWidth));
 
 			float framePixelWidth = (canvas_size.x - legendWidth) / (lastFrame - firstFrame);
@@ -175,14 +175,14 @@ namespace dmbrn
 			else
 			{
 				// test scroll area
-				ImVec2 headerSize(canvas_size.x, ItemHeight);
-				ImVec2 scrollBarSize(canvas_size.x, 14.f);
+				const ImVec2 headerSize(canvas_size.x, ItemHeight);
+				const ImVec2 scrollBarSize(canvas_size.x, 14.f);
 
 				ImGui::InvisibleButton("topBar", headerSize);
 				draw_list->AddRectFilled(canvas_pos, canvas_pos + headerSize, 0xFFFF0000, 0);
 
-				ImVec2 childFramePos = ImGui::GetCursorScreenPos();
-				ImVec2 childFrameSize(canvas_size.x,
+				const ImVec2 childFramePos = ImGui::GetCursorScreenPos();
+				const ImVec2 childFrameSize(canvas_size.x,
 				                      canvas_size.y - 8.f - headerSize.y - scrollBarSize.y);
 
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
@@ -197,7 +197,7 @@ namespace dmbrn
 				draw_list->AddRectFilled(canvas_pos, canvas_pos + canvas_size, 0xFF242424, 0);
 
 				// current frame top
-				ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
+				const ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
 				// current frame  change
@@ -307,9 +307,9 @@ namespace dmbrn
 					unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
 
 					// TODO CustomHeight
-					size_t localCustomHeight = 0; // sequence.GetCustomHeight(i);
+					const size_t localCustomHeight = 0; // sequence.GetCustomHeight(i);
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
-					ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
+					const ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
 					if (!popupOpened && mouse_y >= pos.y && mouse_y < pos.y + (ItemHeight + localCustomHeight) &&
 						movingEntry.first == sequence.end() &&
 						mouse_x > contentMin.x && mouse_x < contentMin.x + canvas_size.x)
@@ -354,20 +354,20 @@ namespace dmbrn
 					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
-						float start = clip_it->first;
-						float end = clip_it->first + clip_it->second.duration_;
-						unsigned color = 0xFFAA8080;
+						const float start = clip_it->first;
+						const float end = clip_it->first + clip_it->second.duration_;
+						const unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
-						float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
+						const float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
 
-						ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+						const ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 						                    contentMin.y + ItemHeight * i + 1 + customHeight);
-						ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
-						ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
-						ImVec2 slotP3(pos.x + end * framePixelWidth + framePixelWidth,
+						const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
+						const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
+						const ImVec2 slotP3(pos.x + end * framePixelWidth + framePixelWidth,
 						              pos.y + ItemHeight - 2 + localCustomHeight);
-						unsigned int slotColor = color | 0xFF000000;
-						unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
+						const unsigned int slotColor = color | 0xFF000000;
+						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
 						if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth))
 						{
 							draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
@@ -383,7 +383,7 @@ namespace dmbrn
 							SEQUENCER_EDIT_STARTEND))
 						// TODOFOCUS && backgroundRect.Contains(io.MousePos))
 						{
-							ImRect rc = ImRect(slotP1, slotP2);
+							const ImRect rc = ImRect(slotP1, slotP2);
 							if (rc.Contains(io.MousePos))
 							{
 								draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
@@ -456,19 +456,19 @@ namespace dmbrn
 							"Animation_clip_DnD", ImGuiDragDropFlags_AcceptBeforeDelivery))
 						{
 							IM_ASSERT(payload->DataSize == sizeof(std::pair<Enttity, const AnimationClip*>));
-							auto payload_data = static_cast<std::pair<Enttity, const AnimationClip*>*>(payload->Data);
+							const auto payload_data = static_cast<std::pair<Enttity, const AnimationClip*>*>(payload->Data);
 
 							if (ent_it->first == payload_data->first)
 							{
 								if (payload->IsPreview())
 								{
-									float start = currentFrame;
-									float end = currentFrame + payload_data->second->duration_;
+									const float start = currentFrame;
+									const float end = currentFrame + payload_data->second->duration_;
 
-									ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+									const ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 									                    contentMin.y + ItemHeight * i + 1 + customHeight);
-									ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
-									ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
+									const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
+									const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
 									              pos.y + ItemHeight - 2);
 
 									draw_list->AddRectFilled(slotP1, slotP2, 0xFF885050, 2);
@@ -495,7 +495,7 @@ namespace dmbrn
 				if (movingEntry.first != sequence.end()) ///*backgroundRect.Contains(io.MousePos) && */
 				{
 					ImGui::SetNextFrameWantCaptureMouse(true);
-					float diffFrame = std::round((mouse_x - movingPos) / framePixelWidth);
+					const float diffFrame = std::round((mouse_x - movingPos) / framePixelWidth);
 					if (std::abs(diffFrame) > 0)
 					{
 						float start = movingEntry.second.value()->first;
@@ -525,7 +525,7 @@ namespace dmbrn
 				// draw cursor
 				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.mFrameMax))
 				{
-					float cursorOffset = contentMin.x +
+					const float cursorOffset = contentMin.x +
 						legendWidth +
 						(currentFrame - static_cast<float>(firstFrame)) * framePixelWidth +
 						framePixelWidth / 2 -
@@ -553,30 +553,30 @@ namespace dmbrn
 
 				// draw scroll bar
 				ImGui::InvisibleButton("scrollBar", scrollBarSize);
-				ImVec2 scrollBarMin = ImGui::GetItemRectMin();
-				ImVec2 scrollBarMax = ImGui::GetItemRectMax();
+				const ImVec2 scrollBarMin = ImGui::GetItemRectMin();
+				const ImVec2 scrollBarMax = ImGui::GetItemRectMax();
 
 				// ratio = number of frames visible in control / number to total frames
-				ImVec2 scrollBarA(scrollBarMin.x + legendWidth, scrollBarMin.y - 2);
-				ImVec2 scrollBarB(scrollBarMin.x + canvas_size.x, scrollBarMax.y - 1);
+				const ImVec2 scrollBarA(scrollBarMin.x + legendWidth, scrollBarMin.y - 2);
+				const ImVec2 scrollBarB(scrollBarMin.x + canvas_size.x, scrollBarMax.y - 1);
 				draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF222222, 0);
 
-				ImRect scrollBarRect(scrollBarA, scrollBarB);
-				bool inScrollBar = scrollBarRect.Contains(io.MousePos);
+				const ImRect scrollBarRect(scrollBarA, scrollBarB);
+				const bool inScrollBar = scrollBarRect.Contains(io.MousePos);
 
 				draw_list->AddRectFilled(scrollBarA, scrollBarB, 0xFF101010, 8);
 
-				ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
-				ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
+				const ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
+				const ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
 				                  scrollBarMax.y - 2);
 				draw_list->AddRectFilled(scrollBarC, scrollBarD,
 				                         (inScrollBar || MovingScrollBar) ? 0xFF606060 : 0xFF505050, 6);
 
-				ImRect barHandleLeft(scrollBarC, ImVec2(scrollBarC.x + 14, scrollBarD.y));
-				ImRect barHandleRight(ImVec2(scrollBarD.x - 14, scrollBarC.y), scrollBarD);
+				const ImRect barHandleLeft(scrollBarC, ImVec2(scrollBarC.x + 14, scrollBarD.y));
+				const ImRect barHandleRight(ImVec2(scrollBarD.x - 14, scrollBarC.y), scrollBarD);
 
-				bool onLeft = barHandleLeft.Contains(io.MousePos);
-				bool onRight = barHandleRight.Contains(io.MousePos);
+				const bool onLeft = barHandleLeft.Contains(io.MousePos);
+				const bool onRight = barHandleRight.Contains(io.MousePos);
 
 				draw_list->AddRectFilled(barHandleLeft.Min, barHandleLeft.Max,
 				                         (onLeft || sizingLBar) ? 0xFFAAAAAA : 0xFF666666, 6);
@@ -603,7 +603,7 @@ namespace dmbrn
 					panningView = false;
 				}
 
-				ImRect scrollBarThumb(scrollBarC, scrollBarD);
+				const ImRect scrollBarThumb(scrollBarC, scrollBarD);
 				if (sizingRBar)
 				{
 					if (!io.MouseDown[0])

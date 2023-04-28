@@ -16,9 +16,9 @@ namespace dmbrn
 		static inline constexpr uint8_t max_count_of_bones_per_vrtx = 4;
 		static inline constexpr uint16_t max_count_of_bones = 256;
 
-		glm::vec3 pos;
-		glm::vec3 normal;
-		glm::vec2 texCoord;
+		glm::vec3 pos={0.f,0.f,0.f};
+		glm::vec3 normal={0.f,0.f,0.f};
+		glm::vec2 texCoord={0.f,0.f};
 		uint32_t bone_IDs[max_count_of_bones_per_vrtx] = {0,0,0,0};
 		float bone_weights[max_count_of_bones_per_vrtx]={0,0,0,0};
 
@@ -32,7 +32,7 @@ namespace dmbrn
 			return bindingDescription;
 		}
 
-		static std::array<vk::VertexInputAttributeDescription, 5> getAttributeDescriptions()
+		constexpr static std::array<vk::VertexInputAttributeDescription, 5> getAttributeDescriptions()
 		{
 			std::array<vk::VertexInputAttributeDescription, 5> attributeDescriptions{};
 

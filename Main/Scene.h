@@ -179,7 +179,7 @@ namespace dmbrn
 					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 						--clip_it;
 
-					float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
+					const float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
 					                              clip_it->second.duration_);
 
 					clip_it->second.updateTransforms(local_time, frame);
@@ -307,7 +307,7 @@ namespace dmbrn
 			}
 
 		private:
-			static inline std::unordered_map<aiNode*, Enttity> ainode_to_enttity;
+			static inline std::unordered_map<const aiNode*, Enttity> ainode_to_enttity;
 			static inline std::unordered_map<std::string, Enttity> anim_node_name_to_enttity;
 			static inline bool with_bones_ = false;
 			static inline bool with_anim_ = false;
@@ -322,16 +322,16 @@ namespace dmbrn
 					AnimationClip clip;
 
 					// TODO make it parametarazible or deduced from file 
-					double sample_period = 1. / 30.;
+					const double sample_period = 1. / 30.;
 
 					clip.name = anim->mName.C_Str();
 					clip.channels.reserve(anim->mNumChannels);
 
 					for (unsigned j = 0; j < anim->mNumChannels; ++j)
 					{
-						aiNodeAnim* node_anim = anim->mChannels[j];
+						const aiNodeAnim* node_anim = anim->mChannels[j];
 
-						Enttity node_entt = anim_node_name_to_enttity[node_anim->mNodeName.C_Str()];
+						const Enttity node_entt = anim_node_name_to_enttity[node_anim->mNodeName.C_Str()];
 
 						AnimationChannels channels;
 
@@ -339,7 +339,7 @@ namespace dmbrn
 
 						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
 						{
-							aiVectorKey pos_k = node_anim->mPositionKeys[k];
+							const aiVectorKey pos_k = node_anim->mPositionKeys[k];
 							channels.positions.insert({
 								static_cast<float>(std::round(pos_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(pos_k.mValue)
@@ -348,7 +348,7 @@ namespace dmbrn
 
 						for (unsigned k = 0; k < node_anim->mNumRotationKeys; ++k)
 						{
-							aiQuatKey rot_k = node_anim->mRotationKeys[k];
+							const aiQuatKey rot_k = node_anim->mRotationKeys[k];
 							channels.rotations.insert({
 								static_cast<float>(std::round(rot_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(rot_k.mValue)
@@ -357,18 +357,18 @@ namespace dmbrn
 
 						for (unsigned k = 0; k < node_anim->mNumScalingKeys; ++k)
 						{
-							aiVectorKey scale_k = node_anim->mScalingKeys[k];
+							const aiVectorKey scale_k = node_anim->mScalingKeys[k];
 							channels.scales.insert({
 									static_cast<float>(std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(scale_k.mValue)
 							});
 						}
 
-						float min = std::min(channels.positions.begin()->first,
+						const float min = std::min(channels.positions.begin()->first,
 						                        std::min(channels.rotations.begin()->first,
 						                                 channels.scales.begin()->first));
 
-						float max = std::max((--channels.positions.end())->first,
+						const float max = std::max((--channels.positions.end())->first,
 						                        std::max((--channels.rotations.end())->first,
 						                                 (--channels.scales.end())->first));
 
@@ -385,13 +385,13 @@ namespace dmbrn
 			{
 				for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
 				{
-					for (unsigned i = 0; i < ai_scene->mNumAnimations; ++i)
+					for (unsigned j = 0; j < ai_scene->mNumAnimations; ++j)
 					{
-						aiAnimation* anim = ai_scene->mAnimations[i];
+						const aiAnimation* anim = ai_scene->mAnimations[j];
 
-						for (unsigned j = 0; j < anim->mNumChannels; ++j)
+						for (unsigned k = 0; k < anim->mNumChannels; ++k)
 						{
-							aiNodeAnim* node_anim = anim->mChannels[j];
+							const aiNodeAnim* node_anim = anim->mChannels[k];
 							if (anim_node_name_to_enttity.find(node_anim->mNodeName.C_Str()) ==
 								anim_node_name_to_enttity.end())
 								anim_node_name_to_enttity.insert({node_anim->mNodeName.C_Str(), Enttity{}});
@@ -402,7 +402,7 @@ namespace dmbrn
 
 			static void collectAnimNodeToEnttity(Enttity root_ent, Scene& scene)
 			{
-				RelationshipComponent& root_rc = root_ent.getComponent<RelationshipComponent>();
+				const RelationshipComponent& root_rc = root_ent.getComponent<RelationshipComponent>();
 
 				Enttity cur_child = root_rc.first;
 				while (cur_child)
@@ -413,15 +413,15 @@ namespace dmbrn
 				}
 			}
 
-			static void populateTree(Scene& scene, aiNode* ai_node, Enttity curent)
+			static void populateTree(Scene& scene,const aiNode* ai_node, Enttity curent)
 			{
 				ainode_to_enttity[ai_node] = curent;
 
 				for (unsigned int i = 0; i < ai_node->mNumChildren; i++)
 				{
-					aiNode* ai_child = ai_node->mChildren[i];
+					const aiNode* ai_child = ai_node->mChildren[i];
 					std::string child_name = ai_child->mName.C_Str();
-					Enttity child = scene.addNewEntityAsChild(curent, child_name);
+					const Enttity child = scene.addNewEntityAsChild(curent, child_name);
 					importNodeTransform(child, ai_child);
 
 					if (with_anim_)
@@ -434,7 +434,7 @@ namespace dmbrn
 				}
 			}
 
-			static void processNodeData(Scene& scene, aiNode* ai_node, const aiScene* ai_scene,
+			static void processNodeData(Scene& scene, const aiNode* ai_node, const aiScene* ai_scene,
 			                            const std::string& directory,
 			                            const std::string& parentName, Enttity parent)
 			{
@@ -445,11 +445,11 @@ namespace dmbrn
 					// process each mesh located at the current node
 					for (unsigned int i = 0; i < ai_node->mNumMeshes; i++)
 					{
-						aiMesh* mesh = ai_scene->mMeshes[ai_node->mMeshes[i]];
+						const aiMesh* mesh = ai_scene->mMeshes[ai_node->mMeshes[i]];
 						std::string mesh_name = name_this + "." + std::string(mesh->mName.C_Str());
 
-						aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
-						Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
+						const aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
+						const Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
 						if (mesh->HasBones() && with_bones_)
 						{
@@ -499,7 +499,7 @@ namespace dmbrn
 				}
 			}
 
-			static void importNodeTransform(Enttity ent, aiNode* ainode)
+			static void importNodeTransform(Enttity ent, const aiNode* ainode)
 			{
 				TransformComponent& trans = ent.getComponent<TransformComponent>();
 
@@ -526,15 +526,14 @@ namespace dmbrn
 				this_trans.dirty[frame] = false;
 
 				const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
-				glm::mat4 parent_trans;
+				glm::mat4 parent_trans= glm::mat4(1.0f);
 
+				// if this is not a root
 				if (ent_rc.parent)
 				{
 					parent_trans = ent_rc.parent.getComponent<TransformComponent>().globalTransformMatrix;
 					//ent_rc.parent.getComponent<TransformComponent>().getMatrix();
 				}
-				else // this is root
-					parent_trans = glm::mat4(1.0f);
 
 				editedTraverseTree(ent, parent_trans, frame);
 			}
@@ -556,7 +555,7 @@ namespace dmbrn
 		void editedTraverseTree(Enttity ent, glm::mat4 parent_trans_mtx, uint32_t frame)
 		{
 			TransformComponent& ent_tc = ent.getComponent<TransformComponent>();
-			glm::mat4 this_matrix = parent_trans_mtx * ent_tc.getMatrix();
+			const glm::mat4 this_matrix = parent_trans_mtx * ent_tc.getMatrix();
 
 			ent_tc.edited[frame] = false;
 			ent_tc.dirty[frame] = false;

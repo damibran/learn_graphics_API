@@ -36,7 +36,7 @@ namespace dmbrn
 		}
 
 		std::vector<unsigned char> data;
-		int width, height, comp_per_pix;
+		int width=0, height=0, comp_per_pix=0;
 	};
 
 }

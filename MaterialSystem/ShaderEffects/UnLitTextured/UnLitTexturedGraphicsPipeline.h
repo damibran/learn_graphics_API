@@ -106,7 +106,7 @@ namespace dmbrn
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
-				{}, 2, shaderStages,
+				{}, shaderStages,
 				&vertexInputInfo, &inputAssembly, {},
 				&viewportState, &rasterizer, &multisampling,
 				&depth_stencil_info, &colorBlending, &dynamicState,
@@ -210,7 +210,7 @@ namespace dmbrn
 
 			const vk::GraphicsPipelineCreateInfo pipelineInfo
 			{
-				{}, 2, shaderStages,
+				{}, shaderStages,
 				&vertexInputInfo, &inputAssembly, {},
 				&viewportState, &rasterizer, &multisampling,
 				&depth_stencil_info, &colorBlending, &dynamicState,

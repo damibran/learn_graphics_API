@@ -82,7 +82,7 @@ namespace dmbrn
 			SkeletalMeshRenderData(const std::string& mesh_name, const aiMesh* mesh):
 				use_this_mesh_({mesh_name})
 			{
-				auto [vertices,indices] = getDataFromMesh(mesh);
+				const auto&& [vertices,indices] = getDataFromMesh(mesh);
 				indices_count = static_cast<uint32_t>(indices.size());
 
 				vertex_buffer_ = HostLocalBuffer(vertices, vk::BufferUsageFlagBits::eVertexBuffer);
@@ -141,14 +141,14 @@ namespace dmbrn
 				// iterate all bones
 				for (unsigned int i = 0; i < mesh->mNumBones; ++i)
 				{
-					aiBone* bone = mesh->mBones[i];
+					const aiBone* bone = mesh->mBones[i];
 
 					bones_offset_mtxs.push_back(toGlm(bone->mOffsetMatrix));
 
 					// iterate all weights, add bone id (i) and weight to corresponding vertex
 					for (unsigned int j = 0; j < bone->mNumWeights; ++j)
 					{
-						aiVertexWeight vw = bone->mWeights[j];
+						const aiVertexWeight vw = bone->mWeights[j];
 
 						unsigned int cur_vrtx_bone_count = vertex_bone_count[vw.mVertexId]++;
 						// save values for this bone move to next after ((++))

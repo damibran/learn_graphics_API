@@ -10,7 +10,7 @@ namespace dmbrn
 		ImGuiRaii(const ImGUIRenderPass& render_pass):
 			imguiPool(nullptr)
 		{
-			vk::DescriptorPoolSize pool_sizes[] =
+			constexpr vk::DescriptorPoolSize pool_sizes[] =
 			{
 				{vk::DescriptorType::eSampler, 1000},
 				{vk::DescriptorType::eCombinedImageSampler, 1000},
@@ -25,7 +25,7 @@ namespace dmbrn
 				{vk::DescriptorType::eInputAttachment, 1000}
 			};
 
-			vk::DescriptorPoolCreateInfo pool_info
+			const vk::DescriptorPoolCreateInfo pool_info
 			{
 				{vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet},
 				1000, pool_sizes

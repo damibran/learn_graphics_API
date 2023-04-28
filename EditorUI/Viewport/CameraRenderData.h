@@ -58,12 +58,11 @@ namespace dmbrn
 
 			for (uint32_t i = 0; i < device.MAX_FRAMES_IN_FLIGHT; i++)
 			{
-				vk::DescriptorBufferInfo bufferInfo
+				const vk::DescriptorBufferInfo bufferInfo
 				{
 					**uniform_buffers_[i], 0, sizeof(UniformBufferObject)
 				};
-
-
+				
 				std::array<vk::WriteDescriptorSet, 1> descriptorWrites{};
 
 				descriptorWrites[0] = vk::WriteDescriptorSet

@@ -57,12 +57,12 @@ namespace dmbrn
 			const TagComponent& tag = enttity.getComponent<TagComponent>();
 			const RelationshipComponent& relation_comp = enttity.getComponent<RelationshipComponent>();
 
-			ImGuiTreeNodeFlags flags =
+			const ImGuiTreeNodeFlags flags =
 				(selected_ == enttity ? ImGuiTreeNodeFlags_Selected : 0) |
 				(!relation_comp.first ? ImGuiTreeNodeFlags_Leaf : 0) |
 				ImGuiTreeNodeFlags_OpenOnArrow;
 
-			bool opened = ImGui::TreeNodeEx(
+			const bool opened = ImGui::TreeNodeEx(
 				reinterpret_cast<const void*>(static_cast<uint64_t>(static_cast<uint32_t>(enttity))),
 				flags, tag.tag.c_str());
 

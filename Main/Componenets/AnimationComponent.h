@@ -35,6 +35,7 @@ namespace dmbrn
 			while(!animation_clips.insert(new_clip).second)
 			{
 				new_clip.name=new_clip.name+std::to_string(i);
+				++i;
 			}
 		}
 
@@ -47,6 +48,7 @@ namespace dmbrn
 				while(!animation_clips.insert(new_clip).second)
 				{
 					new_clip.name=new_clip.name+std::to_string(i);
+					++i;
 				}
 			}
 		}

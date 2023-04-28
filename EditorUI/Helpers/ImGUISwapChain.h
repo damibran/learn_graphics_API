@@ -35,7 +35,7 @@ namespace dmbrn
 			height = rec_size.second;
 			while (width == 0 || height == 0)
 			{
-				auto rec_size = Singletons::window.getFrameBufferSize();
+				const auto rec_size = Singletons::window.getFrameBufferSize();
 				width = rec_size.first;
 				height = rec_size.second;
 				glfwWaitEvents();
@@ -97,7 +97,7 @@ namespace dmbrn
 				PhysicalDevice::querySurfacePresentModes(*physical_device, surface));
 			const vk::Extent2D extent = utils::chooseSwapExtent(capabilities, window);
 
-			uint32_t imageCount = utils::capabilitiesGetImageCount(physical_device, surface);
+			const uint32_t imageCount = utils::capabilitiesGetImageCount(physical_device, surface);
 
 			vk::SwapchainCreateInfoKHR createInfo{}; // very easy to miss something... may be redo
 			createInfo.surface = **surface;

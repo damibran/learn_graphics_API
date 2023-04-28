@@ -70,7 +70,7 @@ namespace dmbrn
 		}
 
 	private:
-		void copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size)
+		void copyBuffer(const vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size)
 		{
 			vk::raii::CommandBuffer commandBuffer = Singletons::command_pool.
 				beginSingleTimeCommands(Singletons::device);
