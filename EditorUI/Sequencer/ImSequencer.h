@@ -83,7 +83,7 @@ namespace dmbrn
 
 		bool panningView = false;
 		ImVec2 panningViewSource;
-		int panningViewFrame;
+		int panningViewFrame=0;
 
 		bool sizingRBar = false;
 		bool sizingLBar = false;
@@ -187,7 +187,7 @@ namespace dmbrn
 
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
 				ImGui::BeginChildFrame(889, childFrameSize);
-				ImGui::InvisibleButton("contentBar", ImVec2(canvas_size.x, float(controlHeight)));
+				ImGui::InvisibleButton("contentBar", ImVec2(canvas_size.x, controlHeight));
 
 				const ImVec2 contentMin = ImGui::GetItemRectMin();
 				const ImVec2 contentMax = ImGui::GetItemRectMax();
@@ -201,7 +201,7 @@ namespace dmbrn
 				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
 				// current frame  change
-				if (!MovingCurrentFrame && !playing && !MovingScrollBar && movingEntry.first == sequence.end() &&
+				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
 					sequenceOptions &
 					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])
 				{
@@ -212,8 +212,8 @@ namespace dmbrn
 				{
 					if (frameCount)
 					{
-						currentFrame = std::round((io.MousePos.x - topRect.Min.x) /
-							framePixelWidth) + firstFrame;
+						currentFrame = std::floorf((io.MousePos.x - topRect.Min.x) /
+							framePixelWidth) + static_cast<float>(firstFrame);
 					}
 					if (!io.MouseDown[0])
 						MovingCurrentFrame = false;
@@ -223,10 +223,7 @@ namespace dmbrn
 					currentFrame = currentFrame + 30 * d_time;
 
 				// looping ?
-				if (currentFrame < sequence.mFrameMin)
-					currentFrame = sequence.mFrameMin;
-				if (currentFrame >= sequence.mFrameMax)
-					currentFrame = sequence.mFrameMax;
+				currentFrame = ImClamp(currentFrame, static_cast<float>(sequence.mFrameMin),static_cast<float>(sequence.mFrameMax));
 
 				//header
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
@@ -244,12 +241,12 @@ namespace dmbrn
 
 				auto drawLine = [&](int i, float regionHeight)
 				{
-					bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
-					bool halfIndex = (i % halfModFrameCount) == 0;
-					float px = canvas_pos.x + i * framePixelWidth + legendWidth -
+					const bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
+					const bool halfIndex = (i % halfModFrameCount) == 0;
+					const float px = canvas_pos.x + i * framePixelWidth + legendWidth -
 						static_cast<float>(firstFrame) * framePixelWidth;
-					float tiretStart = baseIndex ? 4.f : (halfIndex ? 10.f : 14.f);
-					float tiretEnd = baseIndex ? regionHeight : ItemHeight;
+					const float tiretStart = baseIndex ? 4.f : (halfIndex ? 10.f : 14.f);
+					const float tiretEnd = baseIndex ? regionHeight : ItemHeight;
 
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
@@ -264,16 +261,16 @@ namespace dmbrn
 					{
 						char tmps[512];
 						ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", i);
-						draw_list->AddText(ImVec2((float)px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
+						draw_list->AddText(ImVec2(px + 3.f, canvas_pos.y), 0xFFBBBBBB, tmps);
 					}
 				};
 
 				auto drawLineInContentRect = [&](int i, int /*regionHeight*/)
 				{
-					float px = canvas_pos.x + i * framePixelWidth + legendWidth - 
+					const float px = canvas_pos.x + i * framePixelWidth + legendWidth - 
 						static_cast<float>(firstFrame) * framePixelWidth;
-					float tiretStart = contentMin.y;
-					float tiretEnd = contentMax.y;
+					const float tiretStart = contentMin.y;
+					const float tiretEnd = contentMax.y;
 
 					if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
 					{
@@ -293,7 +290,7 @@ namespace dmbrn
 				draw_list->PushClipRect(childFramePos, childFramePos + childFrameSize, true);
 
 				// draw item names in the legend rect on the left
-				size_t customHeight = 0;
+				float customHeight = 0;
 				int i = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
@@ -324,7 +321,7 @@ namespace dmbrn
 					customHeight += localCustomHeight;
 				}
 
-				draw_list->PushClipRect(childFramePos + ImVec2(float(legendWidth), 0.f), childFramePos + childFrameSize,
+				draw_list->PushClipRect(childFramePos + ImVec2(legendWidth, 0.f), childFramePos + childFrameSize,
 				                        true);
 
 				// vertical frame lines in content area
@@ -361,9 +358,9 @@ namespace dmbrn
 						float end = clip_it->first + clip_it->second.duration_;
 						unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
-						size_t localCustomHeight = 0; //sequence.GetCustomHeight(i);
+						float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
 
-						ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrame * framePixelWidth,
+						ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 						                    contentMin.y + ItemHeight * i + 1 + customHeight);
 						ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 						ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
@@ -468,7 +465,7 @@ namespace dmbrn
 									float start = currentFrame;
 									float end = currentFrame + payload_data->second->duration_;
 
-									ImVec2 pos = ImVec2(contentMin.x + legendWidth - firstFrame * framePixelWidth,
+									ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 									                    contentMin.y + ItemHeight * i + 1 + customHeight);
 									ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 									ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
@@ -526,18 +523,18 @@ namespace dmbrn
 				}
 
 				// draw cursor
-				if (currentFrame >= firstFrame && currentFrame <= sequence.mFrameMax)
+				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.mFrameMax))
 				{
 					float cursorOffset = contentMin.x +
 						legendWidth +
-						(currentFrame - firstFrame) * framePixelWidth +
+						(currentFrame - static_cast<float>(firstFrame)) * framePixelWidth +
 						framePixelWidth / 2 -
 						cursorWidth * 0.5f;
 					draw_list->AddLine(ImVec2(cursorOffset, canvas_pos.y), ImVec2(cursorOffset, contentMax.y),
 					                   0xA02A2AFF,
 					                   cursorWidth);
 					char tmps[512];
-					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", currentFrame);
+					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d",static_cast<int>(currentFrame));
 					draw_list->AddText(ImVec2(cursorOffset + 10, canvas_pos.y + 2), 0xFF2A2AFF, tmps);
 				}
 

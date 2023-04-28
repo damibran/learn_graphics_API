@@ -489,8 +489,8 @@ namespace dmbrn
 				sequencer_.draw(d_time,Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
 					| Sequencer::SEQUENCER_COPYPASTE | Sequencer::SEQUENCER_CHANGE_FRAME);
 
-				ImGui::End();
 			}
+			ImGui::End();
 		}
 
 		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)

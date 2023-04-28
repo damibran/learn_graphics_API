@@ -36,6 +36,7 @@ namespace dmbrn
 
 			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
 			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae",true,true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
