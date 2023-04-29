@@ -3,6 +3,7 @@
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
 #include "Componenets/TagComponent.h"
+#include "Componenets/SkeletonComponent.h"
 #include "Componenets/BoneComponenet.h"
 #include "Componenets/SkeletalModelComponent.h"
 #include "Utils/AI_GLM_utils.h"
@@ -34,9 +35,9 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
-			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
-			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae",true,true);
+			//ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
+			ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
 
@@ -143,20 +144,22 @@ namespace dmbrn
 				for (auto entt : view)
 				{
 					SkeletalModelComponent& skeletal_comp = view.get<SkeletalModelComponent>(entt);
+					SkeletonComponent& skeleton_component = skeletal_comp.skeleton_ent.getComponent<
+						SkeletonComponent>();
 
 					// if is visible
-					for (Enttity enttity : skeletal_comp.bone_enttities)
+					for (Enttity enttity : skeleton_component.bone_enttities)
 					{
 						auto [bone, trans] = enttity.getComponent<BoneComponent, TransformComponent>();
 
 						if (bone.need_gpu_state_update)
 						{
 							bone.need_gpu_state_update = false;
-							auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data + skeletal_comp.
-								in_GPU_mtxs_offset);
-							ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * skeletal_comp.mesh.
-								render_data_->
-								getOffsetMtxs()[bone.bone_ind]; //glm::mat4(1.f);//
+
+							auto ubo_data = reinterpret_cast<PerSkeletonData::UBODynamicData*>(data +
+								skeleton_component.in_GPU_mtxs_offset);
+
+							ubo_data->model[bone.bone_ind] = trans.globalTransformMatrix * bone.offset_mat;
 						}
 					}
 				}
@@ -180,7 +183,7 @@ namespace dmbrn
 						--clip_it;
 
 					const float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
-					                              clip_it->second.duration_);
+					                                    clip_it->second.duration_);
 
 					clip_it->second.updateTransforms(local_time, frame);
 				}
@@ -359,18 +362,18 @@ namespace dmbrn
 						{
 							const aiVectorKey scale_k = node_anim->mScalingKeys[k];
 							channels.scales.insert({
-									static_cast<float>(std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
+								static_cast<float>(std::round(scale_k.mTime / anim->mTicksPerSecond / sample_period)),
 								toGlm(scale_k.mValue)
 							});
 						}
 
 						const float min = std::min(channels.positions.begin()->first,
-						                        std::min(channels.rotations.begin()->first,
-						                                 channels.scales.begin()->first));
+						                           std::min(channels.rotations.begin()->first,
+						                                    channels.scales.begin()->first));
 
 						const float max = std::max((--channels.positions.end())->first,
-						                        std::max((--channels.rotations.end())->first,
-						                                 (--channels.scales.end())->first));
+						                           std::max((--channels.rotations.end())->first,
+						                                    (--channels.scales.end())->first));
 
 						clip.duration_ = max - min;
 
@@ -413,7 +416,7 @@ namespace dmbrn
 				}
 			}
 
-			static void populateTree(Scene& scene,const aiNode* ai_node, Enttity curent)
+			static void populateTree(Scene& scene, const aiNode* ai_node, Enttity curent)
 			{
 				ainode_to_enttity[ai_node] = curent;
 
@@ -454,24 +457,70 @@ namespace dmbrn
 						if (mesh->HasBones() && with_bones_)
 						{
 							// import as skeletal mesh
-							std::vector<Enttity> bone_entts;
-							for (unsigned j = 0; j < mesh->mNumBones; ++j)
+
+							const aiNode* arm_node;
+							Enttity arm_ent;
+							std::unordered_map<uint32_t, uint32_t> local_to_global_bone_ind;
+
+							assert(mesh->mBones[0]);
+							arm_node = mesh->mBones[0]->mArmature;
+							arm_ent = ainode_to_enttity[arm_node];
+
+							SkeletonComponent* skeleton_comp = arm_ent.tryGetComponent<SkeletonComponent>();
+
+							if (skeleton_comp)
 							{
-								aiBone* bone = mesh->mBones[j];
+								uint32_t bone_ent_end = skeleton_comp->bone_enttities.size();
+								std::vector<Enttity> bone_entts;
 
-								Enttity entt = ainode_to_enttity[bone->mNode];
-								entt.addComponent<BoneComponent>(j);
+								for (unsigned j = 0; j < mesh->mNumBones; ++j)
+								{
+									aiBone* bone = mesh->mBones[j];
 
-								bone_entts.push_back(entt);
+									Enttity entt = ainode_to_enttity[bone->mNode];
+
+									if (auto bone_comp = entt.tryGetComponent<BoneComponent>())
+									{
+										local_to_global_bone_ind[j] = bone_comp->bone_ind;
+									}
+									else
+									{
+										local_to_global_bone_ind[j] = bone_ent_end;
+										entt.addComponent<BoneComponent>(toGlm(bone->mOffsetMatrix), bone_ent_end++);
+										bone_entts.push_back(entt);
+									}
+								}
+								
+								skeleton_comp->bone_enttities.insert(skeleton_comp->bone_enttities.end(),
+								                                     std::make_move_iterator(bone_entts.begin()),
+								                                     std::make_move_iterator(bone_entts.end()));
+							}
+							else
+							{
+								std::vector<Enttity> bone_entts;
+								for (unsigned j = 0; j < mesh->mNumBones; ++j)
+								{
+									aiBone* bone = mesh->mBones[j];
+
+									Enttity entt = ainode_to_enttity[bone->mNode];
+									entt.addComponent<BoneComponent>(toGlm(bone->mOffsetMatrix), j);
+									local_to_global_bone_ind[j] = j;
+
+									bone_entts.push_back(entt);
+								}
+
+								arm_ent.addComponent<SkeletonComponent>(std::move(bone_entts));
 							}
 
 							std::string ent_mesh_name = std::string(mesh->mName.C_Str()) + ":Mesh";
 
 							Enttity new_entty = scene.addNewEntityAsChild(parent, ent_mesh_name);
 
-							new_entty.addComponent<SkeletalModelComponent>(
-								SkeletalMesh(material, mesh_name, mesh), bone_entts,
-								&Renderer::un_lit_textured
+							new_entty.addComponent<SkeletalModelComponent>(arm_ent,
+							                                               SkeletalMesh(
+								                                               material, mesh_name, mesh,
+								                                               local_to_global_bone_ind),
+							                                               &Renderer::un_lit_textured
 							);
 						}
 						else if (!mesh->HasBones() || !with_bones_)
@@ -526,7 +575,7 @@ namespace dmbrn
 				this_trans.dirty[frame] = false;
 
 				const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
-				glm::mat4 parent_trans= glm::mat4(1.0f);
+				glm::mat4 parent_trans = glm::mat4(1.0f);
 
 				// if this is not a root
 				if (ent_rc.parent)

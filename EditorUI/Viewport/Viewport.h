@@ -185,7 +185,7 @@ namespace dmbrn
 				SkeletalModelComponent& skeletal_model = skeletal_group.get<
 					SkeletalModelComponent>(entity);
 				skeletal_model.getShader()->addToRenderQueue({
-					&skeletal_model.mesh, skeletal_model.in_GPU_mtxs_offset
+					&skeletal_model.mesh, skeletal_model.skeleton_ent.getComponent<SkeletonComponent>().in_GPU_mtxs_offset
 				});
 			}
 

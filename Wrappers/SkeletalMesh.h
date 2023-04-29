@@ -26,10 +26,11 @@ namespace dmbrn
 
 		const Material* material_ = nullptr;
 
-		SkeletalMesh(const Material* material, const std::string& full_mesh_name, const aiMesh* mesh)
+		SkeletalMesh(const Material* material, const std::string& full_mesh_name, const aiMesh* mesh,
+		             const std::unordered_map<uint32_t, uint32_t>& local_to_global_bone_ind)
 		{
 			material_ = material;
-			render_data_ = SkeletalMeshRenderData::GetRenderDataPtr(full_mesh_name, mesh);
+			render_data_ = SkeletalMeshRenderData::GetRenderDataPtr(full_mesh_name, mesh, local_to_global_bone_ind);
 		}
 
 		void bind(const vk::raii::CommandBuffer& command_buffer) const
@@ -46,7 +47,9 @@ namespace dmbrn
 		{
 			friend class SkeletalMesh;
 		public:
-			static SkeletalMeshRenderData* GetRenderDataPtr(const std::string& full_mesh_name, const aiMesh* mesh)
+			static SkeletalMeshRenderData* GetRenderDataPtr(const std::string& full_mesh_name, const aiMesh* mesh,
+			                                                const std::unordered_map<uint32_t, uint32_t>&
+			                                                local_to_global_bone_ind)
 			{
 				std::vector<aiVector3D> temp;
 				std::insert_iterator insrt_it{temp, temp.begin()};
@@ -54,7 +57,9 @@ namespace dmbrn
 
 				auto it = registry_.find(temp);
 				if (it == registry_.end())
-					it = registry_.emplace(temp, SkeletalMeshRenderData{full_mesh_name, mesh}).first;
+					it = registry_.emplace(temp, SkeletalMeshRenderData{
+						                       full_mesh_name, mesh, local_to_global_bone_ind
+					                       }).first;
 				else
 					it->second.use_this_mesh_.push_back(full_mesh_name);
 
@@ -66,23 +71,18 @@ namespace dmbrn
 				return registry_.size();
 			}
 
-			const std::vector<glm::mat4>& getOffsetMtxs() const
-			{
-				return bones_offset_mtxs;
-			}
-
 		private:
 			static inline std::unordered_map<std::vector<aiVector3D>, SkeletalMeshRenderData> registry_;
 			uint32_t indices_count;
-			std::vector<glm::mat4> bones_offset_mtxs;
 			std::vector<std::string> use_this_mesh_;
 			HostLocalBuffer<BonedVertex> vertex_buffer_;
 			HostLocalBuffer<uint16_t> index_buffer_;
 
-			SkeletalMeshRenderData(const std::string& mesh_name, const aiMesh* mesh):
+			SkeletalMeshRenderData(const std::string& mesh_name, const aiMesh* mesh,
+			                       const std::unordered_map<uint32_t, uint32_t>& local_to_global_bone_ind):
 				use_this_mesh_({mesh_name})
 			{
-				const auto&& [vertices,indices] = getDataFromMesh(mesh);
+				const auto&& [vertices,indices] = getDataFromMesh(mesh, local_to_global_bone_ind);
 				indices_count = static_cast<uint32_t>(indices.size());
 
 				vertex_buffer_ = HostLocalBuffer(vertices, vk::BufferUsageFlagBits::eVertexBuffer);
@@ -90,7 +90,8 @@ namespace dmbrn
 				index_buffer_ = HostLocalBuffer(indices, vk::BufferUsageFlagBits::eIndexBuffer);
 			}
 
-			std::pair<std::vector<BonedVertex>, std::vector<uint16_t>> getDataFromMesh(const aiMesh* mesh)
+			std::pair<std::vector<BonedVertex>, std::vector<uint16_t>> getDataFromMesh(
+				const aiMesh* mesh, const std::unordered_map<uint32_t, uint32_t>& local_to_global_bone_ind)
 			{
 				std::vector<BonedVertex> vertices;
 				std::vector<unsigned int> vertex_bone_count(mesh->mNumVertices, 0);
@@ -143,8 +144,6 @@ namespace dmbrn
 				{
 					const aiBone* bone = mesh->mBones[i];
 
-					bones_offset_mtxs.push_back(toGlm(bone->mOffsetMatrix));
-
 					// iterate all weights, add bone id (i) and weight to corresponding vertex
 					for (unsigned int j = 0; j < bone->mNumWeights; ++j)
 					{
@@ -155,7 +154,7 @@ namespace dmbrn
 
 						assert(cur_vrtx_bone_count<BonedVertex::max_count_of_bones_per_vrtx);
 
-						vertices[vw.mVertexId].bone_IDs[cur_vrtx_bone_count] = i;
+						vertices[vw.mVertexId].bone_IDs[cur_vrtx_bone_count] = local_to_global_bone_ind.at(i);
 						vertices[vw.mVertexId].bone_weights[cur_vrtx_bone_count] = vw.mWeight;
 					}
 				}

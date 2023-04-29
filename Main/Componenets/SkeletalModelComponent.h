@@ -10,11 +10,10 @@ namespace dmbrn
 	{
 		SkeletalModelComponent() = default;
 
-		SkeletalModelComponent(SkeletalMesh&& mesh, std::vector<Enttity> bone_entts,
+		SkeletalModelComponent(Enttity skel_ent, SkeletalMesh&& mesh,
 		                       ShaderEffect* shader = nullptr) :
-			in_GPU_mtxs_offset(Renderer::per_skeleton_data_.registerObject()),
+			skeleton_ent(skel_ent),
 			mesh(std::move(mesh)),
-			bone_enttities(bone_entts),
 			shader_(shader)
 		{
 		}
@@ -24,9 +23,8 @@ namespace dmbrn
 			return shader_;
 		}
 
-		uint32_t in_GPU_mtxs_offset=0;
+		Enttity skeleton_ent;
 		SkeletalMesh mesh;
-		std::vector<Enttity> bone_enttities;
 		ShaderEffect* shader_ = nullptr;
 	};
 }
