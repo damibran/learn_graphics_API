@@ -1,4 +1,5 @@
 #pragma once
+#include <stack>
 #include<entt/entt.hpp>
 
 #include "Main/Componenets/ModelComponent.h"
@@ -11,6 +12,8 @@ namespace dmbrn
 	class Enttity
 	{
 	public:
+		struct child_iterator;
+
 		Enttity() = default;
 
 		Enttity(Enttity&& other): registry_(other.registry_), entityID_(other.entityID_)
@@ -38,6 +41,8 @@ namespace dmbrn
 			entityID_ = other.entityID_;
 		}
 
+		child_iterator beginChild() const;
+
 		void destroy()
 		{
 			registry_->destroy(entityID_);
@@ -49,7 +54,7 @@ namespace dmbrn
 			entityID_ = other.entityID_;
 		}
 
-		bool operator==(const Enttity& other)const
+		bool operator==(const Enttity& other) const
 		{
 			return entityID_ == other.entityID_ && registry_ == other.registry_;
 		}
@@ -106,10 +111,11 @@ namespace dmbrn
 		void markTransformAsEdited(uint32_t frame);
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }
+		uint32_t getCountOfAllChildEnts() const;
 
 		struct hash
 		{
-			size_t operator()(const Enttity& ent)const
+			size_t operator()(const Enttity& ent) const
 			{
 				return static_cast<uintptr_t>(ent.entityID_) ^ reinterpret_cast<uintptr_t>(ent.registry_);
 			}
@@ -120,5 +126,37 @@ namespace dmbrn
 		entt::entity entityID_{entt::null};
 
 		void markTransformAsDirty(uint32_t frame);
+	};
+
+	// TODO actually this is only forward iterator
+	struct Enttity::child_iterator
+	{
+		child_iterator(Enttity ent);
+
+		child_iterator& operator++();
+
+		bool operator==(const child_iterator& other)
+		{
+			return val == other.val;
+		}
+
+		bool operator!=(const child_iterator& other)
+		{
+			return !(*this == other);
+		}
+
+		Enttity& operator*()
+		{
+			return val;
+		}
+
+		Enttity* operator->()
+		{
+			return &val;
+		}
+
+	private:
+		Enttity val;
+		std::stack<Enttity> stack;
 	};
 }

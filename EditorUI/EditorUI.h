@@ -263,6 +263,26 @@ namespace dmbrn
 			ex_seq.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
 			ex_seq.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
 			ex_seq.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{0, 10, 30, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{1, 20, 30, true});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{3, 12, 60, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{2, 61, 90, false});
+			ex_seq.myItems.push_back(MySequence::MySequenceItem{4, 90, 99, false});
 		}
 
 		void drawFrame(time_point g_time, double delta_time)
@@ -284,7 +304,7 @@ namespace dmbrn
 			drawSequencer(static_cast<float>(delta_time));
 
 			// example sequencer
-			/*{
+			{
 				if (ImGui::Begin("Sequencer Example"))
 				{
 					// let's create the sequencer
@@ -311,10 +331,9 @@ namespace dmbrn
 						ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
 						// switch (type) ....
 					}
-
-					ImGui::End();
 				}
-			}*/
+				ImGui::End();
+			}
 
 			endDockSpace();
 

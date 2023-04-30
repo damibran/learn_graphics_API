@@ -1,3 +1,4 @@
+#include <stack>
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
 #include "Componenets/SkeletalModelComponent.h"
@@ -32,6 +33,44 @@ namespace dmbrn
 		this_rc.next = old_first;
 	}
 
+	Enttity::child_iterator::child_iterator(Enttity ent): val(ent)
+	{
+		stack.push(Enttity{});
+
+		Enttity child = ent;
+
+		while (child)
+		{
+			stack.push(child);
+			child = child.getComponent<RelationshipComponent>().next;
+		}
+
+		val = stack.top();
+		stack.pop();
+	}
+
+	Enttity::child_iterator& Enttity::child_iterator::operator++()
+	{
+		Enttity child = val.getComponent<RelationshipComponent>().first;
+
+		while (child)
+		{
+			stack.push(child);
+			child = child.getComponent<RelationshipComponent>().next;
+		}
+
+		val = stack.top();
+		stack.pop();
+
+		return *this;
+	}
+
+	Enttity::child_iterator Enttity::beginChild() const
+
+	{
+		return {getComponent<RelationshipComponent>().first};
+	}
+
 	void Enttity::markTransformAsEdited(uint32_t frame)
 	// we make it edited for this node and dirty all the way to the root
 	{
@@ -44,11 +83,42 @@ namespace dmbrn
 		}
 	}
 
+	// TODO too costly
+	uint32_t Enttity::getCountOfAllChildEnts() const
+	{
+		uint32_t count = 0;
+		std::stack<Enttity> stack;
+
+		Enttity this_child = getComponent<RelationshipComponent>().first;
+
+		while (this_child)
+		{
+			stack.push(this_child);
+			this_child = this_child.getComponent<RelationshipComponent>().next;
+		}
+
+		while (!stack.empty())
+		{
+			Enttity ent = stack.top();
+			stack.pop();
+			Enttity child = ent.getComponent<RelationshipComponent>().first;
+			while (child)
+			{
+				stack.push(child);
+				child = child.getComponent<RelationshipComponent>().next;
+			}
+			count += 1;
+		}
+
+		return count;
+	}
+
 	void Enttity::markTransformAsDirty(uint32_t frame) // we make it dirty all the way to the root
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();
 
-		if (!this_tc.isDirtyForAllFrames()) // means that one tree branch was edited simultaneously (during one frame) e.g. by animation
+		if (!this_tc.isDirtyForAllFrames())
+		// means that one tree branch was edited simultaneously (during one frame) e.g. by animation
 		{
 			RelationshipComponent& this_rc = getComponent<RelationshipComponent>();
 			this_tc.markAsDirty();

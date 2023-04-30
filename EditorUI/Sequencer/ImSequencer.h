@@ -83,10 +83,13 @@ namespace dmbrn
 
 		bool panningView = false;
 		ImVec2 panningViewSource;
-		int panningViewFrame=0;
+		int panningViewFrame = 0;
 
 		bool sizingRBar = false;
 		bool sizingLBar = false;
+
+		AnimationSequence::EntityIterator expanded_ent = sequence.end();
+		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -145,10 +148,17 @@ namespace dmbrn
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
-			const float controlHeight = sequenceCount * ItemHeight;
+			float controlHeight = sequenceCount * ItemHeight;
+			uint32_t expanded_ent_child_count = 0;
 			// TODO add expanded height
-			//for (int i = 0; i < sequenceCount; i++)
+			//for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 			//	controlHeight += int(sequence.GetCustomHeight(i));
+			if (expanded_ent != sequence.end())
+			{
+				expanded_ent_child_count = expanded_ent->first.getCountOfAllChildEnts();
+				controlHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+				controlHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+			}
 			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
 			// zoom in/out
@@ -158,7 +168,7 @@ namespace dmbrn
 			firstFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
 			                    frameBarPixelOffsets.x / (canvas_size.x - legendWidth));
 			const int lastFrame = ImLerp(sequence.mFrameMin, sequence.mFrameMax,
-			                       frameBarPixelOffsets.y / (canvas_size.x - legendWidth));
+			                             frameBarPixelOffsets.y / (canvas_size.x - legendWidth));
 
 			float framePixelWidth = (canvas_size.x - legendWidth) / (lastFrame - firstFrame);
 
@@ -183,10 +193,10 @@ namespace dmbrn
 
 				const ImVec2 childFramePos = ImGui::GetCursorScreenPos();
 				const ImVec2 childFrameSize(canvas_size.x,
-				                      canvas_size.y - 8.f - headerSize.y - scrollBarSize.y);
+				                            canvas_size.y - 8.f - headerSize.y - scrollBarSize.y);
 
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, 0);
-				ImGui::BeginChildFrame(889, childFrameSize);
+				ImGui::BeginChildFrame(889, childFrameSize, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 				ImGui::InvisibleButton("contentBar", ImVec2(canvas_size.x, controlHeight));
 
 				const ImVec2 contentMin = ImGui::GetItemRectMin();
@@ -198,7 +208,7 @@ namespace dmbrn
 
 				// current frame top
 				const ImRect topRect(ImVec2(canvas_pos.x + legendWidth, canvas_pos.y),
-				               ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
+				                     ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
 				// current frame  change
 				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
@@ -223,7 +233,8 @@ namespace dmbrn
 					currentFrame = currentFrame + 30 * d_time;
 
 				// looping ?
-				currentFrame = ImClamp(currentFrame, static_cast<float>(sequence.mFrameMin),static_cast<float>(sequence.mFrameMax));
+				currentFrame = ImClamp(currentFrame, static_cast<float>(sequence.mFrameMin),
+				                       static_cast<float>(sequence.mFrameMax));
 
 				//header
 				draw_list->AddRectFilled(canvas_pos, ImVec2(canvas_size.x + canvas_pos.x, canvas_pos.y + ItemHeight),
@@ -241,7 +252,8 @@ namespace dmbrn
 
 				auto drawLine = [&](int i, float regionHeight)
 				{
-					const bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.mFrameMin);
+					const bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence.mFrameMax || i == sequence.
+						mFrameMin);
 					const bool halfIndex = (i % halfModFrameCount) == 0;
 					const float px = canvas_pos.x + i * framePixelWidth + legendWidth -
 						static_cast<float>(firstFrame) * framePixelWidth;
@@ -267,7 +279,7 @@ namespace dmbrn
 
 				auto drawLineInContentRect = [&](int i, int /*regionHeight*/)
 				{
-					const float px = canvas_pos.x + i * framePixelWidth + legendWidth - 
+					const float px = canvas_pos.x + i * framePixelWidth + legendWidth -
 						static_cast<float>(firstFrame) * framePixelWidth;
 					const float tiretStart = contentMin.y;
 					const float tiretEnd = contentMax.y;
@@ -289,35 +301,94 @@ namespace dmbrn
 				// clip content
 				draw_list->PushClipRect(childFramePos, childFramePos + childFrameSize, true);
 
+				const ImVec2 legendMax = {childFramePos.x + legendWidth, (childFramePos + childFrameSize).y};
+				draw_list->PushClipRect(childFramePos, legendMax);
+
 				// draw item names in the legend rect on the left
 				float customHeight = 0;
+				const float expanded_ent_indend_size = 15;
+				const float expanded_transform_indend_size = expanded_ent_indend_size + 15;
 				int i = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
 					ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
+					ImVec2 ent_rect_min{contentMin.x + 3, contentMin.y + i * ItemHeight + customHeight};
+					ImVec2 ent_rect_max = {
+						contentMin.x + 3 + legendWidth, contentMin.y + i * ItemHeight + customHeight + ItemHeight
+					};
+					ImRect ent_rect{ent_rect_min, ent_rect_max};
+
+					if (ent_rect.Contains(io.MousePos))
+						draw_list->AddRectFilled(ent_rect_min, ent_rect_max, 0x5042c4c2);
+
+					if(ent_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
+						expanded_ent=ent_it;
+
 					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
+
 					// TODO CustomHeight
+					if (ent_it == expanded_ent)
+					{
+						int j = 0;
+						for (auto child_it = expanded_ent->first.beginChild(); *child_it; ++child_it, ++j)
+						{
+							tpos = {
+								contentMin.x + 3 + expanded_ent_indend_size,
+								contentMin.y + (i + 1) * ItemHeight + 2 + customHeight + j * ItemHeight
+							};
+
+							const ImVec2 child_rect_min = {
+								contentMin.x + 3 + expanded_ent_indend_size,
+								contentMin.y + (i + 1) * ItemHeight + customHeight + j * ItemHeight
+							};
+							const ImVec2 child_rect_max = {
+								contentMin.x + 3 + expanded_ent_indend_size + legendWidth,
+								contentMin.y + (i + 1) * ItemHeight + customHeight + j * ItemHeight + ItemHeight
+							};
+							const ImRect child_rect{child_rect_min, child_rect_max};
+
+							if (child_rect.Contains(io.MousePos))
+								draw_list->AddRectFilled(child_rect_min, child_rect_max, 0x5042c4c2);
+
+							draw_list->AddText(tpos, 0xFFFFFFFF, child_it->getComponent<TagComponent>().tag.c_str());
+
+							if (expanded_transform_ents.find(*child_it) != expanded_transform_ents.end())
+							{
+								tpos = {
+									contentMin.x + 3 + expanded_transform_indend_size,
+									contentMin.y + (i + 2) * ItemHeight + 2 + customHeight + j * ItemHeight
+								};
+								draw_list->AddText(tpos, 0xFFFFFFFF, "Print transforms");
+							}
+						}
+						customHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+						customHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+					}
 					//customHeight += sequence.GetCustomHeight(i);
 				}
 
+				draw_list->PopClipRect();
+
 				// slots background
+				i = 0;
 				customHeight = 0;
-				for (int i = 0; i < sequenceCount; i++)
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
 					unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
 
-					// TODO CustomHeight
-					const size_t localCustomHeight = 0; // sequence.GetCustomHeight(i);
+					// TODO CustomHeight only one entity can be expanded
+					float localCustomHeight = 0; // sequence.GetCustomHeight(i);
+					if (ent_it == expanded_ent)
+					{
+						localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+						localCustomHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+					}
+
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
 					const ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
-					if (!popupOpened && mouse_y >= pos.y && mouse_y < pos.y + (ItemHeight + localCustomHeight) &&
-						movingEntry.first == sequence.end() &&
-						mouse_x > contentMin.x && mouse_x < contentMin.x + canvas_size.x)
-					{
-						col += 0x80201008;
-						pos.x -= legendWidth;
-					}
+
 					draw_list->AddRectFilled(pos, sz, col, 0);
+
 					customHeight += localCustomHeight;
 				}
 
@@ -351,6 +422,8 @@ namespace dmbrn
 							1.f);
 					}
 
+					const float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
+
 					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
@@ -358,14 +431,14 @@ namespace dmbrn
 						const float end = clip_it->first + clip_it->second.duration_;
 						const unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
-						const float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
 
-						const ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
-						                    contentMin.y + ItemHeight * i + 1 + customHeight);
+						const ImVec2 pos = ImVec2(
+							contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+							contentMin.y + ItemHeight * i + 1 + customHeight);
 						const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 						const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
 						const ImVec2 slotP3(pos.x + end * framePixelWidth + framePixelWidth,
-						              pos.y + ItemHeight - 2 + localCustomHeight);
+						                    pos.y + ItemHeight - 2 + localCustomHeight);
 						const unsigned int slotColor = color | 0xFF000000;
 						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
 						if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth))
@@ -373,10 +446,6 @@ namespace dmbrn
 							draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
 							draw_list->AddRectFilled(slotP1, slotP2, slotColor, 2);
 						}
-						//if (ImRect(slotP1, slotP2).Contains(io.MousePos) && io.MouseDoubleClicked[0])
-						//{
-						//	sequence.DoubleClick(i);
-						//}
 
 						// Ensure grabbable handles
 						if (movingEntry.first == sequence.end() && (sequenceOptions &
@@ -404,47 +473,8 @@ namespace dmbrn
 						draw_list->AddText({slotP1.x + text_offset, slotP1.y}, 0xFF000000,
 						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
-
-						// custom draw
-						//if (localCustomHeight > 0)
-						//{
-						//	ImVec2 rp(canvas_pos.x, contentMin.y + ItemHeight * i + 1 + customHeight);
-						//	ImRect customRect(
-						//		rp + ImVec2(
-						//			legendWidth - (firstFrameUsed - sequence.mFrameMin - 0.5f) * framePixelWidth,
-						//			float(ItemHeight)),
-						//		rp + ImVec2(
-						//			legendWidth + (sequence.mFrameMax - firstFrameUsed - 0.5f + 2.f) *
-						//			framePixelWidth,
-						//			float(localCustomHeight + ItemHeight)));
-						//	ImRect clippingRect(rp + ImVec2(float(legendWidth), float(ItemHeight)),
-						//	                    rp + ImVec2(canvas_size.x, float(localCustomHeight + ItemHeight)));
-						//
-						//	ImRect legendRect(rp + ImVec2(0.f, float(ItemHeight)),
-						//	                  rp + ImVec2(float(legendWidth), float(localCustomHeight)));
-						//	ImRect legendClippingRect(canvas_pos + ImVec2(0.f, float(ItemHeight)),
-						//	                          canvas_pos + ImVec2(float(legendWidth),
-						//	                                              float(localCustomHeight + ItemHeight)));
-						//	customDraws.push_back({i, customRect, legendRect, clippingRect, legendClippingRect});
-						//}
-						//else
-						//{
-						//	ImVec2 rp(canvas_pos.x, contentMin.y + ItemHeight * i + customHeight);
-						//	ImRect customRect(
-						//		rp + ImVec2(
-						//			legendWidth - (firstFrameUsed - sequence.mFrameMin - 0.5f) * framePixelWidth,
-						//			float(0.f)),
-						//		rp + ImVec2(
-						//			legendWidth + (sequence.mFrameMax - firstFrameUsed - 0.5f + 2.f) *
-						//			framePixelWidth,
-						//			float(ItemHeight)));
-						//	ImRect clippingRect(rp + ImVec2(float(legendWidth), float(0.f)),
-						//	                    rp + ImVec2(canvas_size.x, float(ItemHeight)));
-						//
-						//	compactCustomDraws.push_back({i, customRect, ImRect(), clippingRect, ImRect()});
-						//}
-						customHeight += localCustomHeight;
 					}
+					customHeight += localCustomHeight;
 				}
 
 				if (ImGui::BeginDragDropTarget())
@@ -456,7 +486,8 @@ namespace dmbrn
 							"Animation_clip_DnD", ImGuiDragDropFlags_AcceptBeforeDelivery))
 						{
 							IM_ASSERT(payload->DataSize == sizeof(std::pair<Enttity, const AnimationClip*>));
-							const auto payload_data = static_cast<std::pair<Enttity, const AnimationClip*>*>(payload->Data);
+							const auto payload_data = static_cast<std::pair<Enttity, const AnimationClip*>*>(payload->
+								Data);
 
 							if (ent_it->first == payload_data->first)
 							{
@@ -465,11 +496,12 @@ namespace dmbrn
 									const float start = currentFrame;
 									const float end = currentFrame + payload_data->second->duration_;
 
-									const ImVec2 pos = ImVec2(contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
-									                    contentMin.y + ItemHeight * i + 1 + customHeight);
+									const ImVec2 pos = ImVec2(
+										contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+										contentMin.y + ItemHeight * i + 1 + customHeight);
 									const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 									const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
-									              pos.y + ItemHeight - 2);
+									                    pos.y + ItemHeight - 2);
 
 									draw_list->AddRectFilled(slotP1, slotP2, 0xFF885050, 2);
 
@@ -523,7 +555,8 @@ namespace dmbrn
 				}
 
 				// draw cursor
-				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.mFrameMax))
+				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.
+					mFrameMax))
 				{
 					const float cursorOffset = contentMin.x +
 						legendWidth +
@@ -534,7 +567,7 @@ namespace dmbrn
 					                   0xA02A2AFF,
 					                   cursorWidth);
 					char tmps[512];
-					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d",static_cast<int>(currentFrame));
+					ImFormatString(tmps, IM_ARRAYSIZE(tmps), "%d", static_cast<int>(currentFrame));
 					draw_list->AddText(ImVec2(cursorOffset + 10, canvas_pos.y + 2), 0xFF2A2AFF, tmps);
 				}
 
@@ -568,7 +601,7 @@ namespace dmbrn
 
 				const ImVec2 scrollBarC(scrollBarMin.x + legendWidth + frameBarPixelOffsets.x, scrollBarMin.y);
 				const ImVec2 scrollBarD(scrollBarMin.x + legendWidth + frameBarPixelOffsets.y,
-				                  scrollBarMax.y - 2);
+				                        scrollBarMax.y - 2);
 				draw_list->AddRectFilled(scrollBarC, scrollBarD,
 				                         (inScrollBar || MovingScrollBar) ? 0xFF606060 : 0xFF505050, 6);
 
