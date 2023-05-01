@@ -157,7 +157,7 @@ namespace dmbrn
 			{
 				expanded_ent_child_count = expanded_ent->first.getCountOfAllChildEnts();
 				controlHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-				controlHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+				controlHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 			}
 			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
@@ -308,8 +308,7 @@ namespace dmbrn
 				ImVec2 current_min{contentMin.x, contentMin.y};
 				const float expanded_ent_indend_size = 15;
 				const float expanded_transform_indend_size = expanded_ent_indend_size + 15;
-				int i = 0;
-				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 				{
 					ImVec2 tpos(
 						current_min.x + 3,
@@ -347,8 +346,7 @@ namespace dmbrn
 					if (ent_it == expanded_ent)
 					{
 						current_min.x += expanded_ent_indend_size;
-						int j = 0;
-						for (auto child_it = expanded_ent->first.beginChild(); *child_it; ++child_it, ++j)
+						for (auto child_it = expanded_ent->first.beginChild(); *child_it; ++child_it)
 						{
 							tpos = {
 								current_min.x + 3,
@@ -414,26 +412,30 @@ namespace dmbrn
 				draw_list->PopClipRect();
 
 				// slots background
-				i = 0;
-				float customHeight = 0;
-				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
-
-					// TODO CustomHeight only one entity can be expanded
-					float localCustomHeight = 0; // sequence.GetCustomHeight(i);
-					if (ent_it == expanded_ent)
+					int i = 0;
+					float customHeight = 0;
+					for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 					{
-						localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-						localCustomHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+						unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
+
+						// TODO CustomHeight only one entity can be expanded
+						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
+						if (ent_it == expanded_ent)
+						{
+							localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+						}
+
+						ImVec2 pos = ImVec2(contentMin.x + legendWidth,
+						                    contentMin.y + ItemHeight * i + 1 + customHeight);
+						const ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x,
+						                         pos.y + ItemHeight - 1 + localCustomHeight);
+
+						draw_list->AddRectFilled(pos, sz, col, 0);
+
+						customHeight += localCustomHeight;
 					}
-
-					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
-					const ImVec2 sz = ImVec2(canvas_size.x + canvas_pos.x, pos.y + ItemHeight - 1 + localCustomHeight);
-
-					draw_list->AddRectFilled(pos, sz, col, 0);
-
-					customHeight += localCustomHeight;
 				}
 
 				draw_list->PushClipRect(childFramePos + ImVec2(legendWidth, 0.f), childFramePos + childFrameSize,
@@ -448,29 +450,17 @@ namespace dmbrn
 				drawLineInContentRect(sequence.mFrameMax, int(contentHeight));
 
 				// for every entity
-				customHeight = 0;
-				i = 0;
-				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
+				current_min = {contentMin.x, contentMin.y};
+				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 				{
 					// selection
 					if (selectedEntity != sequence.end() && selectedEntity == ent_it)
 					{
-						customHeight = 0;
-						// TODO CustomHeight
-						//for (int i = 0; i < *selectedEntry; i++)
-						//	customHeight += sequence.GetCustomHeight(i);
 						draw_list->AddRectFilled(
-							ImVec2(contentMin.x, contentMin.y + ItemHeight * i + customHeight),
-							ImVec2(contentMin.x + canvas_size.x,
-							       contentMin.y + ItemHeight * (i + 1) + customHeight), 0x801080FF,
+							ImVec2(current_min.x, current_min.y),
+							ImVec2(current_min.x + canvas_size.x,
+							       current_min.y + ItemHeight), 0x801080FF,
 							1.f);
-					}
-
-					float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
-					if (ent_it == expanded_ent)
-					{
-						localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-						localCustomHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 					}
 
 					// draw clips
@@ -482,8 +472,15 @@ namespace dmbrn
 						// TODO CustomHeight
 
 						const ImVec2 pos = ImVec2(
-							contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
-							contentMin.y + ItemHeight * i + 1 + customHeight);
+							current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+							current_min.y + 1);
+
+						float localCustomHeight = 0.f;
+						if (ent_it == expanded_ent)
+						{
+							localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+						}
 
 						const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 						const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
@@ -526,58 +523,98 @@ namespace dmbrn
 
 						if (expanded_ent == ent_it)
 						{
-							int j = 0;
-							for (auto child_it = ent_it->first.beginChild(); *child_it; ++child_it, ++j)
+							for (auto child_it = ent_it->first.beginChild(); *child_it; ++child_it)
 							{
 								bool is_expanded_transform = false;
-								const ImVec2 child_min = pos + ImVec2{0, ItemHeight + j * ItemHeight};
 
 								if (expanded_transform_ents.find(*child_it) != expanded_transform_ents.end())
 									is_expanded_transform = true;
 
 								std::unordered_set<float> existing_keyframe_times;
 
-								/*
-								for (auto key_frame : clip_it->second.channels[child_it->getId()].positions)
-								{
-									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
-										existing_keyframe_times.insert(key_frame.first);
+								current_min.y += ItemHeight;
 
-									if (is_expanded_transform)
-										//draw keyframe rect
-								
+								if (clip_it->second.channels.find(child_it->getId()) != clip_it->second.channels.end())
+								{
+									current_min.y += ItemHeight;
+									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].positions)
+									{
+										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
+											end())
+											existing_keyframe_times.insert(key_frame.first);
+
+										float keyframe_glob_time = std::floor(start + key_frame.first);
+
+										if (is_expanded_transform)
+											draw_list->AddRectFilled(
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
+												},
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
+													current_min.y + ItemHeight - 2
+												},
+												slotColor, 2);
+									}
+
+									current_min.y += ItemHeight;
+									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].rotations)
+									{
+										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
+											end())
+											existing_keyframe_times.insert(key_frame.first);
+
+										float keyframe_glob_time = std::floor(start + key_frame.first);
+
+										if (is_expanded_transform)
+											draw_list->AddRectFilled(
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
+												},
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
+													current_min.y + ItemHeight - 2
+												},
+												slotColor, 2);
+									}
+
+									current_min.y += ItemHeight;
+									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].scales)
+									{
+										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
+											end())
+											existing_keyframe_times.insert(key_frame.first);
+
+										float keyframe_glob_time = std::floor(start + key_frame.first);
+
+										if (is_expanded_transform)
+											draw_list->AddRectFilled(
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
+												},
+												ImVec2{
+													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
+													current_min.y + ItemHeight - 2
+												},
+												slotColor, 2);
+									}
+
+									// draw key frames in child entt row in case it is not trnasform expanded
+									current_min.y -= 3 * ItemHeight;
 								}
 
-								for (auto key_frame : clip_it->second.channels[child_it->getId()].rotations)
-								{
-									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
-										existing_keyframe_times.insert(key_frame.first);
-
-									if (is_expanded_transform)
-										//draw keyframe rect
-								
-								}
-
-								for (auto key_frame : clip_it->second.channels[child_it->getId()].scales)
-								{
-									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
-										existing_keyframe_times.insert(key_frame.first);
-
-									if (is_expanded_transform)
-										//draw keyframe rect
-								
-								}*/
+								if (is_expanded_transform)
+									current_min.y += 3 * ItemHeight;
 							}
 						}
 					}
-
-					customHeight += localCustomHeight;
+					current_min.y += ItemHeight;
 				}
 
 				if (ImGui::BeginDragDropTarget())
 				{
-					i = 0;
-					for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
+					current_min = {contentMin.x, contentMin.y};
+					for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 					{
 						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(
 							"Animation_clip_DnD", ImGuiDragDropFlags_AcceptBeforeDelivery))
@@ -594,8 +631,9 @@ namespace dmbrn
 									const float end = currentFrame + payload_data->second->duration_;
 
 									const ImVec2 pos = ImVec2(
-										contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
-										contentMin.y + ItemHeight * i + 1 + customHeight);
+										current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+										current_min.y + 1);
+
 									const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 									const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth,
 									                    pos.y + ItemHeight - 2);
@@ -614,6 +652,7 @@ namespace dmbrn
 								}
 							}
 						}
+						current_min.y += ItemHeight;
 					}
 					if (!MovingCurrentFrame)
 						MovingCurrentFrame = true;
