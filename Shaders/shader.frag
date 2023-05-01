@@ -32,4 +32,7 @@ void main() {
     vec4 diffuse = diff * lightColor;
 
     outColor = (ambient + diffuse)*0.5*properties.base_color * texture(texSampler, fragTexCoord);
+    
+    const float gamma = 2.2;
+    outColor.rgb = pow(outColor.rgb, vec3(1.0/gamma));
 }
