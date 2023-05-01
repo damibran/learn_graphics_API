@@ -304,7 +304,7 @@ namespace dmbrn
 			drawSequencer(static_cast<float>(delta_time));
 
 			// example sequencer
-			{
+			/*{
 				if (ImGui::Begin("Sequencer Example"))
 				{
 					// let's create the sequencer
@@ -333,7 +333,7 @@ namespace dmbrn
 					}
 				}
 				ImGui::End();
-			}
+			}*/
 
 			endDockSpace();
 

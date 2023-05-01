@@ -377,7 +377,7 @@ namespace dmbrn
 
 						clip.duration_ = max - min;
 
-						clip.channels.push_back(std::move(channels));
+						clip.channels.insert({node_entt.getId(),std::move(channels)});
 					}
 					animation_clips.insert(std::move(clip));
 				}

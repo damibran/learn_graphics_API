@@ -21,19 +21,19 @@ namespace dmbrn
 	{
 		std::string name;
 		float duration_; // in frames
-		std::vector<AnimationChannels> channels;
+		std::unordered_map<entt::entity, AnimationChannels> channels;
 
 		void updateTransforms(float cur_local_frame, uint32_t frame)
 		{
 			for (auto& chnls : channels)
 			{
-				TransformComponent& ent_trans_c = chnls.enttity.getComponent<TransformComponent>();
+				TransformComponent& ent_trans_c = chnls.second.enttity.getComponent<TransformComponent>();
 		
-				ent_trans_c.position = mixPositions(cur_local_frame, chnls);
-				ent_trans_c.setQuat(slerpRotation(cur_local_frame, chnls));
-				ent_trans_c.scale = mixScale(cur_local_frame, chnls);
-		
-				chnls.enttity.markTransformAsEdited(frame);
+				ent_trans_c.position = mixPositions(cur_local_frame, chnls.second);
+				ent_trans_c.setQuat(slerpRotation(cur_local_frame, chnls.second));
+				ent_trans_c.scale = mixScale(cur_local_frame, chnls.second);
+
+				chnls.second.enttity.markTransformAsEdited(frame);
 			}
 		}
 

@@ -108,6 +108,11 @@ namespace dmbrn
 			return entityID_ != entt::null;
 		}
 
+		entt::entity getId()const
+		{
+			return entityID_;
+		}
+
 		void markTransformAsEdited(uint32_t frame);
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }

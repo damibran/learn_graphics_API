@@ -157,7 +157,7 @@ namespace dmbrn
 			{
 				expanded_ent_child_count = expanded_ent->first.getCountOfAllChildEnts();
 				controlHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-				controlHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+				controlHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 			}
 			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
@@ -305,73 +305,117 @@ namespace dmbrn
 				draw_list->PushClipRect(childFramePos, legendMax);
 
 				// draw item names in the legend rect on the left
-				float customHeight = 0;
+				ImVec2 current_min{contentMin.x, contentMin.y};
 				const float expanded_ent_indend_size = 15;
 				const float expanded_transform_indend_size = expanded_ent_indend_size + 15;
 				int i = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
-					ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
-					ImVec2 ent_rect_min{contentMin.x + 3, contentMin.y + i * ItemHeight + customHeight};
+					ImVec2 tpos(
+						current_min.x + 3,
+						current_min.y + 2);
+
 					ImVec2 ent_rect_max = {
-						contentMin.x + 3 + legendWidth, contentMin.y + i * ItemHeight + customHeight + ItemHeight
+						current_min.x + legendWidth,
+						current_min.y + ItemHeight
 					};
-					ImRect ent_rect{ent_rect_min, ent_rect_max};
+
+					ImRect ent_rect{current_min, ent_rect_max};
 
 					if (ent_rect.Contains(io.MousePos))
-						draw_list->AddRectFilled(ent_rect_min, ent_rect_max, 0x5042c4c2);
+						draw_list->AddRectFilled(current_min, ent_rect_max, 0x5042c4c2);
 
-					if(ent_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
-						expanded_ent=ent_it;
+					if (ent_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
+					{
+						if (expanded_ent != ent_it)
+						{
+							expanded_transform_ents.clear();
+							expanded_ent = ent_it;
+						}
+						else
+						{
+							expanded_transform_ents.clear();
+							expanded_ent = sequence.end();
+						}
+					}
 
 					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
+
+					current_min.y += ItemHeight;
 
 					// TODO CustomHeight
 					if (ent_it == expanded_ent)
 					{
+						current_min.x += expanded_ent_indend_size;
 						int j = 0;
 						for (auto child_it = expanded_ent->first.beginChild(); *child_it; ++child_it, ++j)
 						{
 							tpos = {
-								contentMin.x + 3 + expanded_ent_indend_size,
-								contentMin.y + (i + 1) * ItemHeight + 2 + customHeight + j * ItemHeight
+								current_min.x + 3,
+								current_min.y + 2
 							};
 
-							const ImVec2 child_rect_min = {
-								contentMin.x + 3 + expanded_ent_indend_size,
-								contentMin.y + (i + 1) * ItemHeight + customHeight + j * ItemHeight
-							};
 							const ImVec2 child_rect_max = {
-								contentMin.x + 3 + expanded_ent_indend_size + legendWidth,
-								contentMin.y + (i + 1) * ItemHeight + customHeight + j * ItemHeight + ItemHeight
+								current_min.x + legendWidth,
+								current_min.y + ItemHeight
 							};
-							const ImRect child_rect{child_rect_min, child_rect_max};
+
+							const ImRect child_rect{current_min, child_rect_max};
 
 							if (child_rect.Contains(io.MousePos))
-								draw_list->AddRectFilled(child_rect_min, child_rect_max, 0x5042c4c2);
+								draw_list->AddRectFilled(current_min, child_rect_max, 0x5042c4c2);
+
+							if (child_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
+							{
+								auto it = expanded_transform_ents.find(*child_it);
+								if (it == expanded_transform_ents.end())
+									expanded_transform_ents.insert(*child_it);
+								else
+									expanded_transform_ents.erase(it);
+							}
 
 							draw_list->AddText(tpos, 0xFFFFFFFF, child_it->getComponent<TagComponent>().tag.c_str());
 
+							current_min.y += ItemHeight;
+
 							if (expanded_transform_ents.find(*child_it) != expanded_transform_ents.end())
 							{
+								current_min.x += expanded_transform_indend_size;
+
 								tpos = {
-									contentMin.x + 3 + expanded_transform_indend_size,
-									contentMin.y + (i + 2) * ItemHeight + 2 + customHeight + j * ItemHeight
+									current_min.x + 3,
+									current_min.y + 2
 								};
-								draw_list->AddText(tpos, 0xFFFFFFFF, "Print transforms");
+								draw_list->AddText(tpos, 0xFFFFFFFF, "Postition");
+								current_min.y += ItemHeight;
+
+								tpos = {
+									current_min.x + 3,
+									current_min.y + 2
+								};
+								draw_list->AddText(tpos, 0xFFFFFFFF, "Rotation");
+								current_min.y += ItemHeight;
+
+								tpos = {
+									current_min.x + 3,
+									current_min.y + 2
+								};
+								draw_list->AddText(tpos, 0xFFFFFFFF, "Scale");
+								current_min.y += ItemHeight;
+
+								current_min.x -= expanded_transform_indend_size;
 							}
 						}
-						customHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-						customHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+
+						current_min.x -= expanded_ent_indend_size;
 					}
-					//customHeight += sequence.GetCustomHeight(i);
 				}
 
 				draw_list->PopClipRect();
 
 				// slots background
 				i = 0;
-				customHeight = 0;
+				float customHeight = 0;
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it, ++i)
 				{
 					unsigned int col = (i & 1) ? 0xFF3A3636 : 0xFF413D3D;
@@ -381,7 +425,7 @@ namespace dmbrn
 					if (ent_it == expanded_ent)
 					{
 						localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
-						localCustomHeight += static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+						localCustomHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 					}
 
 					ImVec2 pos = ImVec2(contentMin.x + legendWidth, contentMin.y + ItemHeight * i + 1 + customHeight);
@@ -422,7 +466,12 @@ namespace dmbrn
 							1.f);
 					}
 
-					const float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
+					float localCustomHeight = 0.f; //sequence.GetCustomHeight(i);
+					if (ent_it == expanded_ent)
+					{
+						localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+						localCustomHeight += 3*static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+					}
 
 					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
@@ -435,22 +484,23 @@ namespace dmbrn
 						const ImVec2 pos = ImVec2(
 							contentMin.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 							contentMin.y + ItemHeight * i + 1 + customHeight);
+
 						const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
 						const ImVec2 slotP2(pos.x + end * framePixelWidth + framePixelWidth, pos.y + ItemHeight - 2);
 						const ImVec2 slotP3(pos.x + end * framePixelWidth + framePixelWidth,
 						                    pos.y + ItemHeight - 2 + localCustomHeight);
+
 						const unsigned int slotColor = color | 0xFF000000;
 						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
+
 						if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth))
 						{
 							draw_list->AddRectFilled(slotP1, slotP3, slotColorHalf, 2);
 							draw_list->AddRectFilled(slotP1, slotP2, slotColor, 2);
 						}
 
-						// Ensure grabbable handles
 						if (movingEntry.first == sequence.end() && (sequenceOptions &
 							SEQUENCER_EDIT_STARTEND))
-						// TODOFOCUS && backgroundRect.Contains(io.MousePos))
 						{
 							const ImRect rc = ImRect(slotP1, slotP2);
 							if (rc.Contains(io.MousePos))
@@ -473,7 +523,54 @@ namespace dmbrn
 						draw_list->AddText({slotP1.x + text_offset, slotP1.y}, 0xFF000000,
 						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
+
+						if (expanded_ent == ent_it)
+						{
+							int j = 0;
+							for (auto child_it = ent_it->first.beginChild(); *child_it; ++child_it, ++j)
+							{
+								bool is_expanded_transform = false;
+								const ImVec2 child_min = pos + ImVec2{0, ItemHeight + j * ItemHeight};
+
+								if (expanded_transform_ents.find(*child_it) != expanded_transform_ents.end())
+									is_expanded_transform = true;
+
+								std::unordered_set<float> existing_keyframe_times;
+
+								/*
+								for (auto key_frame : clip_it->second.channels[child_it->getId()].positions)
+								{
+									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
+										existing_keyframe_times.insert(key_frame.first);
+
+									if (is_expanded_transform)
+										//draw keyframe rect
+								
+								}
+
+								for (auto key_frame : clip_it->second.channels[child_it->getId()].rotations)
+								{
+									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
+										existing_keyframe_times.insert(key_frame.first);
+
+									if (is_expanded_transform)
+										//draw keyframe rect
+								
+								}
+
+								for (auto key_frame : clip_it->second.channels[child_it->getId()].scales)
+								{
+									if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.end())
+										existing_keyframe_times.insert(key_frame.first);
+
+									if (is_expanded_transform)
+										//draw keyframe rect
+								
+								}*/
+							}
+						}
 					}
+
 					customHeight += localCustomHeight;
 				}
 
