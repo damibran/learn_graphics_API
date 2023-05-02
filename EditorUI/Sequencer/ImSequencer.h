@@ -89,6 +89,7 @@ namespace dmbrn
 		bool sizingLBar = false;
 
 		AnimationSequence::EntityIterator expanded_ent = sequence.end();
+		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
 		enum SEQUENCER_OPTIONS
@@ -149,14 +150,12 @@ namespace dmbrn
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
 			float controlHeight = sequenceCount * ItemHeight;
-			uint32_t expanded_ent_child_count = 0;
 			// TODO add expanded height
 			//for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 			//	controlHeight += int(sequence.GetCustomHeight(i));
 			if (expanded_ent != sequence.end())
 			{
-				expanded_ent_child_count = expanded_ent->first.getCountOfAllChildEnts();
-				controlHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+				controlHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
 				controlHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 			}
 			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
@@ -330,11 +329,13 @@ namespace dmbrn
 						{
 							expanded_transform_ents.clear();
 							expanded_ent = ent_it;
+							expanded_ent_children = expanded_ent->first.getVectorOfAllChild();
 						}
 						else
 						{
 							expanded_transform_ents.clear();
 							expanded_ent = sequence.end();
+							expanded_ent_children.clear();
 						}
 					}
 
@@ -346,7 +347,7 @@ namespace dmbrn
 					if (ent_it == expanded_ent)
 					{
 						current_min.x += expanded_ent_indend_size;
-						for (auto child_it = expanded_ent->first.beginChild(); *child_it; ++child_it)
+						for (auto child_it = expanded_ent_children.begin(); child_it!=expanded_ent_children.end(); ++child_it)
 						{
 							tpos = {
 								current_min.x + 3,
@@ -423,7 +424,7 @@ namespace dmbrn
 						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
 						if (ent_it == expanded_ent)
 						{
-							localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+							localCustomHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
 							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 						}
 
@@ -478,7 +479,7 @@ namespace dmbrn
 						float localCustomHeight = 0.f;
 						if (ent_it == expanded_ent)
 						{
-							localCustomHeight += static_cast<float>(expanded_ent_child_count) * ItemHeight;
+							localCustomHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
 							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 						}
 
@@ -523,7 +524,7 @@ namespace dmbrn
 
 						if (expanded_ent == ent_it)
 						{
-							for (auto child_it = ent_it->first.beginChild(); *child_it; ++child_it)
+							for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end(); ++child_it)
 							{
 								bool is_expanded_transform = false;
 
@@ -539,9 +540,7 @@ namespace dmbrn
 									current_min.y += ItemHeight;
 									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].positions)
 									{
-										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
-											end())
-											existing_keyframe_times.insert(key_frame.first);
+										existing_keyframe_times.insert(key_frame.first);
 
 										float keyframe_glob_time = std::floor(start + key_frame.first);
 
@@ -560,9 +559,7 @@ namespace dmbrn
 									current_min.y += ItemHeight;
 									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].rotations)
 									{
-										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
-											end())
-											existing_keyframe_times.insert(key_frame.first);
+										existing_keyframe_times.insert(key_frame.first);
 
 										float keyframe_glob_time = std::floor(start + key_frame.first);
 
@@ -581,9 +578,7 @@ namespace dmbrn
 									current_min.y += ItemHeight;
 									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].scales)
 									{
-										if (existing_keyframe_times.find(key_frame.first) != existing_keyframe_times.
-											end())
-											existing_keyframe_times.insert(key_frame.first);
+										existing_keyframe_times.insert(key_frame.first);
 
 										float keyframe_glob_time = std::floor(start + key_frame.first);
 

@@ -64,13 +64,7 @@ namespace dmbrn
 
 		return *this;
 	}
-
-	Enttity::child_iterator Enttity::beginChild() const
-
-	{
-		return {getComponent<RelationshipComponent>().first};
-	}
-
+	
 	void Enttity::markTransformAsEdited(uint32_t frame)
 	// we make it edited for this node and dirty all the way to the root
 	{
@@ -83,10 +77,9 @@ namespace dmbrn
 		}
 	}
 
-	// TODO too costly
-	uint32_t Enttity::getCountOfAllChildEnts() const
+	std::vector<Enttity> Enttity::getVectorOfAllChild() const
 	{
-		uint32_t count = 0;
+		std::vector<Enttity> res;
 		std::stack<Enttity> stack;
 
 		Enttity this_child = getComponent<RelationshipComponent>().first;
@@ -100,6 +93,7 @@ namespace dmbrn
 		while (!stack.empty())
 		{
 			Enttity ent = stack.top();
+			res.push_back(ent);
 			stack.pop();
 			Enttity child = ent.getComponent<RelationshipComponent>().first;
 			while (child)
@@ -107,12 +101,11 @@ namespace dmbrn
 				stack.push(child);
 				child = child.getComponent<RelationshipComponent>().next;
 			}
-			count += 1;
 		}
 
-		return count;
+		return res;
 	}
-
+	
 	void Enttity::markTransformAsDirty(uint32_t frame) // we make it dirty all the way to the root
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();
