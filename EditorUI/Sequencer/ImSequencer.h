@@ -150,14 +150,13 @@ namespace dmbrn
 			ImVec2 canvas_size = ImGui::GetContentRegionAvail(); // Resize canvas to what's available
 
 			float controlHeight = sequenceCount * ItemHeight;
-			// TODO add expanded height
-			//for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
-			//	controlHeight += int(sequence.GetCustomHeight(i));
+			float expanded_height = 0;
 			if (expanded_ent != sequence.end())
 			{
-				controlHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
-				controlHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+				expanded_height += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
+				expanded_height += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
 			}
+			controlHeight += expanded_height;
 			const int frameCount = ImMax(sequence.mFrameMax - sequence.mFrameMin, 1);
 
 			// zoom in/out
@@ -347,7 +346,8 @@ namespace dmbrn
 					if (ent_it == expanded_ent)
 					{
 						current_min.x += expanded_ent_indend_size;
-						for (auto child_it = expanded_ent_children.begin(); child_it!=expanded_ent_children.end(); ++child_it)
+						for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end(); ++
+						     child_it)
 						{
 							tpos = {
 								current_min.x + 3,
@@ -422,11 +422,7 @@ namespace dmbrn
 
 						// TODO CustomHeight only one entity can be expanded
 						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
-						if (ent_it == expanded_ent)
-						{
-							localCustomHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
-							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
-						}
+						localCustomHeight += expanded_height;
 
 						ImVec2 pos = ImVec2(contentMin.x + legendWidth,
 						                    contentMin.y + ItemHeight * i + 1 + customHeight);
@@ -439,7 +435,11 @@ namespace dmbrn
 					}
 				}
 
-				draw_list->PushClipRect(childFramePos + ImVec2(legendWidth, 0.f), childFramePos + childFrameSize,
+				ImRect content_rect{
+					ImVec2{childFramePos + ImVec2(legendWidth, 0.f)}, ImVec2{childFramePos + childFrameSize}
+				};
+
+				draw_list->PushClipRect(content_rect.Min, content_rect.Max,
 				                        true);
 
 				// vertical frame lines in content area
@@ -464,6 +464,7 @@ namespace dmbrn
 							1.f);
 					}
 
+					const float ent_height = current_min.y;
 					// draw clips
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
@@ -472,6 +473,8 @@ namespace dmbrn
 						const unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 
+						assert(current_min.y == ent_height);
+
 						const ImVec2 pos = ImVec2(
 							current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 							current_min.y + 1);
@@ -479,8 +482,7 @@ namespace dmbrn
 						float localCustomHeight = 0.f;
 						if (ent_it == expanded_ent)
 						{
-							localCustomHeight += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
-							localCustomHeight += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
+							localCustomHeight += expanded_height;
 						}
 
 						const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y + 2);
@@ -524,86 +526,151 @@ namespace dmbrn
 
 						if (expanded_ent == ent_it)
 						{
-							for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end(); ++child_it)
+							current_min.y += ItemHeight;
+							for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end();
+							     ++child_it)
 							{
 								bool is_expanded_transform = false;
 
 								if (expanded_transform_ents.find(*child_it) != expanded_transform_ents.end())
 									is_expanded_transform = true;
 
-								std::unordered_set<float> existing_keyframe_times;
-
-								current_min.y += ItemHeight;
-
-								if (clip_it->second.channels.find(child_it->getId()) != clip_it->second.channels.end())
+								if (current_min.y < content_rect.Min.y)
 								{
-									current_min.y += ItemHeight;
-									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].positions)
-									{
-										existing_keyframe_times.insert(key_frame.first);
-
-										float keyframe_glob_time = std::floor(start + key_frame.first);
-
-										if (is_expanded_transform)
-											draw_list->AddRectFilled(
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
-												},
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
-													current_min.y + ItemHeight - 2
-												},
-												slotColor, 2);
-									}
-
-									current_min.y += ItemHeight;
-									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].rotations)
-									{
-										existing_keyframe_times.insert(key_frame.first);
-
-										float keyframe_glob_time = std::floor(start + key_frame.first);
-
-										if (is_expanded_transform)
-											draw_list->AddRectFilled(
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
-												},
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
-													current_min.y + ItemHeight - 2
-												},
-												slotColor, 2);
-									}
-
-									current_min.y += ItemHeight;
-									for (const auto& key_frame : clip_it->second.channels[child_it->getId()].scales)
-									{
-										existing_keyframe_times.insert(key_frame.first);
-
-										float keyframe_glob_time = std::floor(start + key_frame.first);
-
-										if (is_expanded_transform)
-											draw_list->AddRectFilled(
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth, current_min.y
-												},
-												ImVec2{
-													pos.x + keyframe_glob_time * framePixelWidth + framePixelWidth,
-													current_min.y + ItemHeight - 2
-												},
-												slotColor, 2);
-									}
-
-									// draw key frames in child entt row in case it is not trnasform expanded
-									current_min.y -= 3 * ItemHeight;
+									if (!is_expanded_transform)
+										current_min.y += ItemHeight;
+									else
+										current_min.y += 4 * ItemHeight;
+									continue;
 								}
+								if (current_min.y > content_rect.Max.y)
+									break;
 
-								if (is_expanded_transform)
-									current_min.y += 3 * ItemHeight;
+								const float child_height = current_min.y;
+
+								auto channels_it = clip_it->second.channels.find(child_it->getId());
+								if (channels_it != clip_it->second.channels.end())
+								{
+									auto pos_it = channels_it->second.positions.lower_bound(
+										static_cast<float>(firstFrame) - start);
+									auto rot_it = channels_it->second.rotations.lower_bound(
+										static_cast<float>(firstFrame) - start);
+									auto scale_it = channels_it->second.scales.lower_bound(
+										static_cast<float>(firstFrame) - start);
+
+									auto pos_end = channels_it->second.positions.end();
+									auto rot_end = channels_it->second.rotations.end();
+									auto scale_end = channels_it->second.scales.end();
+
+									while (pos_it != pos_end || rot_it != rot_end || scale_it != scale_end)
+									{
+										assert(current_min.y == child_height);
+
+										float pos_time = pos_it != pos_end ? pos_it->first : FLT_MAX;
+										float rot_time = rot_it != rot_end ? rot_it->first : FLT_MAX;
+										float scale_time = scale_it != scale_end ? scale_it->first : FLT_MAX;
+
+										float min_time = std::min(pos_time, std::min(rot_time, scale_time));
+
+										float keyframe_glob_time = std::floor(start + min_time);
+
+										const float key_frame_radius = cursorWidth / 2.f;
+
+										ImVec2 key_frame_cpos{
+											contentMin.x +
+											legendWidth +
+											(keyframe_glob_time - static_cast<float>(firstFrame)) * framePixelWidth +
+											framePixelWidth / 2 -
+											key_frame_radius,
+											current_min.y + ItemHeight / 2.f
+										};
+
+										if (key_frame_cpos.x > content_rect.Max.x)
+											break;
+
+										draw_list->AddCircleFilled(key_frame_cpos, key_frame_radius,
+										                           0xFFFF0000, 4);
+										if (is_expanded_transform)
+											current_min.y += ItemHeight;
+
+										if (pos_it != pos_end &&
+											pos_it->first == min_time)
+										{
+											key_frame_cpos = ImVec2{
+												contentMin.x +
+												legendWidth +
+												(keyframe_glob_time - static_cast<float>(firstFrame)) * framePixelWidth
+												+
+												framePixelWidth / 2 -
+												key_frame_radius,
+												current_min.y + ItemHeight / 2.f
+											};
+											if (is_expanded_transform)
+											{
+												draw_list->AddCircleFilled(
+													key_frame_cpos, key_frame_radius, 0xFF0000FF, 4);
+												current_min.y += ItemHeight;
+											}
+											++pos_it;
+										}
+
+										if (rot_it != rot_end &&
+											rot_it->first == min_time)
+										{
+											key_frame_cpos = ImVec2{
+												contentMin.x +
+												legendWidth +
+												(keyframe_glob_time - static_cast<float>(firstFrame)) * framePixelWidth
+												+
+												framePixelWidth / 2 -
+												key_frame_radius,
+												current_min.y + ItemHeight / 2.f
+											};
+											if (is_expanded_transform)
+											{
+												draw_list->AddCircleFilled(
+													key_frame_cpos, key_frame_radius, 0xFF0000FF, 4);
+												current_min.y += ItemHeight;
+											}
+											++rot_it;
+										}
+
+										if (scale_it != scale_end &&
+											scale_it->first == min_time)
+										{
+											key_frame_cpos = ImVec2{
+												contentMin.x +
+												legendWidth +
+												(keyframe_glob_time - static_cast<float>(firstFrame)) * framePixelWidth
+												+
+												framePixelWidth / 2 -
+												key_frame_radius,
+												current_min.y + ItemHeight / 2.f
+											};
+											if (is_expanded_transform)
+											{
+												draw_list->AddCircleFilled(
+													key_frame_cpos, key_frame_radius, 0xFF0000FF, 4);
+											}
+											++scale_it;
+										}
+
+										if (is_expanded_transform)
+											current_min.y -= 3 * ItemHeight;
+									}
+								}
+								if (!is_expanded_transform)
+									current_min.y += ItemHeight;
+								else
+									current_min.y += 4 * ItemHeight;
 							}
+							current_min.y -= expanded_height;
 						}
 					}
-					current_min.y += ItemHeight;
+					if (ent_it == expanded_ent)
+						current_min.y += expanded_height;
+					else
+						current_min.y += ItemHeight;
 				}
 
 				if (ImGui::BeginDragDropTarget())
