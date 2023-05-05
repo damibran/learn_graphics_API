@@ -88,7 +88,7 @@ namespace dmbrn
 		bool sizingRBar = false;
 		bool sizingLBar = false;
 
-		AnimationSequence::EntityIterator expanded_ent = sequence.end();
+		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>expanded_entry = {sequence.end(),std::nullopt};
 		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
@@ -151,7 +151,7 @@ namespace dmbrn
 
 			float controlHeight = sequenceCount * ItemHeight;
 			float expanded_height = 0;
-			if (expanded_ent != sequence.end())
+			if (expanded_entry.first != sequence.end())
 			{
 				expanded_height += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
 				expanded_height += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
@@ -324,16 +324,16 @@ namespace dmbrn
 
 					if (ent_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
 					{
-						if (expanded_ent != ent_it)
+						if (expanded_entry.first != ent_it)
 						{
 							expanded_transform_ents.clear();
-							expanded_ent = ent_it;
-							expanded_ent_children = expanded_ent->first.getVectorOfAllChild();
+							expanded_entry.first = ent_it;
+							expanded_ent_children = expanded_entry.first->first.getVectorOfAllChild();
 						}
 						else
 						{
 							expanded_transform_ents.clear();
-							expanded_ent = sequence.end();
+							expanded_entry.first = sequence.end();
 							expanded_ent_children.clear();
 						}
 					}
@@ -343,7 +343,7 @@ namespace dmbrn
 					current_min.y += ItemHeight;
 
 					// TODO CustomHeight
-					if (ent_it == expanded_ent)
+					if (ent_it == expanded_entry.first)
 					{
 						current_min.x += expanded_ent_indend_size;
 						for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end(); ++
@@ -422,7 +422,7 @@ namespace dmbrn
 
 						// TODO CustomHeight only one entity can be expanded
 						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
-						if(ent_it == expanded_ent)
+						if(ent_it == expanded_entry.first)
 							localCustomHeight += expanded_height;
 
 						ImVec2 pos = ImVec2(contentMin.x + legendWidth,
@@ -481,7 +481,7 @@ namespace dmbrn
 							current_min.y + 1);
 
 						float localCustomHeight = 0.f;
-						if (ent_it == expanded_ent)
+						if (ent_it == expanded_entry.first)
 						{
 							localCustomHeight += expanded_height;
 						}
@@ -525,7 +525,7 @@ namespace dmbrn
 						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
 
-						if (expanded_ent == ent_it)
+						if (expanded_entry.first == ent_it && expanded_entry.second.has_value() && expanded_entry.second.value() == clip_it)
 						{
 							current_min.y += ItemHeight;
 							for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end();
@@ -546,7 +546,7 @@ namespace dmbrn
 								}
 								if (current_min.y > content_rect.Max.y)
 								{
-									current_min.y = ent_height + expanded_height;
+									current_min.y = ent_height + expanded_height + ItemHeight;
 									break;
 								}
 
@@ -668,10 +668,10 @@ namespace dmbrn
 								else
 									current_min.y += 4 * ItemHeight;
 							}
-							current_min.y -= expanded_height;
+							current_min.y -= expanded_height + ItemHeight;
 						}
 					}
-					if (ent_it == expanded_ent)
+					if (ent_it == expanded_entry.first)
 						current_min.y += expanded_height;
 					else
 						current_min.y += ItemHeight;
@@ -749,6 +749,7 @@ namespace dmbrn
 						if (!diffFrame)
 						{
 							selectedEntity = movingEntry.first;
+							expanded_entry.second=movingEntry.second;
 							ret = true;
 						}
 
