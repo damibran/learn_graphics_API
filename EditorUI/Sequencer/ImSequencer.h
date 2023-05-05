@@ -422,7 +422,8 @@ namespace dmbrn
 
 						// TODO CustomHeight only one entity can be expanded
 						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
-						localCustomHeight += expanded_height;
+						if(ent_it == expanded_ent)
+							localCustomHeight += expanded_height;
 
 						ImVec2 pos = ImVec2(contentMin.x + legendWidth,
 						                    contentMin.y + ItemHeight * i + 1 + customHeight);
@@ -544,7 +545,10 @@ namespace dmbrn
 									continue;
 								}
 								if (current_min.y > content_rect.Max.y)
+								{
+									current_min.y = ent_height + expanded_height;
 									break;
+								}
 
 								const float child_height = current_min.y;
 
