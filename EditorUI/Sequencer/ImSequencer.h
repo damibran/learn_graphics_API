@@ -502,14 +502,14 @@ namespace dmbrn
 								slotP1,
 								ImVec2(cursorOffset,
 								       current_min.y + ItemHeight), 0x800000AA,
-								1.f);
+								0);
 						}
 						else
 							draw_list->AddRectFilled(
 								ImVec2(current_min.x, current_min.y),
 								ImVec2(current_min.x + canvas_size.x,
 								       current_min.y + ItemHeight), 0x800000AA,
-								1.f);
+								0);
 					}
 
 					const float ent_height = current_min.y;
@@ -607,11 +607,9 @@ namespace dmbrn
 										start += diffFrame;
 										clip_move_mouse_pos += diffFrame * framePixelWidth;
 
-										sequence.updateStart(
-											ent_it, std::move(clip_it),
+										clip_it = sequence.updateStart(
+											ent_it, std::move_iterator(clip_it),
 											start);
-
-										break;
 									}
 								}
 							}

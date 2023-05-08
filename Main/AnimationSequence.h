@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wrappers/Animation.h"
+
 namespace dmbrn
 {
 	class AnimationSequence
@@ -33,11 +35,11 @@ namespace dmbrn
 			entries_[ent].insert({start, clip});
 		}
 
-		ClipIterator updateStart(const EntityIterator& ent_it, ClipIterator&& clip_it, float new_start)
+		ClipIterator updateStart(const EntityIterator& ent_it, std::move_iterator<ClipIterator> clip_it, float new_start)
 		{
 			AnimationClip animation_clip = std::move(clip_it->second);
-			ent_it->second.erase(clip_it);
-			return {ent_it->second.insert({new_start, animation_clip})};
+			ent_it->second.erase(clip_it.base());
+			return {ent_it->second.insert({new_start, std::move(animation_clip)})};
 		}
 	};
 }
