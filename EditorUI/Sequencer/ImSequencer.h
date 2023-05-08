@@ -70,7 +70,7 @@ namespace dmbrn
 
 		ImVec2 frameBarPixelOffsets = {0, 150};
 		ImVec2 frameBarPixelOffsetsTarget = {0, 150};
-		
+
 		bool MovingScrollBar = false;
 		bool MovingCurrentFrame = false;
 
@@ -81,7 +81,7 @@ namespace dmbrn
 		bool sizingRBar = false;
 		bool sizingLBar = false;
 
-		float clip_move_mouse_pos=0.f;
+		float clip_move_mouse_pos = 0.f;
 
 		std::pair<Enttity, AnimationClip*> expanded_entry;
 		std::vector<Enttity> expanded_ent_children;
@@ -134,7 +134,7 @@ namespace dmbrn
 
 			bool ret = false;
 			const ImGuiIO& io = ImGui::GetIO();
-			
+
 			const int sequenceCount = sequence.getAnimationComponentCount();
 			if (!sequenceCount)
 				return false;
@@ -530,26 +530,43 @@ namespace dmbrn
 							{
 								draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
 
-								//if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
-								//{
-								//	movingEntry = {ent_it, clip_it};
-								//	movingPos = mouse_x;
-								//	break;
-								//}
+								if (io.MouseClicked[0])
+								{
+									clip_move_mouse_pos = io.MousePos.x;
+									if (selected_clips[ent_it->first] != &clip_it->second)
+										selected_clips[ent_it->first] = &clip_it->second;
+									else
+										selected_clips[ent_it->first] = nullptr;
+								}
 
-								if(io.MouseClicked[0])
-									clip_move_mouse_pos=io.MousePos.x;
+								if (io.MouseDoubleClicked[0])
+								{
+									if(expanded_entry.first && expanded_entry.first == ent_it->first)
+									{
+										if(expanded_entry.second!=&clip_it->second)
+											expanded_entry.second = &clip_it->second;
+										else
+											expanded_entry.second = nullptr;
+									}else
+									{
+										expanded_entry.first = ent_it->first;
+										expanded_entry.second = &clip_it->second;
+										expanded_transform_ents.clear();
+										expanded_ent_children = expanded_entry.first.getVectorOfAllChild();
+									}
+								}
 
 								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 								{
 									ImGui::SetNextFrameWantCaptureMouse(true);
-									const float diffFrame = std::round((io.MousePos.x - clip_move_mouse_pos ) / framePixelWidth);
+									const float diffFrame = std::round(
+										(io.MousePos.x - clip_move_mouse_pos) / framePixelWidth);
 									if (std::abs(diffFrame) > 0)
 									{
 										float start = clip_it->first;
 
 										start += diffFrame;
-										clip_move_mouse_pos +=diffFrame*framePixelWidth;
+										clip_move_mouse_pos += diffFrame * framePixelWidth;
 
 										sequence.updateStart(
 											ent_it, std::move(clip_it),
@@ -766,7 +783,7 @@ namespace dmbrn
 						MovingCurrentFrame = true;
 					ImGui::EndDragDropTarget();
 				}
-				
+
 				// draw cursor
 				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.
 					mFrameMax))
@@ -786,7 +803,7 @@ namespace dmbrn
 
 				draw_list->PopClipRect();
 				draw_list->PopClipRect();
-				
+
 				ImGui::EndChildFrame();
 				ImGui::PopStyleColor();
 
