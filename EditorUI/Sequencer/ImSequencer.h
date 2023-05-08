@@ -88,7 +88,7 @@ namespace dmbrn
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
 		std::unordered_set<Enttity, Enttity::hash> recording_ents;
-		std::unordered_map<Enttity, AnimationClip*, Enttity::hash> selected_clips;
+		std::unordered_map<Enttity, std::pair<float, AnimationClip*>, Enttity::hash> selected_clips;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -479,13 +479,37 @@ namespace dmbrn
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 				{
 					// selection
-					if (selected_clips.find(ent_it->first) != selected_clips.end() && selected_clips.at(ent_it->first))
+
+					if (recording_ents.find(ent_it->first) != recording_ents.end())
 					{
-						draw_list->AddRectFilled(
-							ImVec2(current_min.x, current_min.y),
-							ImVec2(current_min.x + canvas_size.x,
-							       current_min.y + ItemHeight), 0x801080FF,
-							1.f);
+						AnimationClip* sel_clip = selected_clips[ent_it->first].second;
+
+						if (sel_clip)
+						{
+							float start = selected_clips.at(ent_it->first).first;
+							const ImVec2 pos = ImVec2(
+								current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
+								current_min.y + 1);
+							const ImVec2 slotP1(pos.x + start * framePixelWidth, pos.y);
+
+							const float cursorOffset = contentMin.x +
+								legendWidth +
+								(currentFrame - static_cast<float>(firstFrame)) * framePixelWidth +
+								framePixelWidth / 2 -
+								cursorWidth * 0.5f;
+
+							draw_list->AddRectFilled(
+								slotP1,
+								ImVec2(cursorOffset,
+								       current_min.y + ItemHeight), 0x800000AA,
+								1.f);
+						}
+						else
+							draw_list->AddRectFilled(
+								ImVec2(current_min.x, current_min.y),
+								ImVec2(current_min.x + canvas_size.x,
+								       current_min.y + ItemHeight), 0x800000AA,
+								1.f);
 					}
 
 					const float ent_height = current_min.y;
@@ -514,8 +538,15 @@ namespace dmbrn
 						const ImVec2 slotP3(pos.x + end * framePixelWidth + framePixelWidth,
 						                    pos.y + ItemHeight - 2 + localCustomHeight);
 
-						const unsigned int slotColor = color | 0xFF000000;
+						unsigned int slotColor = color | 0xFF000000;
 						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
+
+						if (&clip_it->second == selected_clips[ent_it->first].second)
+						{
+							slotColor = 0xFFFFEEEE;
+							if (recording_ents.find(ent_it->first) != recording_ents.end())
+								slotColor = 0xFF9090BB;
+						}
 
 						if (slotP1.x <= (canvas_size.x + contentMin.x) && slotP2.x >= (contentMin.x + legendWidth))
 						{
@@ -533,21 +564,29 @@ namespace dmbrn
 								if (io.MouseClicked[0])
 								{
 									clip_move_mouse_pos = io.MousePos.x;
-									if (selected_clips[ent_it->first] != &clip_it->second)
-										selected_clips[ent_it->first] = &clip_it->second;
+								}
+
+								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0]<0.1 && !io.MouseDoubleClicked[0])
+								{
+									if (selected_clips[ent_it->first].second != &clip_it->second)
+									{
+										selected_clips[ent_it->first].first = clip_it->first;
+										selected_clips[ent_it->first].second = &clip_it->second;
+									}
 									else
-										selected_clips[ent_it->first] = nullptr;
+										selected_clips[ent_it->first].second = nullptr;
 								}
 
 								if (io.MouseDoubleClicked[0])
 								{
-									if(expanded_entry.first && expanded_entry.first == ent_it->first)
+									if (expanded_entry.first && expanded_entry.first == ent_it->first)
 									{
-										if(expanded_entry.second!=&clip_it->second)
+										if (expanded_entry.second != &clip_it->second)
 											expanded_entry.second = &clip_it->second;
 										else
 											expanded_entry.second = nullptr;
-									}else
+									}
+									else
 									{
 										expanded_entry.first = ent_it->first;
 										expanded_entry.second = &clip_it->second;
@@ -556,7 +595,7 @@ namespace dmbrn
 									}
 								}
 
-								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !MovingCurrentFrame)
 								{
 									ImGui::SetNextFrameWantCaptureMouse(true);
 									const float diffFrame = std::round(
@@ -731,7 +770,7 @@ namespace dmbrn
 						}
 					}
 					if (ent_it->first == expanded_entry.first)
-						current_min.y += expanded_height;
+						current_min.y += expanded_height + ItemHeight;
 					else
 						current_min.y += ItemHeight;
 				}
