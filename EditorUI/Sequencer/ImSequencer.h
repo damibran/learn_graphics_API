@@ -52,8 +52,7 @@ namespace dmbrn
 		const float text_offset = 2.f;
 
 		Sequencer(AnimationSequence& sequence):
-			sequence(sequence),
-			selectedEntity(sequence.end())
+			sequence(sequence)
 		{
 		}
 
@@ -65,7 +64,6 @@ namespace dmbrn
 		bool playing = false;
 
 		AnimationSequence& sequence;
-		AnimationSequence::EntityIterator selectedEntity;
 		float currentFrame = 100.f;
 		bool expanded = true;
 		int firstFrame = 0;
@@ -73,8 +71,9 @@ namespace dmbrn
 		ImVec2 frameBarPixelOffsets = {0, 150};
 		ImVec2 frameBarPixelOffsetsTarget = {0, 150};
 
-		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>
-		movingEntry = {sequence.end(), std::nullopt};
+		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>> movingEntry = {
+			sequence.end(), std::nullopt
+		};
 
 		float movingPos = -1.f;
 
@@ -88,9 +87,12 @@ namespace dmbrn
 		bool sizingRBar = false;
 		bool sizingLBar = false;
 
-		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>>expanded_entry = {sequence.end(),std::nullopt};
+		std::pair<Enttity, AnimationClip*> expanded_entry;
 		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
+
+		std::unordered_set<Enttity, Enttity::hash> recording_ents;
+		std::unordered_map<Enttity,AnimationClip*,Enttity::hash> selected_clips;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -151,7 +153,7 @@ namespace dmbrn
 
 			float controlHeight = sequenceCount * ItemHeight;
 			float expanded_height = 0;
-			if (expanded_entry.first != sequence.end())
+			if (expanded_entry.first)
 			{
 				expanded_height += static_cast<float>(expanded_ent_children.size()) * ItemHeight;
 				expanded_height += 3 * static_cast<float>(expanded_transform_ents.size()) * ItemHeight;
@@ -324,26 +326,54 @@ namespace dmbrn
 
 					if (ent_rect.Contains(io.MousePos) && io.MouseDoubleClicked[0])
 					{
-						if (expanded_entry.first != ent_it)
+						if (expanded_entry.first && expanded_entry.first == ent_it->first)
 						{
+							expanded_entry.first = Enttity{};
+							expanded_entry.second=nullptr;
 							expanded_transform_ents.clear();
-							expanded_entry.first = ent_it;
-							expanded_ent_children = expanded_entry.first->first.getVectorOfAllChild();
+							expanded_ent_children.clear();
 						}
 						else
 						{
+							expanded_entry.first = ent_it->first;
+							expanded_entry.second=nullptr;
 							expanded_transform_ents.clear();
-							expanded_entry.first = sequence.end();
-							expanded_ent_children.clear();
+							expanded_ent_children = expanded_entry.first.getVectorOfAllChild();
 						}
 					}
 
 					draw_list->AddText(tpos, 0xFFFFFFFF, ent_it->first.getComponent<TagComponent>().tag.c_str());
 
+					const float text_rec_offset = 10;
+					const float rec_offset = ImGui::CalcTextSize(ent_it->first.getComponent<TagComponent>().tag.c_str())
+						.x +
+						text_rec_offset;
+
+					const bool is_recording = recording_ents.find(ent_it->first) != recording_ents.end();
+					unsigned rec_color = !is_recording ? 0xFF000060 : 0xFF0000B0;
+					const ImVec2 rec_pos = tpos + ImVec2{rec_offset, -2 + ItemHeight * 0.5f};
+					const float rec_radius = 6;
+					const bool is_inside_rec = std::pow(io.MousePos.x - rec_pos.x, 2.f) + std::pow(
+						io.MousePos.y - rec_pos.y, 2.f) <= rec_radius * rec_radius;
+
+					if (is_inside_rec)
+						rec_color += !is_recording ? 0x00000030 : -0x00000030;
+					if (is_inside_rec && io.MouseDown[0])
+						rec_color += !is_recording ? 0x00000030 : -0x00000030;
+					if (is_inside_rec && io.MouseReleased[0])
+					{
+						if (!is_recording)
+							recording_ents.insert(ent_it->first);
+						else
+							recording_ents.erase(ent_it->first);
+					}
+
+					draw_list->AddCircleFilled(rec_pos, rec_radius, rec_color);
+
 					current_min.y += ItemHeight;
 
 					// TODO CustomHeight
-					if (ent_it == expanded_entry.first)
+					if (ent_it->first == expanded_entry.first)
 					{
 						current_min.x += expanded_ent_indend_size;
 						for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end(); ++
@@ -422,7 +452,7 @@ namespace dmbrn
 
 						// TODO CustomHeight only one entity can be expanded
 						float localCustomHeight = 0; // sequence.GetCustomHeight(i);
-						if(ent_it == expanded_entry.first)
+						if (ent_it->first == expanded_entry.first)
 							localCustomHeight += expanded_height;
 
 						ImVec2 pos = ImVec2(contentMin.x + legendWidth,
@@ -456,7 +486,7 @@ namespace dmbrn
 				for (auto ent_it = sequence.begin(); ent_it != sequence.end(); ++ent_it)
 				{
 					// selection
-					if (selectedEntity != sequence.end() && selectedEntity == ent_it)
+					if (selected_clips.find(ent_it->first) != selected_clips.end() && selected_clips.at(ent_it->first))
 					{
 						draw_list->AddRectFilled(
 							ImVec2(current_min.x, current_min.y),
@@ -481,7 +511,7 @@ namespace dmbrn
 							current_min.y + 1);
 
 						float localCustomHeight = 0.f;
-						if (ent_it == expanded_entry.first)
+						if (ent_it->first == expanded_entry.first)
 						{
 							localCustomHeight += expanded_height;
 						}
@@ -525,7 +555,8 @@ namespace dmbrn
 						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
 
-						if (expanded_entry.first == ent_it && expanded_entry.second.has_value() && expanded_entry.second.value() == clip_it)
+						if (expanded_entry.first == ent_it->first && expanded_entry.second!=nullptr
+							&& expanded_entry.second == &clip_it->second)
 						{
 							current_min.y += ItemHeight;
 							for (auto child_it = expanded_ent_children.begin(); child_it != expanded_ent_children.end();
@@ -671,7 +702,7 @@ namespace dmbrn
 							current_min.y -= expanded_height + ItemHeight;
 						}
 					}
-					if (ent_it == expanded_entry.first)
+					if (ent_it->first == expanded_entry.first)
 						current_min.y += expanded_height;
 					else
 						current_min.y += ItemHeight;
@@ -735,9 +766,6 @@ namespace dmbrn
 						float start = movingEntry.second.value()->first;
 
 						start += diffFrame;
-
-						selectedEntity = movingEntry.first;
-
 						movingPos += diffFrame * framePixelWidth;
 
 						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second),
@@ -748,8 +776,7 @@ namespace dmbrn
 						// single select
 						if (!diffFrame)
 						{
-							selectedEntity = movingEntry.first;
-							expanded_entry.second=movingEntry.second;
+							selected_clips[movingEntry.first->first] = &movingEntry.second.value()->second;
 							ret = true;
 						}
 
