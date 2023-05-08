@@ -70,13 +70,7 @@ namespace dmbrn
 
 		ImVec2 frameBarPixelOffsets = {0, 150};
 		ImVec2 frameBarPixelOffsetsTarget = {0, 150};
-
-		std::pair<AnimationSequence::EntityIterator, std::optional<AnimationSequence::ClipIterator>> movingEntry = {
-			sequence.end(), std::nullopt
-		};
-
-		float movingPos = -1.f;
-
+		
 		bool MovingScrollBar = false;
 		bool MovingCurrentFrame = false;
 
@@ -87,12 +81,14 @@ namespace dmbrn
 		bool sizingRBar = false;
 		bool sizingLBar = false;
 
+		float clip_move_mouse_pos=0.f;
+
 		std::pair<Enttity, AnimationClip*> expanded_entry;
 		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
 		std::unordered_set<Enttity, Enttity::hash> recording_ents;
-		std::unordered_map<Enttity,AnimationClip*,Enttity::hash> selected_clips;
+		std::unordered_map<Enttity, AnimationClip*, Enttity::hash> selected_clips;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -138,10 +134,7 @@ namespace dmbrn
 
 			bool ret = false;
 			const ImGuiIO& io = ImGui::GetIO();
-			const float mouse_x = io.MousePos.x;
-			const float mouse_y = io.MousePos.y;
-
-			const bool popupOpened = false;
+			
 			const int sequenceCount = sequence.getAnimationComponentCount();
 			if (!sequenceCount)
 				return false;
@@ -211,7 +204,7 @@ namespace dmbrn
 				                     ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + ItemHeight));
 
 				// current frame  change
-				if (!MovingCurrentFrame && !MovingScrollBar && movingEntry.first == sequence.end() &&
+				if (!MovingCurrentFrame && !MovingScrollBar &&
 					sequenceOptions &
 					SEQUENCER_CHANGE_FRAME && topRect.Contains(io.MousePos) && io.MouseDown[0])
 				{
@@ -329,14 +322,14 @@ namespace dmbrn
 						if (expanded_entry.first && expanded_entry.first == ent_it->first)
 						{
 							expanded_entry.first = Enttity{};
-							expanded_entry.second=nullptr;
+							expanded_entry.second = nullptr;
 							expanded_transform_ents.clear();
 							expanded_ent_children.clear();
 						}
 						else
 						{
 							expanded_entry.first = ent_it->first;
-							expanded_entry.second=nullptr;
+							expanded_entry.second = nullptr;
 							expanded_transform_ents.clear();
 							expanded_ent_children = expanded_entry.first.getVectorOfAllChild();
 						}
@@ -530,20 +523,38 @@ namespace dmbrn
 							draw_list->AddRectFilled(slotP1, slotP2, slotColor, 2);
 						}
 
-						if (movingEntry.first == sequence.end() && (sequenceOptions &
-							SEQUENCER_EDIT_STARTEND))
+						if (sequenceOptions & SEQUENCER_EDIT_STARTEND)
 						{
 							const ImRect rc = ImRect(slotP1, slotP2);
 							if (rc.Contains(io.MousePos))
 							{
 								draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
 
-								if (ImRect(childFramePos, childFramePos + childFrameSize).Contains(io.MousePos))
+								//if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+								//{
+								//	movingEntry = {ent_it, clip_it};
+								//	movingPos = mouse_x;
+								//	break;
+								//}
+
+								if(io.MouseClicked[0])
+									clip_move_mouse_pos=io.MousePos.x;
+
+								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 								{
-									if (ImGui::IsMouseClicked(0) && !MovingScrollBar && !MovingCurrentFrame)
+									ImGui::SetNextFrameWantCaptureMouse(true);
+									const float diffFrame = std::round((io.MousePos.x - clip_move_mouse_pos ) / framePixelWidth);
+									if (std::abs(diffFrame) > 0)
 									{
-										movingEntry = {ent_it, clip_it};
-										movingPos = mouse_x;
+										float start = clip_it->first;
+
+										start += diffFrame;
+										clip_move_mouse_pos +=diffFrame*framePixelWidth;
+
+										sequence.updateStart(
+											ent_it, std::move(clip_it),
+											start);
+
 										break;
 									}
 								}
@@ -555,7 +566,7 @@ namespace dmbrn
 						                   clip_it->second.name.c_str());
 						draw_list->PopClipRect();
 
-						if (expanded_entry.first == ent_it->first && expanded_entry.second!=nullptr
+						if (expanded_entry.first == ent_it->first && expanded_entry.second != nullptr
 							&& expanded_entry.second == &clip_it->second)
 						{
 							current_min.y += ItemHeight;
@@ -755,35 +766,7 @@ namespace dmbrn
 						MovingCurrentFrame = true;
 					ImGui::EndDragDropTarget();
 				}
-
-				// moving
-				if (movingEntry.first != sequence.end()) ///*backgroundRect.Contains(io.MousePos) && */
-				{
-					ImGui::SetNextFrameWantCaptureMouse(true);
-					const float diffFrame = std::round((mouse_x - movingPos) / framePixelWidth);
-					if (std::abs(diffFrame) > 0)
-					{
-						float start = movingEntry.second.value()->first;
-
-						start += diffFrame;
-						movingPos += diffFrame * framePixelWidth;
-
-						movingEntry.second = sequence.updateStart(movingEntry.first, std::move(*movingEntry.second),
-						                                          start);
-					}
-					if (!io.MouseDown[0])
-					{
-						// single select
-						if (!diffFrame)
-						{
-							selected_clips[movingEntry.first->first] = &movingEntry.second.value()->second;
-							ret = true;
-						}
-
-						movingEntry = {sequence.end(), std::nullopt};
-					}
-				}
-
+				
 				// draw cursor
 				if (currentFrame >= static_cast<float>(firstFrame) && currentFrame <= static_cast<float>(sequence.
 					mFrameMax))
@@ -803,14 +786,7 @@ namespace dmbrn
 
 				draw_list->PopClipRect();
 				draw_list->PopClipRect();
-
-				//for (auto& customDraw : customDraws)
-				//	sequence.CustomDraw(customDraw.index, draw_list, customDraw.customRect, customDraw.legendRect,
-				//	                    customDraw.clippingRect, customDraw.legendClippingRect);
-				//for (auto& customDraw : compactCustomDraws)
-				//	sequence.CustomDrawCompact(customDraw.index, draw_list, customDraw.customRect,
-				//	                           customDraw.clippingRect);
-
+				
 				ImGui::EndChildFrame();
 				ImGui::PopStyleColor();
 
@@ -919,7 +895,7 @@ namespace dmbrn
 					else
 					{
 						if (scrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && !
-							MovingCurrentFrame && movingEntry.first == sequence.end())
+							MovingCurrentFrame)
 						{
 							MovingScrollBar = true;
 							panningViewSource = io.MousePos;
