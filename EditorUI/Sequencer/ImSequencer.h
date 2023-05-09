@@ -70,53 +70,11 @@ namespace dmbrn
 		{
 			if (selected_clips[rec_parent].has_value())
 			{
-				if(currentFrame > selected_clips[rec_parent].value()->first)
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].positions[currentFrame] = key;
-				else
-				{
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].positions[currentFrame] = key;
-					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
-				}
+				selected_clips[rec_parent] = sequence.updateClipWithKey(*enttity,currentFrame,selected_clips[rec_parent].value(),key);
 			}
 			else
 			{
-				selected_clips[rec_parent]= sequence.processPositionKey(enttity, rec_parent, key, currentFrame);
-			}
-		}
-
-		void processRotationKey(const Enttity* enttity, const Enttity& rec_parent,const glm::quat& key)
-		{
-			if (selected_clips[rec_parent].has_value())
-			{
-				if(currentFrame > selected_clips[rec_parent].value()->first)
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].rotations[currentFrame] = key;
-				else
-				{
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].rotations[currentFrame] = key;
-					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
-				}
-			}
-			else
-			{
-				selected_clips[rec_parent]= sequence.processRotationKey(enttity, rec_parent, key, currentFrame);
-			}
-		}
-
-		void processScaleKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key)
-		{
-			if (selected_clips[rec_parent].has_value())
-			{
-				if(currentFrame > selected_clips[rec_parent].value()->first)
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].scales[currentFrame] = key;
-				else
-				{
-					selected_clips[rec_parent].value()->second.channels[enttity->getId()].scales[currentFrame] = key;
-					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
-				}
-			}
-			else
-			{
-				selected_clips[rec_parent]= sequence.processScaleKey(enttity, rec_parent, key, currentFrame);
+				selected_clips[rec_parent]= sequence.createNewClipWithKey(enttity, rec_parent, key, currentFrame);
 			}
 		}
 
@@ -715,7 +673,7 @@ namespace dmbrn
 
 								const float child_height = current_min.y;
 
-								auto channels_it = clip_it->second.channels.find(child_it->getId());
+								auto channels_it = clip_it->second.channels.find(*child_it);
 								if (channels_it != clip_it->second.channels.end())
 								{
 									auto pos_it = channels_it->second.positions.lower_bound(

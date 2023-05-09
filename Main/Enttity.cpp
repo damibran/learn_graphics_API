@@ -66,7 +66,7 @@ namespace dmbrn
 		return *this;
 	}
 
-	void Enttity::markTransformAsEdited(uint32_t frame)
+	void Enttity::markTransformAsEdited(uint32_t frame)const
 	// we make it edited for this node and dirty all the way to the root
 	{
 		RelationshipComponent& this_rc = getComponent<RelationshipComponent>();

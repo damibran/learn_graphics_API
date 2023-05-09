@@ -11,7 +11,6 @@ namespace dmbrn
 {
 	struct AnimationChannels
 	{
-		Enttity enttity;
 		std::map<float, glm::vec3> positions;
 		std::map<float, glm::quat> rotations;
 		std::map<float, glm::vec3> scales;
@@ -21,13 +20,13 @@ namespace dmbrn
 	{
 		std::string name;
 		float duration_; // in frames
-		std::unordered_map<entt::entity, AnimationChannels> channels;
+		std::unordered_map<Enttity, AnimationChannels,Enttity::hash> channels;
 
 		void updateTransforms(float cur_local_frame, uint32_t frame)
 		{
 			for (auto& chnls : channels)
 			{
-				TransformComponent& ent_trans_c = chnls.second.enttity.getComponent<TransformComponent>();
+				TransformComponent& ent_trans_c = chnls.first.getComponent<TransformComponent>();
 
 				if (!chnls.second.positions.empty())
 					ent_trans_c.position = mixPositions(cur_local_frame, chnls.second);
@@ -36,7 +35,7 @@ namespace dmbrn
 				if (!chnls.second.scales.empty())
 					ent_trans_c.scale = mixScale(cur_local_frame, chnls.second);
 
-				chnls.second.enttity.markTransformAsEdited(frame);
+				chnls.first.markTransformAsEdited(frame);
 			}
 		}
 

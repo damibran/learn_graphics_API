@@ -111,7 +111,7 @@ namespace dmbrn
 			return entityID_;
 		}
 
-		void markTransformAsEdited(uint32_t frame);
+		void markTransformAsEdited(uint32_t frame)const;
 		std::vector<Enttity> getVectorOfAllChild() const;
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }

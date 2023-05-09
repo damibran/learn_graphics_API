@@ -35,38 +35,40 @@ namespace dmbrn
 		}
 
 		[[nodiscard]] ClipIterator updateStart(const EntityIterator& ent_it, std::move_iterator<ClipIterator> clip_it,
-		                         float new_start)
+		                                       float new_start)
 		{
 			AnimationClip animation_clip = std::move(clip_it->second);
 			ent_it->second.erase(clip_it.base());
 			return {ent_it->second.insert({new_start, std::move(animation_clip)})};
 		}
 
-		[[nodiscard]] ClipIterator processPositionKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key, float key_time)
+		[[nodiscard]] ClipIterator updateClipWithKey(Enttity trans_ent, float currentFrame, std::move_iterator<ClipIterator> sel_clip,
+		                                             const glm::vec3& key)
+		{
+			float start = sel_clip->first;
+			float end = sel_clip->first + sel_clip->second.duration_;
+			if (currentFrame >= start && currentFrame <= end)
+				sel_clip->second.channels[trans_ent].positions[currentFrame - start] = key;
+			else if (currentFrame > end)
+			{
+				sel_clip->second.channels[trans_ent].positions[currentFrame - start] = key;
+				sel_clip->second.duration_ = currentFrame - start;
+			}
+			else if (currentFrame < start)
+			{
+				for(auto&& it:sel_clip.base()->second.channels)
+			}
+		}
+
+		[[nodiscard]] ClipIterator createNewClipWithKey(const Enttity* enttity, const Enttity& rec_parent,
+		                                                const glm::vec3& key, float key_time)
 		{
 			decltype(AnimationClip::channels) channels;
-			channels[enttity->getId()].positions[key_time] = key;
-			channels[enttity->getId()].enttity=*enttity;
+			channels[*enttity].positions[key_time] = key;
 			AnimationClip new_clip{"New clip", 0, std::move(channels)};
 			return entries_[rec_parent].insert({key_time, std::move(new_clip)});
 		}
 
-		[[nodiscard]] ClipIterator processRotationKey(const Enttity* enttity, const Enttity& rec_parent,const glm::quat& key, float key_time)
-		{
-			decltype(AnimationClip::channels) channels;
-			channels[enttity->getId()].rotations[key_time] = key;
-			channels[enttity->getId()].enttity=*enttity;
-			AnimationClip new_clip{"New clip", 0, std::move(channels)};
-			return entries_[rec_parent].insert({key_time, std::move(new_clip)});
-		}
-
-		[[nodiscard]] ClipIterator processScaleKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key, float key_time)
-		{
-			decltype(AnimationClip::channels) channels;
-			channels[enttity->getId()].scales[key_time] = key;
-			channels[enttity->getId()].enttity=*enttity;
-			AnimationClip new_clip{"New clip", 0, std::move(channels)};
-			return entries_[rec_parent].insert({key_time, std::move(new_clip)});
-		}
+	private:
 	};
 }

@@ -338,8 +338,6 @@ namespace dmbrn
 
 						AnimationChannels channels;
 
-						channels.enttity = node_entt;
-
 						for (unsigned k = 0; k < node_anim->mNumPositionKeys; ++k)
 						{
 							const aiVectorKey pos_k = node_anim->mPositionKeys[k];
@@ -377,7 +375,7 @@ namespace dmbrn
 
 						clip.duration_ = max - min;
 
-						clip.channels.insert({node_entt.getId(),std::move(channels)});
+						clip.channels.insert({node_entt,std::move(channels)});
 					}
 					animation_clips.insert(std::move(clip));
 				}
