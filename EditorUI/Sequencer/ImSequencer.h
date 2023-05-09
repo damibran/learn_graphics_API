@@ -332,6 +332,7 @@ namespace dmbrn
 							expanded_entry.second = nullptr;
 							expanded_transform_ents.clear();
 							expanded_ent_children = expanded_entry.first.getVectorOfAllChild();
+							expanded_ent_children.insert(expanded_ent_children.begin(), ent_it->first);
 						}
 					}
 
@@ -566,7 +567,8 @@ namespace dmbrn
 									clip_move_mouse_pos = io.MousePos.x;
 								}
 
-								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0]<0.1 && !io.MouseDoubleClicked[0])
+								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0] < 0.1 && !io.MouseDoubleClicked[
+									0])
 								{
 									if (selected_clips[ent_it->first].second != &clip_it->second)
 									{
@@ -592,6 +594,7 @@ namespace dmbrn
 										expanded_entry.second = &clip_it->second;
 										expanded_transform_ents.clear();
 										expanded_ent_children = expanded_entry.first.getVectorOfAllChild();
+										expanded_ent_children.insert(expanded_ent_children.begin(), ent_it->first);
 									}
 								}
 
@@ -814,7 +817,10 @@ namespace dmbrn
 								}
 							}
 						}
-						current_min.y += ItemHeight;
+						if (ent_it->first == expanded_entry.first)
+							current_min.y += expanded_height + ItemHeight;
+						else
+							current_min.y += ItemHeight;
 					}
 					if (!MovingCurrentFrame)
 						MovingCurrentFrame = true;
