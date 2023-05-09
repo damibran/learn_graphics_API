@@ -5,6 +5,8 @@
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
 #include "EditorUI/Viewport/ViewportCamera.h"
+#include "Utils/Transform.h"
+#include "EditorUI/Sequencer/ImSequencer.h"
 
 namespace dmbrn
 {
@@ -13,14 +15,15 @@ namespace dmbrn
 	public:
 		const static inline ViewportRenderPass render_pass_;
 
-		Viewport(Scene& scene, Enttity* selected, const std::string& name = "Viewport"):
+		Viewport(Scene& scene, Sequencer& sequencer, Enttity* selected, const std::string& name = "Viewport"):
 			window_name_(name),
 			size_(1280, 720),
 			camera_(size_),
 			swap_chain_({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			            render_pass_),
 			scene_(scene),
-			selected_(selected)
+			selected_(selected),
+			sequencer_(sequencer)
 		{
 			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
 			{
@@ -96,7 +99,7 @@ namespace dmbrn
 
 					const glm::vec3 parent_glob_scale = getScale(parent_trans);
 
-					const float avg_scale = (parent_glob_scale.x + parent_glob_scale.y+ parent_glob_scale.z)/3;
+					const float avg_scale = (parent_glob_scale.x + parent_glob_scale.y + parent_glob_scale.z) / 3;
 
 					size_clip_space = size_clip_space / avg_scale;
 
@@ -108,13 +111,28 @@ namespace dmbrn
 
 						if (ImGuizmo::IsUsing())
 						{
-							glm::vec3 rot_deg;
+							Transform new_trans;
 							ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_trans),
-							                                      glm::value_ptr(t_c.position),
-							                                      glm::value_ptr(rot_deg),
-							                                      glm::value_ptr(t_c.scale));
+							                                      glm::value_ptr(new_trans.position),
+							                                      glm::value_ptr(new_trans.rotation),
+							                                      glm::value_ptr(new_trans.scale));
+							if (sequencer_.hasRecordingEnts())
+							{
+								Enttity rec_parent = selected_->findRecordingAnimationCompParent();
+								if (rec_parent)
+								{
+									if (new_trans.position != t_c.position)
+										sequencer_.processPositionKey(selected_,rec_parent,new_trans.position);
+									if (new_trans.rotation != t_c.getRotationDegrees())
+										sequencer_.processRotationKey(selected_,rec_parent,glm::quat{new_trans.rotation});
+									if (new_trans.scale != t_c.scale)
+										sequencer_.processScaleKey(selected_,rec_parent,new_trans.scale);
+								}
+							}
 
-							t_c.setDegrees(rot_deg);
+							t_c.position = new_trans.position;
+							t_c.setDegrees(new_trans.rotation);
+							t_c.scale = new_trans.scale;
 
 							selected_->markTransformAsEdited(frame);
 
@@ -185,7 +203,8 @@ namespace dmbrn
 				SkeletalModelComponent& skeletal_model = skeletal_group.get<
 					SkeletalModelComponent>(entity);
 				skeletal_model.getShader()->addToRenderQueue({
-					&skeletal_model.mesh, skeletal_model.skeleton_ent.getComponent<SkeletonComponent>().in_GPU_mtxs_offset
+					&skeletal_model.mesh,
+					skeletal_model.skeleton_ent.getComponent<SkeletonComponent>().in_GPU_mtxs_offset
 				});
 			}
 
@@ -203,6 +222,7 @@ namespace dmbrn
 		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
 		Enttity* selected_;
+		Sequencer& sequencer_;
 		static inline Viewport* last_used_focused = nullptr;
 		static inline ImGuizmo::OPERATION current_operation = ImGuizmo::OPERATION::TRANSLATE;
 

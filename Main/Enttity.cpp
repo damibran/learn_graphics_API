@@ -2,6 +2,7 @@
 #include "Enttity.h"
 #include "Componenets/RelationshipComponent.h"
 #include "Componenets/SkeletalModelComponent.h"
+#include "Componenets/AnimationComponent.h"
 
 namespace dmbrn
 {
@@ -64,7 +65,7 @@ namespace dmbrn
 
 		return *this;
 	}
-	
+
 	void Enttity::markTransformAsEdited(uint32_t frame)
 	// we make it edited for this node and dirty all the way to the root
 	{
@@ -105,7 +106,24 @@ namespace dmbrn
 
 		return res;
 	}
-	
+
+	Enttity Enttity::findRecordingAnimationCompParent()
+	{
+		AnimationComponent* this_a_c = tryGetComponent<AnimationComponent>();
+		if (this_a_c && this_a_c->is_recording)
+			return *this;
+		else
+		{
+			RelationshipComponent& r_c = getComponent<RelationshipComponent>();
+			if (r_c.parent)
+			{
+				return r_c.parent.findRecordingAnimationCompParent();
+			}
+			else
+				return Enttity{};
+		}
+	}
+
 	void Enttity::markTransformAsDirty(uint32_t frame) // we make it dirty all the way to the root
 	{
 		TransformComponent& this_tc = getComponent<TransformComponent>();

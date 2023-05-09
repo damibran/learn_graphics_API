@@ -247,11 +247,11 @@ namespace dmbrn
 			im_gui_(render_pass_),
 			scene_(scene),
 			scene_tree_(scene_),
+			sequencer_(scene.getAnimationSequence()),
 			inspector_(scene_,scene_tree_),
-			viewport_(scene_, scene_tree_.getSelected()),
-			viewport2_(scene_, scene_tree_.getSelected()
-			           , "Viewport 2"),
-			sequencer_(scene.getAnimationSequence())
+			viewport_(scene_, sequencer_,scene_tree_.getSelected()),
+			viewport2_(scene_, sequencer_,scene_tree_.getSelected()
+			           , "Viewport 2")
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
@@ -359,10 +359,10 @@ namespace dmbrn
 		ImGuiRaii im_gui_;
 		Scene& scene_;
 		SceneTree scene_tree_;
+		Sequencer sequencer_;
 		Inspector inspector_;
 		Viewport viewport_;
 		Viewport viewport2_;
-		Sequencer sequencer_;
 		MySequence ex_seq;
 		bool show_model_import = false;
 		std::string model_path;

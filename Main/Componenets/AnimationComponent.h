@@ -14,7 +14,7 @@ namespace dmbrn
 
 	struct AnimationComponent
 	{
-		const bool loop =true;
+		bool is_recording=false;
 		std::set<AnimationClip> animation_clips;
 
 		AnimationComponent() = default;

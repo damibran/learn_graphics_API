@@ -115,6 +115,7 @@ namespace dmbrn
 		std::vector<Enttity> getVectorOfAllChild() const;
 
 		operator uint32_t() const { return static_cast<uint32_t>(entityID_); }
+		Enttity findRecordingAnimationCompParent();
 
 		struct hash
 		{

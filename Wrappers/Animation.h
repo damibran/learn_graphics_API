@@ -28,18 +28,21 @@ namespace dmbrn
 			for (auto& chnls : channels)
 			{
 				TransformComponent& ent_trans_c = chnls.second.enttity.getComponent<TransformComponent>();
-		
-				ent_trans_c.position = mixPositions(cur_local_frame, chnls.second);
-				ent_trans_c.setQuat(slerpRotation(cur_local_frame, chnls.second));
-				ent_trans_c.scale = mixScale(cur_local_frame, chnls.second);
+
+				if (!chnls.second.positions.empty())
+					ent_trans_c.position = mixPositions(cur_local_frame, chnls.second);
+				if (!chnls.second.rotations.empty())
+					ent_trans_c.setQuat(slerpRotation(cur_local_frame, chnls.second));
+				if (!chnls.second.scales.empty())
+					ent_trans_c.scale = mixScale(cur_local_frame, chnls.second);
 
 				chnls.second.enttity.markTransformAsEdited(frame);
 			}
 		}
 
-		bool operator<(const AnimationClip& other)const
+		bool operator<(const AnimationClip& other) const
 		{
-			return std::lexicographical_compare(name.begin(),name.end(),other.name.begin(),other.name.end());
+			return std::lexicographical_compare(name.begin(), name.end(), other.name.begin(), other.name.end());
 		}
 
 	private:
@@ -53,44 +56,44 @@ namespace dmbrn
 		glm::vec3 mixPositions(float l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.positions.equal_range(l_time);
-		
+
 			if (lb != chnls.positions.begin())
 				--lb;
 
-			if(ub == chnls.positions.end())
+			if (ub == chnls.positions.end())
 				--ub;
 
 			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
 			return glm::mix(lb->second, ub->second, factor);
 		}
-		
+
 		glm::quat slerpRotation(float l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.rotations.equal_range(l_time);
-		
+
 			if (lb != chnls.rotations.begin())
 				--lb;
 
-			if(ub == chnls.rotations.end())
+			if (ub == chnls.rotations.end())
 				--ub;
-		
+
 			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
-		
+
 			return glm::slerp(lb->second, ub->second, static_cast<float>(factor));
 		}
-		
+
 		glm::vec3 mixScale(float l_time, const AnimationChannels& chnls)
 		{
 			auto [lb,ub] = chnls.scales.equal_range(l_time);
-		
+
 			if (lb != chnls.scales.begin())
 				--lb;
 
-			if(ub == chnls.scales.end())
+			if (ub == chnls.scales.end())
 				--ub;
-		
+
 			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
-		
+
 			return glm::mix(lb->second, ub->second, factor);
 		}
 	};

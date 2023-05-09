@@ -61,6 +61,65 @@ namespace dmbrn
 			return currentFrame;
 		}
 
+		bool hasRecordingEnts()
+		{
+			return count_recording != 0;
+		}
+
+		void processPositionKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key)
+		{
+			if (selected_clips[rec_parent].has_value())
+			{
+				if(currentFrame > selected_clips[rec_parent].value()->first)
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].positions[currentFrame] = key;
+				else
+				{
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].positions[currentFrame] = key;
+					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
+				}
+			}
+			else
+			{
+				selected_clips[rec_parent]= sequence.processPositionKey(enttity, rec_parent, key, currentFrame);
+			}
+		}
+
+		void processRotationKey(const Enttity* enttity, const Enttity& rec_parent,const glm::quat& key)
+		{
+			if (selected_clips[rec_parent].has_value())
+			{
+				if(currentFrame > selected_clips[rec_parent].value()->first)
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].rotations[currentFrame] = key;
+				else
+				{
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].rotations[currentFrame] = key;
+					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
+				}
+			}
+			else
+			{
+				selected_clips[rec_parent]= sequence.processRotationKey(enttity, rec_parent, key, currentFrame);
+			}
+		}
+
+		void processScaleKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key)
+		{
+			if (selected_clips[rec_parent].has_value())
+			{
+				if(currentFrame > selected_clips[rec_parent].value()->first)
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].scales[currentFrame] = key;
+				else
+				{
+					selected_clips[rec_parent].value()->second.channels[enttity->getId()].scales[currentFrame] = key;
+					selected_clips[rec_parent] = sequence.updateStart(sequence.entries_.find(rec_parent),std::move_iterator(selected_clips[rec_parent].value()),currentFrame);
+				}
+			}
+			else
+			{
+				selected_clips[rec_parent]= sequence.processScaleKey(enttity, rec_parent, key, currentFrame);
+			}
+		}
+
 		bool playing = false;
 
 		AnimationSequence& sequence;
@@ -87,8 +146,9 @@ namespace dmbrn
 		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
-		std::unordered_set<Enttity, Enttity::hash> recording_ents;
-		std::unordered_map<Enttity, std::pair<float, AnimationClip*>, Enttity::hash> selected_clips;
+		std::unordered_map<Enttity, std::optional<AnimationSequence::ClipIterator>, Enttity::hash> selected_clips;
+
+		unsigned count_recording = 0;
 
 		enum SEQUENCER_OPTIONS
 		{
@@ -343,7 +403,8 @@ namespace dmbrn
 						.x +
 						text_rec_offset;
 
-					const bool is_recording = recording_ents.find(ent_it->first) != recording_ents.end();
+					AnimationComponent& ent_anim_comp = ent_it->first.getComponent<AnimationComponent>();
+					const bool is_recording = ent_anim_comp.is_recording;
 					unsigned rec_color = !is_recording ? 0xFF000060 : 0xFF0000B0;
 					const ImVec2 rec_pos = tpos + ImVec2{rec_offset, -2 + ItemHeight * 0.5f};
 					const float rec_radius = 6;
@@ -357,9 +418,15 @@ namespace dmbrn
 					if (is_inside_rec && io.MouseReleased[0])
 					{
 						if (!is_recording)
-							recording_ents.insert(ent_it->first);
+						{
+							ent_anim_comp.is_recording = true;
+							++count_recording;
+						}
 						else
-							recording_ents.erase(ent_it->first);
+						{
+							ent_anim_comp.is_recording = false;
+							--count_recording;
+						}
 					}
 
 					draw_list->AddCircleFilled(rec_pos, rec_radius, rec_color);
@@ -481,13 +548,11 @@ namespace dmbrn
 				{
 					// selection
 
-					if (recording_ents.find(ent_it->first) != recording_ents.end())
+					if (ent_it->first.getComponent<AnimationComponent>().is_recording)
 					{
-						AnimationClip* sel_clip = selected_clips[ent_it->first].second;
-
-						if (sel_clip)
+						if (selected_clips[ent_it->first].has_value())
 						{
-							float start = selected_clips.at(ent_it->first).first;
+							float start = selected_clips.at(ent_it->first).value()->first;
 							const ImVec2 pos = ImVec2(
 								current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,
 								current_min.y + 1);
@@ -542,10 +607,10 @@ namespace dmbrn
 						unsigned int slotColor = color | 0xFF000000;
 						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
 
-						if (&clip_it->second == selected_clips[ent_it->first].second)
+						if (selected_clips[ent_it->first].has_value() && clip_it == selected_clips[ent_it->first].value())
 						{
 							slotColor = 0xFFFFEEEE;
-							if (recording_ents.find(ent_it->first) != recording_ents.end())
+							if (ent_it->first.getComponent<AnimationComponent>().is_recording)
 								slotColor = 0xFF9090BB;
 						}
 
@@ -570,13 +635,12 @@ namespace dmbrn
 								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0] < 0.1 && !io.MouseDoubleClicked[
 									0])
 								{
-									if (selected_clips[ent_it->first].second != &clip_it->second)
+									if (!selected_clips[ent_it->first].has_value() || selected_clips[ent_it->first] != clip_it)
 									{
-										selected_clips[ent_it->first].first = clip_it->first;
-										selected_clips[ent_it->first].second = &clip_it->second;
+										selected_clips[ent_it->first] = clip_it;
 									}
 									else
-										selected_clips[ent_it->first].second = nullptr;
+										selected_clips[ent_it->first] = std::nullopt;
 								}
 
 								if (io.MouseDoubleClicked[0])
