@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <algorithm>
+#include <variant>
 
 #include "Main/Enttity.h"
 
@@ -11,16 +12,44 @@ namespace dmbrn
 {
 	struct AnimationChannels
 	{
+		struct PosKeyTag;
+		struct RotKeyTag;
+		struct ScaleKeyTag;
+
 		std::map<float, glm::vec3> positions;
 		std::map<float, glm::quat> rotations;
 		std::map<float, glm::vec3> scales;
+
+		template <typename KeyTag, typename KeyType>
+		inline void setKey(float time, const KeyType& value)
+		{
+			assert(false);
+		}
+
+		template <>
+		inline void setKey<PosKeyTag, glm::vec3>(float time, const glm::vec3& value)
+		{
+			positions[time] = value;
+		}
+
+		template <>
+		inline void setKey<RotKeyTag, glm::quat>(float time, const glm::quat& value)
+		{
+			rotations[time] = value;
+		}
+
+		template <>
+		inline void setKey<ScaleKeyTag, glm::vec3>(float time, const glm::vec3& value)
+		{
+			scales[time] = value;
+		}
 	};
 
 	struct AnimationClip
 	{
 		std::string name;
-		float duration_; // in frames
-		std::unordered_map<Enttity, AnimationChannels,Enttity::hash> channels;
+		float min = 0.f, max = 0.f;
+		std::unordered_map<Enttity, AnimationChannels, Enttity::hash> channels;
 
 		void updateTransforms(float cur_local_frame, uint32_t frame)
 		{
@@ -44,11 +73,16 @@ namespace dmbrn
 			return std::lexicographical_compare(name.begin(), name.end(), other.name.begin(), other.name.end());
 		}
 
-	private:
-		double GetScaleFactor(double lastTimeStamp, double nextTimeStamp, double animationTime)
+		float getDuration() const
 		{
-			const double midWayLength = animationTime - lastTimeStamp;
-			const double framesDiff = nextTimeStamp - lastTimeStamp;
+			return max - min;
+		}
+
+	private:
+		float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime)
+		{
+			const float midWayLength = animationTime - lastTimeStamp;
+			const float framesDiff = nextTimeStamp - lastTimeStamp;
 			return midWayLength / framesDiff;
 		}
 
@@ -62,7 +96,12 @@ namespace dmbrn
 			if (ub == chnls.positions.end())
 				--ub;
 
-			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = 0.f;
+			if (lb != ub)
+				factor = GetScaleFactor(lb->first, ub->first, l_time);
+			else
+				factor = 0;
+
 			return glm::mix(lb->second, ub->second, factor);
 		}
 
@@ -76,9 +115,13 @@ namespace dmbrn
 			if (ub == chnls.rotations.end())
 				--ub;
 
-			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = 0.f;
+			if (lb != ub)
+				factor = GetScaleFactor(lb->first, ub->first, l_time);
+			else
+				factor = 0;
 
-			return glm::slerp(lb->second, ub->second, static_cast<float>(factor));
+			return glm::slerp(lb->second, ub->second, factor);
 		}
 
 		glm::vec3 mixScale(float l_time, const AnimationChannels& chnls)
@@ -91,7 +134,11 @@ namespace dmbrn
 			if (ub == chnls.scales.end())
 				--ub;
 
-			const double factor = GetScaleFactor(lb->first, ub->first, l_time);
+			float factor = 0.f;
+			if (lb != ub)
+				factor = GetScaleFactor(lb->first, ub->first, l_time);
+			else
+				factor = 0;
 
 			return glm::mix(lb->second, ub->second, factor);
 		}

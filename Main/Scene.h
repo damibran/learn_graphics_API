@@ -182,8 +182,8 @@ namespace dmbrn
 					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 						--clip_it;
 
-					const float local_time = glm::clamp(anim_frame - clip_it->first, 0.f,
-					                                    clip_it->second.duration_);
+					const float local_time = glm::clamp(anim_frame - clip_it->first, clip_it->second.min,
+					                                    clip_it->second.max);
 
 					clip_it->second.updateTransforms(local_time, frame);
 				}
@@ -373,7 +373,8 @@ namespace dmbrn
 						                           std::max((--channels.rotations.end())->first,
 						                                    (--channels.scales.end())->first));
 
-						clip.duration_ = max - min;
+						clip.min = min;
+						clip.max = max;
 
 						clip.channels.insert({node_entt,std::move(channels)});
 					}

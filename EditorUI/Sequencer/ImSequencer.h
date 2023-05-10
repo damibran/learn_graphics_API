@@ -66,15 +66,16 @@ namespace dmbrn
 			return count_recording != 0;
 		}
 
-		void processPositionKey(const Enttity* enttity, const Enttity& rec_parent,const glm::vec3& key)
+		template <typename KeyTag, typename KeyType>
+		void processKey(const Enttity* enttity, const Enttity& rec_parent,const KeyType& key)
 		{
 			if (selected_clips[rec_parent].has_value())
 			{
-				selected_clips[rec_parent] = sequence.updateClipWithKey(*enttity,currentFrame,selected_clips[rec_parent].value(),key);
+				selected_clips[rec_parent] = sequence.updateClipWithKey<KeyTag>(rec_parent,*enttity,currentFrame,std::move_iterator(selected_clips[rec_parent].value()),key);
 			}
 			else
 			{
-				selected_clips[rec_parent]= sequence.createNewClipWithKey(enttity, rec_parent, key, currentFrame);
+				selected_clips[rec_parent]= sequence.createNewClipWithKey<KeyTag>(rec_parent,enttity,currentFrame, key);
 			}
 		}
 
@@ -541,7 +542,7 @@ namespace dmbrn
 					for (auto clip_it = ent_it->second.begin(); clip_it != ent_it->second.end(); ++clip_it)
 					{
 						const float start = clip_it->first;
-						const float end = clip_it->first + clip_it->second.duration_;
+						const float end = clip_it->first + clip_it->second.getDuration();
 						const unsigned color = 0xFFAA8080;
 						// TODO CustomHeight
 
@@ -815,7 +816,7 @@ namespace dmbrn
 								if (payload->IsPreview())
 								{
 									const float start = currentFrame;
-									const float end = currentFrame + payload_data->second->duration_;
+									const float end = currentFrame + payload_data->second->getDuration();
 
 									const ImVec2 pos = ImVec2(
 										current_min.x + legendWidth - static_cast<float>(firstFrame) * framePixelWidth,

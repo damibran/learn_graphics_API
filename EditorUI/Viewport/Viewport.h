@@ -122,11 +122,11 @@ namespace dmbrn
 								if (rec_parent)
 								{
 									if (new_trans.position != t_c.position)
-										sequencer_.processPositionKey(selected_,rec_parent,new_trans.position);
+										sequencer_.processKey<AnimationChannels::PosKeyTag>(selected_,rec_parent,new_trans.position);
 									if (new_trans.rotation != t_c.getRotationDegrees())
-										sequencer_.processRotationKey(selected_,rec_parent,glm::quat{new_trans.rotation});
+										sequencer_.processKey<AnimationChannels::RotKeyTag>(selected_,rec_parent,glm::quat{new_trans.rotation});
 									if (new_trans.scale != t_c.scale)
-										sequencer_.processScaleKey(selected_,rec_parent,new_trans.scale);
+										sequencer_.processKey<AnimationChannels::ScaleKeyTag>(selected_,rec_parent,new_trans.scale);
 								}
 							}
 

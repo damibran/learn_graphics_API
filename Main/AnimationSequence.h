@@ -1,5 +1,6 @@
 #pragma once
 
+#include <variant>
 #include "Wrappers/Animation.h"
 
 namespace dmbrn
@@ -42,33 +43,37 @@ namespace dmbrn
 			return {ent_it->second.insert({new_start, std::move(animation_clip)})};
 		}
 
-		[[nodiscard]] ClipIterator updateClipWithKey(Enttity trans_ent, float currentFrame, std::move_iterator<ClipIterator> sel_clip,
-		                                             const glm::vec3& key)
+		template <typename KeyTag, typename KeyType>
+		[[nodiscard]] ClipIterator updateClipWithKey(const Enttity& rec_parent,Enttity trans_ent, float currentFrame, std::move_iterator<ClipIterator> sel_clip, const KeyType& key)
 		{
 			float start = sel_clip->first;
-			float end = sel_clip->first + sel_clip->second.duration_;
+			float end = sel_clip->first + sel_clip->second.getDuration();
 			if (currentFrame >= start && currentFrame <= end)
-				sel_clip->second.channels[trans_ent].positions[currentFrame - start] = key;
+			{
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
+				return sel_clip.base();
+			}
 			else if (currentFrame > end)
 			{
-				sel_clip->second.channels[trans_ent].positions[currentFrame - start] = key;
-				sel_clip->second.duration_ = currentFrame - start;
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
+				sel_clip->second.max = currentFrame - start;
+				return sel_clip.base();
 			}
 			else if (currentFrame < start)
 			{
-				for(auto&& it:sel_clip.base()->second.channels)
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
+				sel_clip->second.min = currentFrame - start;
+				return updateStart(entries_.find(rec_parent), sel_clip, currentFrame - start);
 			}
 		}
 
-		[[nodiscard]] ClipIterator createNewClipWithKey(const Enttity* enttity, const Enttity& rec_parent,
-		                                                const glm::vec3& key, float key_time)
+		template <typename KeyTag, typename KeyType>
+		[[nodiscard]] ClipIterator createNewClipWithKey(const Enttity& rec_parent, const Enttity* enttity, float key_time, const KeyType& key)
 		{
 			decltype(AnimationClip::channels) channels;
-			channels[*enttity].positions[key_time] = key;
-			AnimationClip new_clip{"New clip", 0, std::move(channels)};
+			channels[*enttity].setKey<KeyTag>(key_time, key);
+			AnimationClip new_clip{"New clip", key_time, key_time, std::move(channels)};
 			return entries_[rec_parent].insert({key_time, std::move(new_clip)});
 		}
-
-	private:
 	};
 }
