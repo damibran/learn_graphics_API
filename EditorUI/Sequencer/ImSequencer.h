@@ -633,9 +633,17 @@ namespace dmbrn
 										start += diffFrame;
 										clip_move_mouse_pos += diffFrame * framePixelWidth;
 
+										if(selected_clips[ent_it->first].has_value() && selected_clips[ent_it->first] != clip_it)
 										clip_it = sequence.updateStart(
 											ent_it, std::move_iterator(clip_it),
 											start);
+										else
+										{
+											clip_it = sequence.updateStart(
+											ent_it, std::move_iterator(clip_it),
+											start);
+											selected_clips[ent_it->first]=clip_it;
+										}
 									}
 								}
 							}
