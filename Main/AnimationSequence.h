@@ -44,31 +44,33 @@ namespace dmbrn
 		}
 
 		template <typename KeyTag, typename KeyType>
-		[[nodiscard]] ClipIterator updateClipWithKey(const Enttity& rec_parent,Enttity trans_ent, float currentFrame, std::move_iterator<ClipIterator> sel_clip, const KeyType& key)
+		[[nodiscard]] ClipIterator updateClipWithKey(const Enttity& rec_parent, Enttity trans_ent, float currentFrame,
+		                                             std::move_iterator<ClipIterator> sel_clip, const KeyType& key)
 		{
 			float start = sel_clip->first;
 			float end = sel_clip->first + sel_clip->second.getDuration();
 			if (currentFrame >= start && currentFrame <= end)
 			{
-				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start + sel_clip->second.min, key);
 				return sel_clip.base();
 			}
 			else if (currentFrame > end)
 			{
-				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
-				sel_clip->second.max = currentFrame - start;
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start + sel_clip->second.min, key);
+				sel_clip->second.max = currentFrame - start + sel_clip->second.min;
 				return sel_clip.base();
 			}
 			else if (currentFrame < start)
 			{
-				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start,key);
-				sel_clip->second.min = currentFrame - start;
-				return updateStart(entries_.find(rec_parent), sel_clip, currentFrame - start);
+				sel_clip->second.channels[trans_ent].setKey<KeyTag>(currentFrame - start + sel_clip->second.min, key);
+				sel_clip->second.min = currentFrame - start + sel_clip->second.min;
+				return updateStart(entries_.find(rec_parent), sel_clip, currentFrame);
 			}
 		}
 
 		template <typename KeyTag, typename KeyType>
-		[[nodiscard]] ClipIterator createNewClipWithKey(const Enttity& rec_parent, const Enttity* enttity, float key_time, const KeyType& key)
+		[[nodiscard]] ClipIterator createNewClipWithKey(const Enttity& rec_parent, const Enttity* enttity,
+		                                                float key_time, const KeyType& key)
 		{
 			decltype(AnimationClip::channels) channels;
 			channels[*enttity].setKey<KeyTag>(key_time, key);

@@ -706,7 +706,7 @@ namespace dmbrn
 
 										float min_time = std::min(pos_time, std::min(rot_time, scale_time));
 
-										float keyframe_glob_time = std::floor(start + min_time);
+										float keyframe_glob_time = std::floor(start + min_time - clip_it->second.min);
 
 										const float key_frame_radius = cursorWidth / 2.f;
 
@@ -743,10 +743,12 @@ namespace dmbrn
 											{
 												draw_list->AddCircleFilled(
 													key_frame_cpos, key_frame_radius, 0xFF0000FF, 4);
-												current_min.y += ItemHeight;
 											}
 											++pos_it;
 										}
+										
+										if(is_expanded_transform)
+											current_min.y += ItemHeight;
 
 										if (rot_it != rot_end &&
 											rot_it->first == min_time)
@@ -764,10 +766,13 @@ namespace dmbrn
 											{
 												draw_list->AddCircleFilled(
 													key_frame_cpos, key_frame_radius, 0xFF0000FF, 4);
-												current_min.y += ItemHeight;
 											}
 											++rot_it;
 										}
+
+										if(is_expanded_transform)
+											current_min.y += ItemHeight;
+
 
 										if (scale_it != scale_end &&
 											scale_it->first == min_time)

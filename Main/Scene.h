@@ -182,7 +182,7 @@ namespace dmbrn
 					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 						--clip_it;
 
-					const float local_time = glm::clamp(anim_frame - clip_it->first, clip_it->second.min,
+					const float local_time = glm::clamp(clip_it->second.min + anim_frame - clip_it->first, clip_it->second.min,
 					                                    clip_it->second.max);
 
 					clip_it->second.updateTransforms(local_time, frame);
