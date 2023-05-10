@@ -43,6 +43,7 @@ namespace dmbrn
 		{
 			scales[time] = value;
 		}
+
 	};
 
 	struct AnimationClip
@@ -90,7 +91,10 @@ namespace dmbrn
 		{
 			auto [lb,ub] = chnls.positions.equal_range(l_time);
 
-			if (lb != chnls.positions.begin())
+			if(lb==chnls.positions.end())
+				lb = --chnls.positions.end();
+
+			if(lb!=chnls.positions.begin() && lb->first > l_time)
 				--lb;
 
 			if (ub == chnls.positions.end())
@@ -109,7 +113,10 @@ namespace dmbrn
 		{
 			auto [lb,ub] = chnls.rotations.equal_range(l_time);
 
-			if (lb != chnls.rotations.begin())
+			if(lb==chnls.rotations.end())
+				lb = --chnls.rotations.end();
+
+			if(lb!=chnls.rotations.begin()&& lb->first > l_time)
 				--lb;
 
 			if (ub == chnls.rotations.end())
@@ -128,7 +135,10 @@ namespace dmbrn
 		{
 			auto [lb,ub] = chnls.scales.equal_range(l_time);
 
-			if (lb != chnls.scales.begin())
+			if(lb==chnls.scales.end())
+				lb = --chnls.scales.end();
+
+			if(lb!=chnls.scales.begin() && lb->first > l_time)
 				--lb;
 
 			if (ub == chnls.scales.end())
