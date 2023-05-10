@@ -7,9 +7,10 @@ namespace dmbrn
 	class Inspector
 	{
 	public:
-		Inspector(Scene& scene, SceneTree& scene_tree):
+		Inspector(Scene& scene, SceneTree& scene_tree,Sequencer& sequencer):
 		scene_(scene),
-			scene_tree_(scene_tree)
+			scene_tree_(scene_tree),
+		sequencer_(sequencer)
 		{
 		}
 
@@ -44,6 +45,7 @@ namespace dmbrn
 	private:
 		Scene& scene_;
 		SceneTree& scene_tree_;
+		Sequencer& sequencer_;
 		std::string file_path;
 
 		void drawComponents(Enttity entity, uint32_t frame)
@@ -66,14 +68,42 @@ namespace dmbrn
 					bool edited = false;
 					glm::vec3 rot_deg = comp->getRotationDegrees();
 					if (drawVec3Control("Translation", comp->position))
+					{
 						edited = true;
+						if (sequencer_.hasRecordingEnts())
+						{
+							Enttity rec_parent = entity.findRecordingAnimationCompParent();
+							if (rec_parent)
+							{
+								sequencer_.processKey<AnimationChannels::PosKeyTag>(&entity,rec_parent,comp->position);
+							}
+						}
+					}
 					if (drawVec3Control("Rotation", rot_deg))
 					{
+						if (sequencer_.hasRecordingEnts())
+						{
+							Enttity rec_parent = entity.findRecordingAnimationCompParent();
+							if (rec_parent)
+							{
+								sequencer_.processKey<AnimationChannels::RotKeyTag>(&entity,rec_parent,glm::quat{glm::radians(rot_deg)});
+							}
+						}
 						comp->setDegrees(rot_deg);
 						edited = true;
 					}
 					if (drawVec3Control("Scale", comp->scale, 1.0f))
+					{
+						if (sequencer_.hasRecordingEnts())
+						{
+							Enttity rec_parent = entity.findRecordingAnimationCompParent();
+							if (rec_parent)
+							{
+								sequencer_.processKey<AnimationChannels::ScaleKeyTag>(&entity,rec_parent,comp->scale);
+							}
+						}
 						edited = true;
+					}
 
 					if (edited)
 						entity.markTransformAsEdited(frame);
