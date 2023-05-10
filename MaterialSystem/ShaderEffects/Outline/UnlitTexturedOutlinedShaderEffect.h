@@ -5,11 +5,11 @@
 
 namespace dmbrn
 {
-	/*struct UnlitTexturedOutlinedShaderEffect : public ShaderEffect
+	struct UnlitTexturedOutlinedShaderEffect : public ShaderEffect
 	{
 		//UnlitTexturedOutlinedShaderEffect()=default;
 
-		UnlitTexturedOutlinedShaderEffect(PerRenderableData& per_object_data_buffer,
+		UnlitTexturedOutlinedShaderEffect(PerStaticModelData& per_object_data_buffer,
 		                                  PerSkeletonData& per_skeleton_data):
 			per_object_data_buffer_(per_object_data_buffer),
 			per_skeleton_data_(per_skeleton_data)
@@ -27,37 +27,37 @@ namespace dmbrn
 		void draw(int frame, const vk::raii::CommandBuffer& command_buffer) override
 		{
 			drawStatic(frame, command_buffer, per_object_data_buffer_);
-			//drawSkeletal(frame, command_buffer, per_skeleton_data_);
+			drawSkeletal(frame, command_buffer, per_skeleton_data_);
 		}
 
 	private:
-		PerRenderableData& per_object_data_buffer_;
+		PerStaticModelData& per_object_data_buffer_;
 		PerSkeletonData& per_skeleton_data_;
 
 		void drawStatic(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerRenderableData& per_object_data_buffer)
+		                const PerStaticModelData& per_object_data_buffer)
 		{
-			stencil_graphics_pipeline_.bindPipeline(command_buffer);
-			stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
+			stencil_graphics_pipeline_.bindStaticPipeline(command_buffer);
+			stencil_graphics_pipeline_.bindStaticShaderData(frame, command_buffer);
 			for (auto& [mesh, offset] : static_render_queue)
 			{
-				mesh->material_->bindMaterialData(frame, command_buffer, *stencil_graphics_pipeline_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *stencil_graphics_pipeline_.static_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *stencil_graphics_pipeline_.pipeline_layout_,
+				                                   *stencil_graphics_pipeline_.static_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
 			}
 
-			outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
-			outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
+			outline_graphics_pipeline_statics_.bindStaticPipeline(command_buffer);
+			outline_graphics_pipeline_statics_.bindStaticSharedData(frame, command_buffer);
 			for (auto& [mesh, offset] : static_render_queue)
 			{
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *outline_graphics_pipeline_statics_.pipeline_layout_,
+				                                   *outline_graphics_pipeline_statics_.static_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
@@ -68,32 +68,32 @@ namespace dmbrn
 		void drawSkeletal(int frame, const vk::raii::CommandBuffer& command_buffer,
 		                const PerSkeletonData& per_object_data_buffer)
 		{
-			stencil_graphics_pipeline_.bindPipeline(command_buffer);
-			stencil_graphics_pipeline_.bindShaderData(frame, command_buffer);
+			stencil_graphics_pipeline_.bindSkeletalPipeline(command_buffer);
+			stencil_graphics_pipeline_.bindSkeletalShaderData(frame, command_buffer);
 			for (auto& [mesh, offset] : skeletal_render_queue)
 			{
-				mesh->material_->bindMaterialData(frame, command_buffer, *stencil_graphics_pipeline_.pipeline_layout_);
+				mesh->material_->bindMaterialData(frame, command_buffer, *stencil_graphics_pipeline_.skeletal_pipeline_layout_);
 
 				mesh->bind(command_buffer);
 
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *stencil_graphics_pipeline_.pipeline_layout_,
+				                                   *stencil_graphics_pipeline_.skeletal_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
 			}
 
-			outline_graphics_pipeline_statics_.bindPipeline(command_buffer);
-			outline_graphics_pipeline_statics_.bindShaderData(frame, command_buffer);
+			outline_graphics_pipeline_statics_.bindSkeletalPipeline(command_buffer);
+			outline_graphics_pipeline_statics_.bindSkeletalSharedData(frame, command_buffer);
 			for (auto& [mesh, offset] : skeletal_render_queue)
 			{
 				per_object_data_buffer.bindDataFor(frame, command_buffer,
-				                                   *outline_graphics_pipeline_statics_.pipeline_layout_,
+				                                   *outline_graphics_pipeline_statics_.static_pipeline_layout_,
 				                                   offset);
 
 				mesh->drawIndexed(command_buffer);
 			}
-			static_render_queue.clear();
+			skeletal_render_queue.clear();
 		}
 
 	public:
@@ -105,12 +105,12 @@ namespace dmbrn
 				0xff, 1
 
 			};
-			stencil_graphics_pipeline_.setRenderPass(render_pass, stencil_op);
+			stencil_graphics_pipeline_.setRenderPass(render_pass, true, stencil_op);
 
 			outline_graphics_pipeline_statics_.setRenderPass(render_pass);
 		}
 
 		static inline UnLitTexturedGraphicsPipelineStatics stencil_graphics_pipeline_;
 		static inline OutlineGraphicsPipelineStatics outline_graphics_pipeline_statics_{};
-	};*/
+	};
 }

@@ -209,7 +209,7 @@ namespace dmbrn
 			}
 
 			Renderer::un_lit_textured.draw(current_frame, command_buffer);
-			//Renderer::outlined_.draw(current_frame, command_buffer);
+			Renderer::outlined_.draw(current_frame, command_buffer);
 
 			command_buffer.endRenderPass();
 		}

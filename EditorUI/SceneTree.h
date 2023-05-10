@@ -153,6 +153,11 @@ namespace dmbrn
 				model_comp->shader_ = &Renderer::un_lit_textured;
 			}
 
+			if(SkeletalModelComponent* skeletal_model_comp = enttity.tryGetComponent<SkeletalModelComponent>())
+			{
+				skeletal_model_comp->shader_ = &Renderer::un_lit_textured;
+			}
+
 			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;
 			while (cur_child)
 			{
@@ -166,7 +171,12 @@ namespace dmbrn
 		{
 			if (StaticModelComponent* model_comp = enttity.tryGetComponent<StaticModelComponent>())
 			{
-				//model_comp->shader_ = &Renderer::outlined_;
+				model_comp->shader_ = &Renderer::outlined_;
+			}
+
+			if(SkeletalModelComponent* skeletal_model_comp = enttity.tryGetComponent<SkeletalModelComponent>())
+			{
+				skeletal_model_comp->shader_ = &Renderer::outlined_;
 			}
 
 			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;
