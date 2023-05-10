@@ -33,9 +33,9 @@ namespace dmbrn
 			scene_(scene),
 			scene_tree_(scene_),
 			sequencer_(scene.getAnimationSequence()),
-			inspector_(scene_,scene_tree_,sequencer_),
-			viewport_(scene_, sequencer_,scene_tree_.getSelected()),
-			viewport2_(scene_, sequencer_,scene_tree_.getSelected()
+			inspector_(scene_, scene_tree_, sequencer_),
+			viewport_(scene_, sequencer_, scene_tree_.getSelected()),
+			viewport2_(scene_, sequencer_, scene_tree_.getSelected()
 			           , "Viewport 2")
 		{
 			Renderer::setRenderPass(*Viewport::render_pass_);
@@ -62,9 +62,6 @@ namespace dmbrn
 
 			endDockSpace();
 
-			if (show_model_import)
-				showImportWindow();
-
 			scene_.updateAnimations(sequencer_.getCurrentFrame(), current_frame_);
 			scene_.updateGlobalTransforms(current_frame_);
 			scene_.updatePerStaticModelData(current_frame_);
@@ -88,8 +85,6 @@ namespace dmbrn
 		Inspector inspector_;
 		Viewport viewport_;
 		Viewport viewport2_;
-		bool show_model_import = false;
-		std::string model_path;
 
 		uint32_t current_frame_ = 0;
 
@@ -107,32 +102,6 @@ namespace dmbrn
 					SkeletalMesh::SkeletalMeshRenderData::getRegistrySize())).c_str());
 
 			ImGui::Text(("Count of unique materials: " + std::to_string(DiffusionMaterial::getRegistrySize())).c_str());
-
-			ImGui::End();
-		}
-
-		void showImportWindow()
-		{
-			if (!ImGui::Begin("Model import", &show_model_import))
-			{
-				ImGui::End();
-				return;
-			}
-
-			char buf[256] = {0};
-
-			strcpy_s(buf, sizeof(buf), model_path.c_str());
-
-			if (ImGui::InputText("Model path", buf, sizeof(buf)))
-			{
-				model_path = std::string(buf);
-			}
-
-			if (ImGui::Button("Import"))
-			{
-				//scene_.addModel(model_path);
-				show_model_import = false;
-			}
 
 			ImGui::End();
 		}
@@ -217,8 +186,6 @@ namespace dmbrn
 				}
 				if (ImGui::BeginMenu("Scene"))
 				{
-					ImGui::MenuItem("Import model",NULL, &show_model_import);
-
 					ImGui::EndMenu();
 				}
 				ImGui::EndMainMenuBar();
@@ -229,9 +196,9 @@ namespace dmbrn
 		{
 			if (ImGui::Begin("Sequencer"))
 			{
-				sequencer_.draw(d_time,Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
+				sequencer_.draw(
+					d_time, Sequencer::SEQUENCER_EDIT_STARTEND | Sequencer::SEQUENCER_ADD | Sequencer::SEQUENCER_DEL
 					| Sequencer::SEQUENCER_COPYPASTE | Sequencer::SEQUENCER_CHANGE_FRAME);
-
 			}
 			ImGui::End();
 		}

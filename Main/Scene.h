@@ -182,7 +182,8 @@ namespace dmbrn
 					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
 						--clip_it;
 
-					const float local_time = glm::clamp(clip_it->second.min + anim_frame - clip_it->first, clip_it->second.min,
+					const float local_time = glm::clamp(clip_it->second.min + anim_frame - clip_it->first,
+					                                    clip_it->second.min,
 					                                    clip_it->second.max);
 
 					clip_it->second.updateTransforms(local_time, frame);
@@ -193,6 +194,11 @@ namespace dmbrn
 		void importAnimationTo(Enttity ent, const std::string& file_path)
 		{
 			ModelImporter::ImportAnimationTo(*this, ent, file_path);
+		}
+
+		void importModel(const std::string& path, bool with_bones, bool with_anim)
+		{
+			ModelImporter::ImportModel(*this, path, with_anim, with_bones);
 		}
 
 		// may perform culling
@@ -376,7 +382,7 @@ namespace dmbrn
 						clip.min = min;
 						clip.max = max;
 
-						clip.channels.insert({node_entt,std::move(channels)});
+						clip.channels.insert({node_entt, std::move(channels)});
 					}
 					animation_clips.insert(std::move(clip));
 				}
@@ -489,7 +495,7 @@ namespace dmbrn
 										bone_entts.push_back(entt);
 									}
 								}
-								
+
 								skeleton_comp->bone_enttities.insert(skeleton_comp->bone_enttities.end(),
 								                                     std::make_move_iterator(bone_entts.begin()),
 								                                     std::make_move_iterator(bone_entts.end()));

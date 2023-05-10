@@ -18,26 +18,43 @@ namespace dmbrn
 
 			Enttity cur_child = scene_.getRootRelationshipComponent().first;
 
-			while (cur_child)
+			if (ImGui::BeginTable("SceneTreeTable", 1,ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_BordersInnerH))
 			{
-				recursivelyDraw(cur_child);
+				ImGui::TableNextColumn();
 
-				cur_child = cur_child.getComponent<RelationshipComponent>().next;
-			}
+				if (ImGui::Button("Add new from file"))
+				{
+					ImGui::OpenPopup("Import_Model_Modal");
+					import_model_modal_vars_.modal_opened = true;
+				}
 
-			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
-			{
-				if (selected_)
-					deselect(selected_);
-				selected_ = scene_.getNullEntt();
-			}
+				showImportWindow();
 
-			if (ImGui::BeginPopupContextWindow())
-			{
-				if (ImGui::MenuItem("Create Empty Entity"))
-					scene_.addNewEntityToRoot("Empty Entity");
+				ImGui::TableNextColumn();
 
-				ImGui::EndPopup();
+				while (cur_child)
+				{
+					recursivelyDraw(cur_child);
+
+					cur_child = cur_child.getComponent<RelationshipComponent>().next;
+				}
+
+				if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
+				{
+					if (selected_)
+						deselect(selected_);
+					selected_ = scene_.getNullEntt();
+				}
+
+				if (ImGui::BeginPopupContextWindow())
+				{
+					if (ImGui::MenuItem("Create Empty Entity"))
+						scene_.addNewEntityToRoot("Empty Entity");
+
+					ImGui::EndPopup();
+				}
+
+				ImGui::EndTable();
 			}
 
 			ImGui::End();
@@ -51,6 +68,14 @@ namespace dmbrn
 	private:
 		Scene& scene_;
 		Enttity selected_;
+
+		struct ImportModelModalVars
+		{
+			bool modal_opened = false;
+			std::string model_path;
+			bool with_bones = false;
+			bool with_anim = false;
+		} import_model_modal_vars_;
 
 		void recursivelyDraw(Enttity enttity)
 		{
@@ -92,6 +117,35 @@ namespace dmbrn
 			}
 		}
 
+		void showImportWindow()
+		{
+			char buf[256] = {0};
+
+			if (ImGui::BeginPopupModal("Import_Model_Modal", &import_model_modal_vars_.modal_opened,
+			                           ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				strcpy_s(buf, sizeof(buf), import_model_modal_vars_.model_path.c_str());
+
+				if (ImGui::InputText("Model path", buf, sizeof(buf)))
+				{
+					import_model_modal_vars_.model_path = std::string(buf);
+				}
+
+				ImGui::Checkbox("Import with animations", &import_model_modal_vars_.with_anim);
+				ImGui::Checkbox("Import with bones", &import_model_modal_vars_.with_bones);
+
+				if (ImGui::Button("Import"))
+				{
+					scene_.importModel(import_model_modal_vars_.model_path, import_model_modal_vars_.with_bones,
+					                   import_model_modal_vars_.with_anim);
+					ImGui::CloseCurrentPopup();
+					import_model_modal_vars_.modal_opened = false;
+				}
+
+				ImGui::EndPopup();
+			}
+		}
+
 		void deselect(Enttity enttity)
 		{
 			if (StaticModelComponent* model_comp = enttity.tryGetComponent<StaticModelComponent>())
@@ -116,7 +170,7 @@ namespace dmbrn
 			}
 
 			Enttity cur_child = enttity.getComponent<RelationshipComponent>().first;
-			while (cur_child )
+			while (cur_child)
 			{
 				select(cur_child);
 
