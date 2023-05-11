@@ -35,8 +35,8 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
-			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
 			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
@@ -199,6 +199,8 @@ namespace dmbrn
 		void importModel(const std::string& path, bool with_bones, bool with_anim)
 		{
 			ModelImporter::ImportModel(*this, path, with_anim, with_bones);
+			for(int i=0;i<Singletons::device.MAX_FRAMES_IN_FLIGHT;++i)
+				scene_root_.markTransformAsEdited(i);
 		}
 
 		// may perform culling
