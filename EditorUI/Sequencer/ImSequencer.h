@@ -67,15 +67,17 @@ namespace dmbrn
 		}
 
 		template <typename KeyTag, typename KeyType>
-		void processKey(const Enttity* enttity, const Enttity& rec_parent,const KeyType& key)
+		void processKey(const Enttity* enttity, const Enttity& rec_parent, const KeyType& key)
 		{
 			if (selected_clips[rec_parent].has_value())
 			{
-				selected_clips[rec_parent] = sequence.updateClipWithKey<KeyTag>(rec_parent,*enttity,currentFrame,std::move_iterator(selected_clips[rec_parent].value()),key);
+				selected_clips[rec_parent] = sequence.updateClipWithKey<KeyTag>(
+					rec_parent, *enttity, currentFrame, std::move_iterator(selected_clips[rec_parent].value()), key);
 			}
 			else
 			{
-				selected_clips[rec_parent]= sequence.createNewClipWithKey<KeyTag>(rec_parent,enttity,currentFrame, key);
+				selected_clips[rec_parent] = sequence.createNewClipWithKey<KeyTag>(
+					rec_parent, enttity, currentFrame, key);
 			}
 		}
 
@@ -99,13 +101,15 @@ namespace dmbrn
 		bool sizingRBar = false;
 		bool sizingLBar = false;
 
-		float clip_move_mouse_pos = 0.f;
+		float clip_move_mouse_pos = -1.f;
 
 		std::pair<Enttity, AnimationClip*> expanded_entry;
 		std::vector<Enttity> expanded_ent_children;
 		std::unordered_set<Enttity, Enttity::hash> expanded_transform_ents;
 
 		std::unordered_map<Enttity, std::optional<AnimationSequence::ClipIterator>, Enttity::hash> selected_clips;
+
+		std::optional<AnimationSequence::ClipIterator> movingClip=std::nullopt;
 
 		unsigned count_recording = 0;
 
@@ -566,7 +570,8 @@ namespace dmbrn
 						unsigned int slotColor = color | 0xFF000000;
 						const unsigned int slotColorHalf = (color & 0xFFFFFF) | 0x40000000;
 
-						if (selected_clips[ent_it->first].has_value() && clip_it == selected_clips[ent_it->first].value())
+						if (selected_clips[ent_it->first].has_value() && clip_it == selected_clips[ent_it->first].
+							value())
 						{
 							slotColor = 0xFFFFEEEE;
 							if (ent_it->first.getComponent<AnimationComponent>().is_recording)
@@ -584,17 +589,26 @@ namespace dmbrn
 							const ImRect rc = ImRect(slotP1, slotP2);
 							if (rc.Contains(io.MousePos))
 							{
-								draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
+								if(!movingClip.has_value())
+									draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
 
-								if (io.MouseClicked[0])
+								if (io.MouseClicked[0] && !movingClip.has_value())
 								{
 									clip_move_mouse_pos = io.MousePos.x;
+									movingClip = clip_it;
+								}
+
+								if (io.MouseReleased[0] && movingClip.has_value() && movingClip.value() == clip_it)
+								{
+									clip_move_mouse_pos = -1.f;
+									movingClip=std::nullopt;
 								}
 
 								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0] < 0.1 && !io.MouseDoubleClicked[
 									0])
 								{
-									if (!selected_clips[ent_it->first].has_value() || selected_clips[ent_it->first] != clip_it)
+									if (!selected_clips[ent_it->first].has_value() || selected_clips[ent_it->first] !=
+										clip_it)
 									{
 										selected_clips[ent_it->first] = clip_it;
 									}
@@ -621,7 +635,7 @@ namespace dmbrn
 									}
 								}
 
-								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !MovingCurrentFrame)
+								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !MovingCurrentFrame && movingClip.has_value() && movingClip.value() == clip_it)
 								{
 									ImGui::SetNextFrameWantCaptureMouse(true);
 									const float diffFrame = std::round(
@@ -633,17 +647,17 @@ namespace dmbrn
 										start += diffFrame;
 										clip_move_mouse_pos += diffFrame * framePixelWidth;
 
-										if(selected_clips[ent_it->first].has_value() && selected_clips[ent_it->first] != clip_it)
-										clip_it = sequence.updateStart(
-											ent_it, std::move_iterator(clip_it),
-											start);
-										else
-										{
-											clip_it = sequence.updateStart(
-											ent_it, std::move_iterator(clip_it),
-											start);
-											selected_clips[ent_it->first]=clip_it;
-										}
+										AnimationSequence::ClipIterator old_it = clip_it;
+
+										clip_it = clip_it = sequence.updateStart(
+												ent_it, std::move_iterator(clip_it),
+												start);
+
+										movingClip = clip_it;
+
+										if (selected_clips[ent_it->first].has_value() && selected_clips[ent_it->first]
+											== old_it)
+											selected_clips[ent_it->first] = clip_it;
 									}
 								}
 							}
@@ -746,8 +760,8 @@ namespace dmbrn
 											}
 											++pos_it;
 										}
-										
-										if(is_expanded_transform)
+
+										if (is_expanded_transform)
 											current_min.y += ItemHeight;
 
 										if (rot_it != rot_end &&
@@ -770,7 +784,7 @@ namespace dmbrn
 											++rot_it;
 										}
 
-										if(is_expanded_transform)
+										if (is_expanded_transform)
 											current_min.y += ItemHeight;
 
 
