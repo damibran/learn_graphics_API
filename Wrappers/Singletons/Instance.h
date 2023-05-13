@@ -19,7 +19,23 @@ namespace dmbrn
 
 	class Instance
 	{
+		friend struct Singletons;
 	public:
+
+		const vk::raii::Instance& operator*() const
+		{
+			return instance_;
+		}
+
+		const vk::raii::Instance* operator->() const
+		{
+			return &instance_;
+		}
+
+	private:
+		vk::raii::Instance instance_;
+		vk::raii::DebugUtilsMessengerEXT debug_messenger_;
+
 		Instance(const vk::raii::Context& context):
 			instance_(nullptr),
 			debug_messenger_(nullptr)
@@ -67,20 +83,6 @@ namespace dmbrn
 				instance_.createDebugUtilsMessengerEXT(debug_create_info)
 			};
 		}
-
-		const vk::raii::Instance& operator*() const
-		{
-			return instance_;
-		}
-
-		const vk::raii::Instance* operator->() const
-		{
-			return &instance_;
-		}
-
-	private:
-		vk::raii::Instance instance_;
-		vk::raii::DebugUtilsMessengerEXT debug_messenger_;
 
 		std::vector<const char*> getRequiredExtensions()
 		{

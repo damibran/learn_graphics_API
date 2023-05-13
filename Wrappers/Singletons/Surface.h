@@ -11,15 +11,8 @@ namespace dmbrn
 {
 	class Surface
 	{
+		friend struct Singletons;
 	public:
-		Surface(const Instance& instance, const GLFWwindowWrapper& window) :
-			surface_(nullptr)
-		{
-			VkSurfaceKHR raw_surface;
-			glfwCreateWindowSurface(**instance, window.data(), nullptr, &raw_surface);
-			surface_ = vk::raii::SurfaceKHR{*instance, raw_surface, nullptr};
-		}
-
 		const vk::raii::SurfaceKHR& operator*() const
 		{
 			return surface_;
@@ -32,5 +25,13 @@ namespace dmbrn
 
 	private:
 		vk::raii::SurfaceKHR surface_;
+
+		Surface(const Instance& instance, const GLFWwindowWrapper& window) :
+			surface_(nullptr)
+		{
+			VkSurfaceKHR raw_surface;
+			glfwCreateWindowSurface(**instance, window.data(), nullptr, &raw_surface);
+			surface_ = vk::raii::SurfaceKHR{*instance, raw_surface, nullptr};
+		}
 	};
 }

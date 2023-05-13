@@ -11,20 +11,8 @@ namespace dmbrn
 {
 	class CommandPool
 	{
+		friend struct Singletons;
 	public:
-		CommandPool(const PhysicalDevice& physical_device, const LogicalDevice& device):
-			command_pool_(nullptr)
-		{
-			const PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
-
-			const vk::CommandPoolCreateInfo poolInfo
-			{
-				vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-				queueFamilyIndices.graphicsFamily.value()
-			};
-
-			command_pool_ = vk::raii::CommandPool{device->createCommandPool(poolInfo)};
-		}
 
 		const vk::raii::CommandPool& operator*() const
 		{
@@ -70,5 +58,19 @@ namespace dmbrn
 
 	private:
 		vk::raii::CommandPool command_pool_;
+
+		CommandPool(const PhysicalDevice& physical_device, const LogicalDevice& device):
+			command_pool_(nullptr)
+		{
+			const PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physical_device.getQueueFamilyIndices();
+
+			const vk::CommandPoolCreateInfo poolInfo
+			{
+				vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+				queueFamilyIndices.graphicsFamily.value()
+			};
+
+			command_pool_ = vk::raii::CommandPool{device->createCommandPool(poolInfo)};
+		}
 	};
 }

@@ -11,29 +11,8 @@ namespace dmbrn
 {
 	class PhysicalDevice
 	{
+		friend struct Singletons;
 	public:
-		PhysicalDevice(const Instance& instance, const Surface& surface)
-			: physical_device_(nullptr)
-		{
-			const vk::raii::PhysicalDevices physical_devices(*instance);
-
-			bool finded = false;
-			for (const auto& device : physical_devices)
-			{
-				if (isDeviceSuitable(device, surface))
-				{
-					physical_device_ = device;
-					finded = true;
-					queue_family_indices_ = findQueueFamilies(physical_device_, surface);
-					break;
-				}
-			}
-
-			if (!finded)
-			{
-				throw std::runtime_error("failed to find a suitable GPU!");
-			}
-		}
 
 		uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) const
 		{
@@ -102,6 +81,29 @@ namespace dmbrn
 	private:
 		vk::raii::PhysicalDevice physical_device_;
 		QueueFamilyIndices queue_family_indices_;
+
+		PhysicalDevice(const Instance& instance, const Surface& surface)
+			: physical_device_(nullptr)
+		{
+			const vk::raii::PhysicalDevices physical_devices(*instance);
+
+			bool finded = false;
+			for (const auto& device : physical_devices)
+			{
+				if (isDeviceSuitable(device, surface))
+				{
+					physical_device_ = device;
+					finded = true;
+					queue_family_indices_ = findQueueFamilies(physical_device_, surface);
+					break;
+				}
+			}
+
+			if (!finded)
+			{
+				throw std::runtime_error("failed to find a suitable GPU!");
+			}
+		}
 
 		bool isDeviceSuitable(const vk::raii::PhysicalDevice& device, const Surface& surface) const
 		{

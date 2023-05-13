@@ -20,7 +20,7 @@ namespace dmbrn
 			return bindingDescription;
 		}
 
-		constexpr static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
+		static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
 		{
 			std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions{};
 

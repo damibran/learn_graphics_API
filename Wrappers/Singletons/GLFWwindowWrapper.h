@@ -5,20 +5,8 @@ namespace dmbrn
 {
 	class GLFWwindowWrapper
 	{
+		friend struct Singletons;
 	public:
-		GLFWwindowWrapper()
-		{
-			glfwInit();
-
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			glfwWindowHint(GLFW_MAXIMIZED,GLFW_TRUE);
-
-			window_ = glfwCreateWindow(1280, 720, "Vulkan", nullptr, nullptr);
-			
-			glfwSetWindowUserPointer(window_, this);
-			glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);
-		}
-
 		GLFWwindow* data() const
 		{
 			return window_;
@@ -55,6 +43,19 @@ namespace dmbrn
 
 	private:
 		GLFWwindow* window_;
+
+		GLFWwindowWrapper()
+		{
+			glfwInit();
+
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_MAXIMIZED,GLFW_TRUE);
+
+			window_ = glfwCreateWindow(1280, 720, "Vulkan", nullptr, nullptr);
+			
+			glfwSetWindowUserPointer(window_, this);
+			glfwSetFramebufferSizeCallback(window_, framebufferResizeCallback);
+		}
 	public:
 		bool framebufferResized = false;
 	};

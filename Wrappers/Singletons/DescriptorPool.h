@@ -6,11 +6,8 @@ namespace dmbrn
 {
 	class DescriptorPool
 	{
+		friend struct Singletons;
 	public:
-		DescriptorPool(const LogicalDevice& device): pool_(createDescriptorPool(device))
-		{
-		}
-
 		const vk::raii::DescriptorPool& operator*() const
 		{
 			return pool_;
@@ -20,6 +17,10 @@ namespace dmbrn
 		static const int MAX_SETS = 100;
 		static const int MAX_UB = 100;
 		static const int MAX_IMG_SAMPLR = 30;
+
+		DescriptorPool(const LogicalDevice& device): pool_(createDescriptorPool(device))
+		{
+		}
 
 		static vk::raii::DescriptorPool createDescriptorPool(const LogicalDevice& device)
 		{

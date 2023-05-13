@@ -10,8 +10,22 @@ namespace dmbrn
 {
 	class LogicalDevice
 	{
+		friend struct Singletons;
 	public:
 		static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
+		const vk::raii::Device& operator*() const
+		{
+			return device_;
+		}
+
+		const vk::raii::Device* operator->() const
+		{
+			return &device_;
+		}
+
+	private:
+		vk::raii::Device device_;
 
 		LogicalDevice(const PhysicalDevice& physical_device):
 			device_(nullptr)
@@ -58,18 +72,5 @@ namespace dmbrn
 
 			device_ = vk::raii::Device{physical_device->createDevice(createInfo)};
 		}
-
-		const vk::raii::Device& operator*() const
-		{
-			return device_;
-		}
-
-		const vk::raii::Device* operator->() const
-		{
-			return &device_;
-		}
-
-	private:
-		vk::raii::Device device_;
 	};
 }

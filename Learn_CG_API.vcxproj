@@ -160,7 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);C:\VulkanSDK\1.3.236.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);C:\VulkanSDK\1.3.236.0\Include;$(SolutionDir)vcpkg_installed\x64-windows-static\x64-windows-static\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnablePREfast>true</EnablePREfast>
@@ -219,7 +219,6 @@
     <ClInclude Include="Main\Scene.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h" />
-    <ClInclude Include="MaterialSystem\Materials\Material.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineShaderEffectRenderData.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipelineStatics.h" />
