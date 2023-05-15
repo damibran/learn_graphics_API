@@ -27,9 +27,9 @@ namespace dmbrn
 		Mesh(Mesh&& other) = default;
 		Mesh& operator=(Mesh&& other) = default;
 
-		const Material* material_=nullptr;
+		const DiffusionMaterial* material_=nullptr;
 
-		Mesh(const Material* material, const std::string& full_mesh_name, const aiMesh* mesh)
+		Mesh(const DiffusionMaterial* material, const std::string& full_mesh_name, const aiMesh* mesh)
 		{
 			material_ = material;
 			render_data_ = MeshRenderData::GetRenderDataPtr(full_mesh_name, mesh);

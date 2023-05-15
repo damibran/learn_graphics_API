@@ -6,13 +6,12 @@
 #include "Utils/StdUtils.h"
 
 #include "DiffusionUniformBuffer.h"
-#include"MaterialSystem/Materials/Material.h"
 #include"MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
 #include"Wrappers/Texture.h"
 
 namespace dmbrn
 {
-	class DiffusionMaterial : public Material
+	class DiffusionMaterial
 	{
 		struct MaterialRegistryHandle
 		{
@@ -48,17 +47,17 @@ namespace dmbrn
 		DiffusionMaterial& operator=(DiffusionMaterial&&)=default;
 
 		// TODO actually some where it should delete it self from registry but reference counting needed so shred pointer to the rescue
-		~DiffusionMaterial()override=default;
+		~DiffusionMaterial()=default;
 
 		void bindMaterialData(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                      vk::PipelineLayout layout) const override
+		                      vk::PipelineLayout layout) const 
 		{
 			command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
 			                                  layout, 2,
 			                                  *descriptor_sets_[frame], nullptr);
 		}
 
-		static Material* GetMaterialPtr(const std::string& directory, const aiScene* scene,
+		static DiffusionMaterial* GetMaterialPtr(const std::string& directory, const aiScene* scene,
 		                                const aiMaterial* ai_material)
 		{
 			std::cout << "\nNew mat\n";

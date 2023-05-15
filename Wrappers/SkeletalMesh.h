@@ -24,9 +24,9 @@ namespace dmbrn
 		SkeletalMesh(SkeletalMesh&& other) = default;
 		SkeletalMesh& operator=(SkeletalMesh&& other) = default;
 
-		const Material* material_ = nullptr;
+		const DiffusionMaterial* material_ = nullptr;
 
-		SkeletalMesh(const Material* material, const std::string& full_mesh_name, const aiMesh* mesh,
+		SkeletalMesh(const DiffusionMaterial* material, const std::string& full_mesh_name, const aiMesh* mesh,
 		             const std::unordered_map<uint32_t, uint32_t>& local_to_global_bone_ind)
 		{
 			material_ = material;

@@ -5,12 +5,6 @@
 
 namespace dmbrn
 {
-	struct SkeletalOffsets
-	{
-		uint32_t renderable_offset;
-		uint32_t skeletal_offset;
-	};
-
 	struct BonedVertex
 	{
 		static inline constexpr uint8_t max_count_of_bones_per_vrtx = 4;

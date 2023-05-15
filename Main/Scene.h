@@ -35,8 +35,8 @@ namespace dmbrn
 
 			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
 
-			//ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
-			//ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
+			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
+			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
 			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae", true, true);
 
 			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
@@ -459,7 +459,7 @@ namespace dmbrn
 						std::string mesh_name = name_this + "." + std::string(mesh->mName.C_Str());
 
 						const aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
-						const Material* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
+						const DiffusionMaterial* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
 
 						if (mesh->HasBones() && with_bones_)
 						{

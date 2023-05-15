@@ -37,15 +37,27 @@ namespace dmbrn
 		PerSkeletonData& per_skeleton_data_;
 
 		void drawStatic(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerStaticModelData& per_renderable_data_buffer) 		{
+		                const PerStaticModelData& per_renderable_data_buffer)
+		{
+			const Mesh::MeshRenderData* prev_mesh=nullptr;
+			const DiffusionMaterial* prev_mat = nullptr;
+			
 			un_lit_graphics_pipeline_statics_.bindStaticPipeline(command_buffer);
 			un_lit_graphics_pipeline_statics_.bindStaticShaderData(frame, command_buffer);
 
 			for(auto& [mesh, offset]: static_render_queue){
 
-				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.static_pipeline_layout_);
+				if(mesh->render_data_!=prev_mesh)
+				{
+					mesh->bind(command_buffer);
+					prev_mesh = mesh->render_data_;
+				}
 
-				mesh->bind(command_buffer);
+				if(mesh->material_!=prev_mat)
+				{
+					mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.static_pipeline_layout_);
+					prev_mat=mesh->material_;
+				}
 
 				per_renderable_data_buffer.bindDataFor(frame, command_buffer,
 				                                   *un_lit_graphics_pipeline_statics_.static_pipeline_layout_,
@@ -58,15 +70,26 @@ namespace dmbrn
 		}
 
 		void drawSkeletal(int frame, const vk::raii::CommandBuffer& command_buffer,
-		                const PerSkeletonData& per_skeletal_data_buffer) 		{
+		                const PerSkeletonData& per_skeletal_data_buffer)
+		{
+			const SkeletalMesh::SkeletalMeshRenderData* prev_mesh=nullptr;
+			const DiffusionMaterial* prev_mat = nullptr;
 			un_lit_graphics_pipeline_statics_.bindSkeletalPipeline(command_buffer);
 			un_lit_graphics_pipeline_statics_.bindSkeletalShaderData(frame, command_buffer);
 
 			for(auto& [mesh, offset]: skeletal_render_queue){
 
-				mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.skeletal_pipeline_layout_);
+				if(mesh->render_data_!=prev_mesh)
+				{
+					mesh->bind(command_buffer);
+					prev_mesh = mesh->render_data_;
+				}
 
-				mesh->bind(command_buffer);
+				if(mesh->material_!=prev_mat)
+				{
+					mesh->material_->bindMaterialData(frame, command_buffer, *un_lit_graphics_pipeline_statics_.static_pipeline_layout_);
+					prev_mat=mesh->material_;
+				}
 
 				per_skeletal_data_buffer.bindDataFor(frame, command_buffer,
 				                                   *un_lit_graphics_pipeline_statics_.skeletal_pipeline_layout_,
