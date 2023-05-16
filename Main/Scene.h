@@ -139,13 +139,11 @@ namespace dmbrn
 
 			if (data)
 			{
-				auto view = registry_.view<SkeletalModelComponent>();
+				auto view = registry_.view<SkeletonComponent>();
 
 				for (auto entt : view)
 				{
-					SkeletalModelComponent& skeletal_comp = view.get<SkeletalModelComponent>(entt);
-					SkeletonComponent& skeleton_component = skeletal_comp.skeleton_ent.getComponent<
-						SkeletonComponent>();
+					SkeletonComponent& skeleton_component = view.get<SkeletonComponent>(entt);
 
 					// if is visible
 					for (Enttity enttity : skeleton_component.bone_enttities)
@@ -305,8 +303,7 @@ namespace dmbrn
 				{
 					throw std::runtime_error(std::string("ERROR::ASSIMP:: ") + importer.GetErrorString());
 				}
-
-
+				
 				collectAnimNodeToEnttity(root_ent, scene);
 				// TODO check if there is no empty anim node (that means, that user renamed entities)
 
