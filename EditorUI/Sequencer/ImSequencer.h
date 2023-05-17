@@ -45,12 +45,6 @@ namespace dmbrn
 	class Sequencer
 	{
 	public:
-		const float cursorWidth = 8.f;
-		const float MinBarWidth = 80.f;
-		const float ItemHeight = 20.;
-		const float legendWidth = 200.f;
-		const float text_offset = 2.f;
-
 		Sequencer(AnimationSequence& sequence):
 			sequence(sequence)
 		{
@@ -81,7 +75,14 @@ namespace dmbrn
 			}
 		}
 
+	private:
 		bool playing = false;
+
+		const float cursorWidth = 8.f;
+		const float MinBarWidth = 80.f;
+		const float ItemHeight = 20.;
+		const float legendWidth = 200.f;
+		const float text_offset = 2.f;
 
 		AnimationSequence& sequence;
 		float currentFrame = 100.f;
@@ -109,20 +110,9 @@ namespace dmbrn
 
 		std::unordered_map<Enttity, std::optional<AnimationSequence::ClipIterator>, Enttity::hash> selected_clips;
 
-		std::optional<AnimationSequence::ClipIterator> movingClip=std::nullopt;
+		std::optional<AnimationSequence::ClipIterator> movingClip = std::nullopt;
 
 		unsigned count_recording = 0;
-
-		enum SEQUENCER_OPTIONS
-		{
-			SEQUENCER_EDIT_NONE = 0,
-			SEQUENCER_EDIT_STARTEND = 1 << 1,
-			SEQUENCER_CHANGE_FRAME = 1 << 3,
-			SEQUENCER_ADD = 1 << 4,
-			SEQUENCER_DEL = 1 << 5,
-			SEQUENCER_COPYPASTE = 1 << 6,
-			SEQUENCER_EDIT_ALL = SEQUENCER_EDIT_STARTEND | SEQUENCER_CHANGE_FRAME
-		};
 
 		void drawControls()
 		{
@@ -150,6 +140,18 @@ namespace dmbrn
 
 			ImGui::PopItemWidth();
 		}
+
+	public:
+		enum SEQUENCER_OPTIONS
+		{
+			SEQUENCER_EDIT_NONE = 0,
+			SEQUENCER_EDIT_STARTEND = 1 << 1,
+			SEQUENCER_CHANGE_FRAME = 1 << 3,
+			SEQUENCER_ADD = 1 << 4,
+			SEQUENCER_DEL = 1 << 5,
+			SEQUENCER_COPYPASTE = 1 << 6,
+			SEQUENCER_EDIT_ALL = SEQUENCER_EDIT_STARTEND | SEQUENCER_CHANGE_FRAME
+		};
 
 		bool draw(float d_time, int sequenceOptions)
 		{
@@ -589,7 +591,7 @@ namespace dmbrn
 							const ImRect rc = ImRect(slotP1, slotP2);
 							if (rc.Contains(io.MousePos))
 							{
-								if(!movingClip.has_value())
+								if (!movingClip.has_value())
 									draw_list->AddRectFilled(rc.Min, rc.Max, 0xFFFFFFFF, 2);
 
 								if (io.MouseClicked[0] && !movingClip.has_value())
@@ -601,7 +603,7 @@ namespace dmbrn
 								if (io.MouseReleased[0] && movingClip.has_value() && movingClip.value() == clip_it)
 								{
 									clip_move_mouse_pos = -1.f;
-									movingClip=std::nullopt;
+									movingClip = std::nullopt;
 								}
 
 								if (io.MouseReleased[0] && io.MouseDownDurationPrev[0] < 0.1 && !io.MouseDoubleClicked[
@@ -635,7 +637,8 @@ namespace dmbrn
 									}
 								}
 
-								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !MovingCurrentFrame && movingClip.has_value() && movingClip.value() == clip_it)
+								if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !MovingCurrentFrame && movingClip.
+									has_value() && movingClip.value() == clip_it)
 								{
 									ImGui::SetNextFrameWantCaptureMouse(true);
 									const float diffFrame = std::round(
@@ -650,8 +653,8 @@ namespace dmbrn
 										AnimationSequence::ClipIterator old_it = clip_it;
 
 										clip_it = clip_it = sequence.updateStart(
-												ent_it, std::move_iterator(clip_it),
-												start);
+											ent_it, std::move_iterator(clip_it),
+											start);
 
 										movingClip = clip_it;
 
