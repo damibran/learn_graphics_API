@@ -25,12 +25,6 @@ namespace dmbrn
 			selected_(selected),
 			sequencer_(sequencer)
 		{
-			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
-			{
-				const Texture& buf = swap_chain_.getColorBuffers()[i];
-				images_.push_back(ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
-				                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-			}
 			last_used_focused = this;
 		}
 
@@ -56,7 +50,7 @@ namespace dmbrn
 
 			const auto pos = ImGui::GetCursorPos();
 
-			ImGui::Image(images_[imageIndex], size_);
+			ImGui::Image(swap_chain_.getImGuiImageWithIndex(imageIndex), size_);
 
 			ImGui::SetItemAllowOverlap();
 
@@ -145,11 +139,11 @@ namespace dmbrn
 			ImGui::PopStyleVar();
 		}
 
-		void render(const LogicalDevice& device, const vk::raii::CommandBuffer& command_buffer,
+		void render(const vk::raii::CommandBuffer& command_buffer,
 		            uint32_t current_frame,
 		            uint32_t imageIndex)
 		{
-			const Texture& color_buffer = swap_chain_.getColorBuffers()[imageIndex];
+			const Texture& color_buffer = swap_chain_.getColorBufferWithIndex(imageIndex);
 
 			color_buffer.transitionImageLayoutWithCommandBuffer(command_buffer, vk::ImageLayout::eShaderReadOnlyOptimal,
 			                                                    vk::ImageLayout::eColorAttachmentOptimal);
@@ -163,7 +157,7 @@ namespace dmbrn
 			const vk::RenderPassBeginInfo renderPassInfo
 			{
 				**render_pass_,
-				*swap_chain_.getFrameBuffers()[imageIndex],
+				*swap_chain_.getFrameBufferWithIndex(imageIndex),
 				vk::Rect2D{vk::Offset2D{0, 0}, swap_chain_.getExtent()},
 				clear_values
 			};
@@ -219,7 +213,6 @@ namespace dmbrn
 		ImVec2 size_;
 		ViewportCamera camera_;
 		ViewportSwapChain swap_chain_;
-		std::vector<VkDescriptorSet> images_;
 		Scene& scene_;
 		Enttity* selected_;
 		Sequencer& sequencer_;
@@ -255,13 +248,6 @@ namespace dmbrn
 		{
 			swap_chain_.recreate({static_cast<unsigned>(size_.x), static_cast<unsigned>(size_.y)},
 			                     render_pass_);
-
-			for (int i = 0; i < swap_chain_.getFrameBuffers().size(); ++i)
-			{
-				const Texture& buf = swap_chain_.getColorBuffers()[i];
-				images_[i] = (ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
-				                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-			}
 
 			camera_.updateAspectRatio({size_.x, size_.y});
 		}

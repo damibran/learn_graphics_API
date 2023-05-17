@@ -35,7 +35,7 @@ namespace dmbrn
 				const double delta_time = elapsed_time.count();
 
 				glfwPollEvents();
-				editor_ui_.drawFrame(tp2_, delta_time);
+				editor_ui_.drawFrame(delta_time);
 
 				Singletons::window.setWindowTitle("Vulkan. FPS: " + std::to_string(1.0f / delta_time));
 			}

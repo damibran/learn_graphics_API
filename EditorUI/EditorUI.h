@@ -42,7 +42,7 @@ namespace dmbrn
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 		}
 
-		void drawFrame(time_point g_time, double delta_time)
+		void drawFrame(double delta_time)
 		{
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
@@ -67,7 +67,7 @@ namespace dmbrn
 			scene_.updatePerStaticModelData(current_frame_);
 			scene_.updatePerSkeletalData(current_frame_);
 
-			render(Singletons::device, frame, imageIndex);
+			render(frame, imageIndex);
 
 			submitAndPresent(Singletons::present_queue, Singletons::graphics_queue, Singletons::window, frame,
 			                 imageIndex);
@@ -224,7 +224,7 @@ namespace dmbrn
 		/**
 		* \brief record command buffer with ImGUIRenderPass
 		*/
-		void render(const LogicalDevice& device, const EditorFrame& frame, uint32_t imageIndex)
+		void render(const EditorFrame& frame, uint32_t imageIndex)
 		{
 			const ImGuiIO& io = ImGui::GetIO();
 			ImGui::Render();
@@ -238,8 +238,8 @@ namespace dmbrn
 
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
-			viewport_.render(device, command_buffer, current_frame_, imageIndex);
-			viewport2_.render(device, command_buffer, current_frame_, imageIndex);
+			viewport_.render( command_buffer, current_frame_, imageIndex);
+			viewport2_.render( command_buffer, current_frame_, imageIndex);
 
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));

@@ -19,6 +19,12 @@ namespace dmbrn
 			depth_buffer_(extent_, Singletons::physical_device,Singletons::device),
 			framebuffers_(createFrameBuffers(Singletons::device, render_pass))
 		{
+			for (int i = 0; i < framebuffers_.size(); ++i)
+			{
+				const Texture& buf = color_buffers_[i];
+				imgui_images_ds.push_back(ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
+				                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			}
 		}
 
 		void recreate(const vk::Extent2D extent, const ViewportRenderPass& render_pass)
@@ -31,6 +37,29 @@ namespace dmbrn
 			depth_buffer_ = DepthBuffer(extent_, Singletons::physical_device,
 			                            Singletons::device);
 			framebuffers_ = createFrameBuffers(Singletons::device, render_pass);
+
+			for (int i = 0; i < framebuffers_.size(); ++i)
+			{
+				ImGui_ImplVulkan_RemoveTexture(imgui_images_ds[i]);
+				const Texture& buf = color_buffers_[i];
+				imgui_images_ds[i] = (ImGui_ImplVulkan_AddTexture(*buf.getSampler(), *buf.getImageView(),
+				                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			}
+		}
+
+		const Texture& getColorBufferWithIndex(int i) const
+		{
+			return color_buffers_[i];
+		}
+
+		const vk::raii::Framebuffer& getFrameBufferWithIndex(int i) const
+		{
+			return framebuffers_[i];
+		}
+
+		const VkDescriptorSet getImGuiImageWithIndex(int i)const
+		{
+			return imgui_images_ds[i];
 		}
 
 		const vk::Extent2D& getExtent() const
@@ -38,21 +67,13 @@ namespace dmbrn
 			return extent_;
 		}
 
-		const std::vector<Texture>& getColorBuffers() const
-		{
-			return color_buffers_;
-		}
-
-		const std::vector<vk::raii::Framebuffer>& getFrameBuffers() const
-		{
-			return framebuffers_;
-		}
-
 	private:
 		vk::Extent2D extent_;
 		std::vector<Texture> color_buffers_;
 		DepthBuffer depth_buffer_;
 		std::vector<vk::raii::Framebuffer> framebuffers_;
+		std::vector<VkDescriptorSet> imgui_images_ds;
+
 
 		[[nodiscard]] std::vector<Texture> createColorBuffers(vk::Extent2D extent)
 		{
