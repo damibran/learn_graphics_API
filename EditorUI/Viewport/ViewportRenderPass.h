@@ -22,13 +22,13 @@ namespace dmbrn
 				vk::AttachmentStoreOp::eStore,
 				vk::AttachmentLoadOp::eDontCare,
 				vk::AttachmentStoreOp::eDontCare,
-				vk::ImageLayout::eColorAttachmentOptimal,
+				vk::ImageLayout::eShaderReadOnlyOptimal,
 				vk::ImageLayout::eShaderReadOnlyOptimal
 			};
 
 			constexpr vk::AttachmentReference colorAttachmentRef
 			{
-				0, vk::ImageLayout::eColorAttachmentOptimal
+				0, vk::ImageLayout::eShaderReadOnlyOptimal
 			};
 
 			const vk::AttachmentDescription depthAttachment
@@ -72,10 +72,10 @@ namespace dmbrn
 			{
 				VK_SUBPASS_EXTERNAL,
 				0,
-				vk::PipelineStageFlagBits::eColorAttachmentOutput,
-				vk::PipelineStageFlagBits::eColorAttachmentOutput,
-				vk::AccessFlagBits::eNone,
-				vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead
+				vk::PipelineStageFlagBits::eFragmentShader,
+				vk::PipelineStageFlagBits::eFragmentShader,
+				vk::AccessFlagBits::eColorAttachmentWrite,
+				vk::AccessFlagBits::eShaderRead
 			};
 
 			const std::array<vk::AttachmentDescription, 2> attachments{colorAttachment, depthAttachment};

@@ -47,11 +47,6 @@ namespace dmbrn
 			}
 		}
 
-		const Texture& getColorBufferWithIndex(uint32_t i) const
-		{
-			return color_buffers_[i];
-		}
-
 		const vk::raii::Framebuffer& getFrameBufferWithIndex(uint32_t i) const
 		{
 			return framebuffers_[i];

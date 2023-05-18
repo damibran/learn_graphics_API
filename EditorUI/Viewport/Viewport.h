@@ -143,11 +143,6 @@ namespace dmbrn
 		            uint32_t current_frame,
 		            uint32_t imageIndex)
 		{
-			const Texture& color_buffer = swap_chain_.getColorBufferWithIndex(imageIndex);
-
-			color_buffer.transitionImageLayoutWithCommandBuffer(command_buffer, vk::ImageLayout::eShaderReadOnlyOptimal,
-			                                                    vk::ImageLayout::eColorAttachmentOptimal);
-
 			const std::array<vk::ClearValue, 2> clear_values
 			{
 				vk::ClearValue{vk::ClearColorValue{std::array<float, 4>{0.3f, 0.3f, 0.3f, 1.0f}}},

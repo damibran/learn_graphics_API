@@ -7,10 +7,10 @@ namespace dmbrn
 	class Inspector
 	{
 	public:
-		Inspector(Scene& scene, SceneTree& scene_tree,Sequencer& sequencer):
-		scene_(scene),
+		Inspector(Scene& scene, SceneTree& scene_tree, Sequencer& sequencer):
+			scene_(scene),
 			scene_tree_(scene_tree),
-		sequencer_(sequencer)
+			sequencer_(sequencer)
 		{
 		}
 
@@ -75,7 +75,8 @@ namespace dmbrn
 							Enttity rec_parent = entity.findRecordingAnimationCompParent();
 							if (rec_parent)
 							{
-								sequencer_.processKey<AnimationChannels::PosKeyTag>(&entity,rec_parent,comp->position);
+								sequencer_.processKey<
+									AnimationChannels::PosKeyTag>(&entity, rec_parent, comp->position);
 							}
 						}
 					}
@@ -86,7 +87,8 @@ namespace dmbrn
 							Enttity rec_parent = entity.findRecordingAnimationCompParent();
 							if (rec_parent)
 							{
-								sequencer_.processKey<AnimationChannels::RotKeyTag>(&entity,rec_parent,glm::quat{glm::radians(rot_deg)});
+								sequencer_.processKey<AnimationChannels::RotKeyTag>(
+									&entity, rec_parent, glm::quat{glm::radians(rot_deg)});
 							}
 						}
 						comp->setDegrees(rot_deg);
@@ -99,7 +101,7 @@ namespace dmbrn
 							Enttity rec_parent = entity.findRecordingAnimationCompParent();
 							if (rec_parent)
 							{
-								sequencer_.processKey<AnimationChannels::ScaleKeyTag>(&entity,rec_parent,comp->scale);
+								sequencer_.processKey<AnimationChannels::ScaleKeyTag>(&entity, rec_parent, comp->scale);
 							}
 						}
 						edited = true;
@@ -114,21 +116,26 @@ namespace dmbrn
 
 			if (auto* comp = entity.tryGetComponent<StaticModelComponent>())
 			{
-				if (ImGui::TreeNodeEx("ModelComponent", ImGuiTreeNodeFlags_DefaultOpen))
+				if (ImGui::TreeNodeEx("Static Model Component", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					//const Mesh* model = comp->getModel();
-					//std::string text = model ? model->getPath() : "";
-					//char buf[256];
-					//memset(buf, 0, sizeof(buf));
-					//strcpy_s(buf, sizeof(buf), text.c_str());
-					//bool newPath = false;
-					//ImGui::Text("Model: ");
-					//ImGui::SameLine();
-					//if (ImGui::InputText("##ModelPathLabel", buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue))
-					//{
-					//	//comp->setNewModel(buf);
-					//}
-					//
+					const Mesh& mesh = comp->mesh;
+
+					std::string text = "GPU mem offset: " + std::to_string(comp->inGPU_transform_offset);
+
+					ImGui::Text(text.c_str());
+
+					ImGui::TreePop();
+				}
+			}
+
+			if (auto* comp = entity.tryGetComponent<SkeletalModelComponent>())
+			{
+				if (ImGui::TreeNodeEx("Skeleton Model Component", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					std::string text = "Skeleton ent name: " + comp->skeleton_ent.getComponent<TagComponent>().tag;
+
+					ImGui::Text(text.c_str());
+
 					ImGui::TreePop();
 				}
 			}
@@ -144,25 +151,28 @@ namespace dmbrn
 					                      ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings |
 					                      ImGuiTableFlags_Borders))
 					{
-						int i=1;
-						for (decltype(comp->animation_clips)::iterator clip_it = comp->animation_clips.begin();clip_it!=comp->animation_clips.end();++clip_it,++i)
+						int i = 1;
+						for (decltype(comp->animation_clips)::iterator clip_it = comp->animation_clips.begin(); clip_it
+						     != comp->animation_clips.end(); ++clip_it, ++i)
 						{
 							ImGui::TableNextColumn();
 
 							strcpy_s(buf, sizeof(buf), clip_it->name.data());
 
-							std::string label = "Clip "+std::to_string(i);
+							std::string label = "Clip " + std::to_string(i);
 
-							if(ImGui::InputText(label.c_str(),buf,sizeof(buf),ImGuiInputTextFlags_EnterReturnsTrue))
+							if (ImGui::InputText(label.c_str(), buf, sizeof(buf), ImGuiInputTextFlags_EnterReturnsTrue))
 							{
-								comp->updateClipName(std::make_move_iterator(clip_it),std::string(buf));
+								comp->updateClipName(std::make_move_iterator(clip_it), std::string(buf));
 								break;
 							}
 
-							if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID|ImGuiDragDropFlags_AcceptBeforeDelivery))
+							if (ImGui::BeginDragDropSource(
+								ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptBeforeDelivery))
 							{
-								const std::pair<Enttity,const AnimationClip*> payload_data = std::make_pair(entity,&*clip_it);
-								ImGui::SetDragDropPayload("Animation_clip_DnD",&payload_data,sizeof(payload_data));
+								const std::pair<Enttity, const AnimationClip*> payload_data = std::make_pair(
+									entity, &*clip_it);
+								ImGui::SetDragDropPayload("Animation_clip_DnD", &payload_data, sizeof(payload_data));
 
 								ImGui::Text(clip_it->name.c_str());
 								ImGui::EndDragDropSource();
@@ -175,7 +185,7 @@ namespace dmbrn
 					if (ImGui::Button("Add animation from file"))
 						ImGui::OpenPopup("Import_Animation_Modal");
 
-					if (ImGui::BeginPopupModal("Import_Animation_Modal",NULL,ImGuiWindowFlags_AlwaysAutoResize))
+					if (ImGui::BeginPopupModal("Import_Animation_Modal",NULL, ImGuiWindowFlags_AlwaysAutoResize))
 					{
 						strcpy_s(buf, sizeof(buf), file_path.c_str());
 
@@ -186,13 +196,33 @@ namespace dmbrn
 
 						if (ImGui::Button("Import"))
 						{
-							scene_.importAnimationTo(entity,file_path);
+							scene_.importAnimationTo(entity, file_path);
 							ImGui::CloseCurrentPopup();
 						}
 
 						ImGui::EndPopup();
 					}
 
+					ImGui::TreePop();
+				}
+			}
+
+			if (auto* comp = entity.tryGetComponent<BoneComponent>())
+			{
+				if (ImGui::TreeNodeEx("Bone Component"))
+				{
+					std::string s = "Bone index: " + std::to_string(comp->bone_ind);
+					ImGui::Text(s.c_str());
+					ImGui::TreePop();
+				}
+			}
+
+			if (auto* comp = entity.tryGetComponent<SkeletonComponent>())
+			{
+				if (ImGui::TreeNodeEx("Skeleton Component"))
+				{
+					std::string s = "GPU mem offset: " + std::to_string(comp->in_GPU_mtxs_offset);
+					ImGui::Text(s.c_str());
 					ImGui::TreePop();
 				}
 			}
