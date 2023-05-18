@@ -47,17 +47,17 @@ namespace dmbrn
 			}
 		}
 
-		const Texture& getColorBufferWithIndex(int i) const
+		const Texture& getColorBufferWithIndex(uint32_t i) const
 		{
 			return color_buffers_[i];
 		}
 
-		const vk::raii::Framebuffer& getFrameBufferWithIndex(int i) const
+		const vk::raii::Framebuffer& getFrameBufferWithIndex(uint32_t i) const
 		{
 			return framebuffers_[i];
 		}
 
-		const VkDescriptorSet getImGuiImageWithIndex(int i)const
+		const VkDescriptorSet& getImGuiImageWithIndex(uint32_t i)const
 		{
 			return imgui_images_ds[i];
 		}

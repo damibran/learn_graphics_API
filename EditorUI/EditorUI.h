@@ -12,8 +12,8 @@
 
 #include "Wrappers/Singletons/Singletons.h"
 #include "Helpers/ImGuiRaii.h"
-#include "Helpers/ImGUIRenderPass.h"
-#include "Helpers/ImGUISwapChain.h"
+#include "Helpers/EditorRenderPass.h"
+#include "Helpers/EditorSwapChain.h"
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
 #include "Inspector.h"
@@ -76,8 +76,8 @@ namespace dmbrn
 		}
 
 	private:
-		ImGUIRenderPass render_pass_;
-		ImGUISwapChain swap_chain_;
+		EditorRenderPass render_pass_;
+		EditorSwapChain swap_chain_;
 		ImGuiRaii im_gui_;
 		Scene& scene_;
 		SceneTree scene_tree_;

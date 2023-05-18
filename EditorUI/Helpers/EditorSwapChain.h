@@ -9,16 +9,16 @@
 #include "Wrappers/Singletons/Surface.h"
 #include "Wrappers/Singletons/PhysicalDevice.h"
 #include "Wrappers/Singletons/LogicalDevice.h"
-#include "ImGUIRenderPass.h"
+#include "EditorRenderPass.h"
 #include "Utils/UtilsFunctions.h"
 #include "EditorFrame.h"
 
 namespace dmbrn
 {
-	class ImGUISwapChain
+	class EditorSwapChain
 	{
 	public:
-		ImGUISwapChain(const ImGUIRenderPass& render_pass):
+		EditorSwapChain(const EditorRenderPass& render_pass):
 			swap_chain_(createSwapChain(Singletons::physical_device, Singletons::device, Singletons::surface, Singletons::window))
 		{
 			for (auto image : swap_chain_.getImages())
@@ -27,7 +27,7 @@ namespace dmbrn
 			}
 		}
 
-		void recreate(const ImGUIRenderPass& render_pass)
+		void recreate(const EditorRenderPass& render_pass)
 		{
 			int width = 0, height = 0;
 			const auto rec_size = Singletons::window.getFrameBufferSize();

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "ImGUIRenderPass.h"
+#include "EditorRenderPass.h"
 #include "Wrappers/Singletons/Singletons.h"
 
 
@@ -18,7 +18,7 @@ namespace dmbrn
 		vk::raii::ImageView image_view;
 		vk::raii::Framebuffer frame_buffer;
 
-		EditorFrame( const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
+		EditorFrame( const EditorRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
 		            const VkImage& image) :
 			command_buffer(std::move(createCommandBuffer(Singletons::device, Singletons::command_pool)[0])),
 			image_available_semaphore(Singletons::device->createSemaphore({})),
@@ -29,7 +29,7 @@ namespace dmbrn
 		{
 		}
 
-		void resize(const ImGUIRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
+		void resize(const EditorRenderPass& render_pass,vk::Format format,const vk::Extent2D& extent,
 		            const VkImage& image)
 		{
 			image_view = createImageView(Singletons::device, image, format);
@@ -62,7 +62,7 @@ namespace dmbrn
 		}
 
 		[[nodiscard]] vk::raii::Framebuffer createFrameBuffers(
-			const LogicalDevice& device, const ImGUIRenderPass& render_pass, const vk::Extent2D& extent)
+			const LogicalDevice& device, const EditorRenderPass& render_pass, const vk::Extent2D& extent)
 		{
 			const vk::ImageView attachments[] = {
 				*image_view,

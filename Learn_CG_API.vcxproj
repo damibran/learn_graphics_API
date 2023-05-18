@@ -194,8 +194,8 @@
     <ClInclude Include="EditorUI\EditorUI.h" />
     <ClInclude Include="EditorUI\Helpers\EditorFrame.h" />
     <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h" />
-    <ClInclude Include="EditorUI\Helpers\ImGUIRenderPass.h" />
-    <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h" />
+    <ClInclude Include="EditorUI\Helpers\EditorRenderPass.h" />
+    <ClInclude Include="EditorUI\Helpers\EditorSwapChain.h" />
     <ClInclude Include="EditorUI\Inspector.h" />
     <ClInclude Include="EditorUI\SceneTree.h" />
     <ClInclude Include="EditorUI\Sequencer\ImSequencer.h" />

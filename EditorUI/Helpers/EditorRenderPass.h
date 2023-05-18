@@ -11,10 +11,10 @@
 
 namespace dmbrn
 {
-	class ImGUIRenderPass
+	class EditorRenderPass
 	{
 	public:
-		ImGUIRenderPass():
+		EditorRenderPass():
 			render_pass_(nullptr)
 		{
 			const vk::AttachmentDescription colorAttachment

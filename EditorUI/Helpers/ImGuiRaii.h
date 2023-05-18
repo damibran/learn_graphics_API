@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ImGUIRenderPass.h"
+#include "EditorRenderPass.h"
 
 namespace dmbrn
 {
 	class ImGuiRaii
 	{
 	public:
-		ImGuiRaii(const ImGUIRenderPass& render_pass):
+		ImGuiRaii(const EditorRenderPass& render_pass):
 			imguiPool(nullptr)
 		{
 			constexpr vk::DescriptorPoolSize pool_sizes[] =

@@ -138,10 +138,10 @@
     <ClInclude Include="EditorUI\Helpers\ImGuiRaii.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Helpers\ImGUIRenderPass.h">
+    <ClInclude Include="EditorUI\Helpers\EditorRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Helpers\ImGUISwapChain.h">
+    <ClInclude Include="EditorUI\Helpers\EditorSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EditorUI\Viewport\Viewport.h">
