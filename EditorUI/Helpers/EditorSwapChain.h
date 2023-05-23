@@ -15,6 +15,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents editor UI swap chain
+	 */
 	class EditorSwapChain
 	{
 	public:

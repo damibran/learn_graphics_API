@@ -6,7 +6,7 @@
 #include <imgui_internal.h>
 #include <ImSequencer.h>
 
-#include "ImSequencer.h"
+#include "Sequencer.h"
 
 namespace dmbrn
 {

@@ -42,6 +42,9 @@ struct ImRect;
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents animation sequencer UI window
+	 */
 	class Sequencer
 	{
 	public:

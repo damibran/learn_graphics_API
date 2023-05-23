@@ -3,6 +3,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages uniform GPU data for every static model in scene
+	 */
 	class PerStaticModelData
 	{
 		public:

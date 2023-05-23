@@ -9,6 +9,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief wrapper for vkCommandPool
+	 */
 	class CommandPool
 	{
 		friend struct Singletons;

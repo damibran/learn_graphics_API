@@ -9,7 +9,11 @@
 
 namespace dmbrn
 {
-	class Texture // need to cache current layout it makes transitioning clearer 
+	/**
+	 * \brief manages texture image data on GPU
+	 * TODO need to cache current layout it makes transitioning clearer 
+	 */
+	class Texture 
 	{
 	public:
 		Texture(const Texture&)=delete;

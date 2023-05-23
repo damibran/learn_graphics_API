@@ -201,7 +201,7 @@
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wrappers\Singletons\PerRenderableData.h">
+    <ClInclude Include="Wrappers\Singletons\PerStaticModelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\UnlitTexturedOutlinedShaderEffect.h">
@@ -252,7 +252,7 @@
     <ClInclude Include="Main\Componenets\RelationshipComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\ModelComponent.h">
+    <ClInclude Include="Main\Componenets\StaticModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Main\Componenets\SkeletalModelComponent.h">
@@ -270,7 +270,7 @@
     <ClInclude Include="EditorUI\Sequencer\MySequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Sequencer\ImSequencer.h">
+    <ClInclude Include="EditorUI\Sequencer\Sequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Main\AnimationSequence.h">

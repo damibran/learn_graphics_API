@@ -8,6 +8,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief wrapper for vkDevice
+	 */
 	class LogicalDevice
 	{
 		friend struct Singletons;

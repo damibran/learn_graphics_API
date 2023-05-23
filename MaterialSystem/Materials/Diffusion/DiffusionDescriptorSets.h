@@ -6,6 +6,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes and stores descriptor sets of diffuse material
+	 */
 	class DiffusionDescriptorSets
 	{
 	public:

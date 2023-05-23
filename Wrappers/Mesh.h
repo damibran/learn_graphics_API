@@ -16,6 +16,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief is just combination of material and static mesh render data
+	 */
 	class Mesh
 	{
 	public:
@@ -45,6 +48,9 @@ namespace dmbrn
 			command_buffer.drawIndexed(render_data_->indices_count, 1, 0, 0, 0);
 		}
 
+		/**
+		 * \brief controls static mesh render data on GPU
+		 */
 		const class MeshRenderData
 		{
 			friend class Mesh;

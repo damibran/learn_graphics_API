@@ -3,6 +3,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief name of an entity
+	 */
 	struct TagComponent
 	{
 		std::string tag;

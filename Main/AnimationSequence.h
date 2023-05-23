@@ -5,6 +5,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief stores and manages sequence of animation clips for every animated entity in scene
+	 */
 	class AnimationSequence
 	{
 		// TODO make private

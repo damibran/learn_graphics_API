@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages UnlitTexturedShaderEffect GPU render data 
+	 */
 	class UnLitTexturedRenderData
 	{
 	public:

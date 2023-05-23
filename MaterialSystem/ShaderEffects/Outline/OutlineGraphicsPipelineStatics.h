@@ -7,11 +7,14 @@
 #include "EditorUI/Viewport/CameraRenderData.h"
 #include "OutlineGraphicsPipeline.h"
 #include "MaterialSystem/Materials/Diffusion/DiffusionDescriptorSets.h"
-#include "Wrappers/Singletons/PerRenderableData.h"
+#include "Wrappers/Singletons/PerStaticModelData.h"
 #include "OutlineShaderEffectRenderData.h"
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages objects needed for drawing with UnlitTexturedOutlinedShaderEffect
+	 */
 	class OutlineGraphicsPipelineStatics
 	{
 	public:

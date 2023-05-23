@@ -5,7 +5,10 @@
 
 namespace dmbrn
 {
-	// TODO proper unregister
+	/**
+	 * \brief describes an entity with skeletal model visual representation
+	 * TODO proper unregister
+	 */
 	struct SkeletalModelComponent
 	{
 		SkeletalModelComponent() = default;

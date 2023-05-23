@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents inspector UI window
+	 */
 	class Inspector
 	{
 	public:

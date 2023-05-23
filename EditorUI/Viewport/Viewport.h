@@ -6,10 +6,13 @@
 #include "ViewportSwapChain.h"
 #include "EditorUI/Viewport/ViewportCamera.h"
 #include "Utils/Transform.h"
-#include "EditorUI/Sequencer/ImSequencer.h"
+#include "EditorUI/Sequencer/Sequencer.h"
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents viewport UI window
+	 */
 	class Viewport
 	{
 	public:

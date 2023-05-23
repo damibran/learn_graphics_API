@@ -7,6 +7,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents transformation of an entity
+	 */
 	struct TransformComponent
 	{
 		glm::vec3 position;

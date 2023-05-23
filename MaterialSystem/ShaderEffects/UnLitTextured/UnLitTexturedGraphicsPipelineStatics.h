@@ -6,11 +6,14 @@
 #include "EditorUI/Viewport/CameraRenderData.h"
 #include "UnLitTexturedGraphicsPipeline.h"
 #include "UnLitTexturedRenderData.h"
-#include "Wrappers/Singletons/PerRenderableData.h"
+#include "Wrappers/Singletons/PerStaticModelData.h"
 #include "Wrappers/Singletons/PerSkeletonData.h"
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages objects needed for drawing with UnlitTexturedShaderEffect
+	 */
 	class UnLitTexturedGraphicsPipelineStatics
 	{
 	public:

@@ -5,7 +5,9 @@
 
 namespace dmbrn
 {
-
+	/**
+	 * \brief represents image data on CPU
+	 */
 	struct image_data
 	{
 		bool operator==(const image_data& other)const

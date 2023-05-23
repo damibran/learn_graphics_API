@@ -8,6 +8,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages and stores objects needed for rendering
+	 */
 	class Renderer
 	{
 	public:

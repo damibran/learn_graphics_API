@@ -10,6 +10,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents viewport swap chain
+	 */
 	class ViewportSwapChain
 	{
 	public:

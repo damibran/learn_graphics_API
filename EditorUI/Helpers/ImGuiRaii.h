@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief RAII wrapper for ImGui objects
+	 */
 	class ImGuiRaii
 	{
 	public:

@@ -11,6 +11,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents render pass of editor UI
+	 */
 	class EditorRenderPass
 	{
 	public:
@@ -40,7 +43,7 @@ namespace dmbrn
 				{},
 				vk::PipelineBindPoint::eGraphics,
 				nullptr,
-				colorAttachmentRef,
+				colorAttachmentRef
 			};
 
 			const vk::SubpassDependency dependency

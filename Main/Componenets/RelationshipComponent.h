@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes hierarchical relations between entities
+	 */
 	struct RelationshipComponent
 	{
 		Enttity first;

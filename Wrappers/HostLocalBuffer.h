@@ -5,6 +5,11 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents host local GPU buffer
+	 * \tparam T type of objects in buffer
+	 * TODO actually this is device local buffer so should make renaming
+	 */
 	template <typename T>
 	class HostLocalBuffer
 	{

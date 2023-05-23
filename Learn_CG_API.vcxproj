@@ -198,7 +198,7 @@
     <ClInclude Include="EditorUI\Helpers\EditorSwapChain.h" />
     <ClInclude Include="EditorUI\Inspector.h" />
     <ClInclude Include="EditorUI\SceneTree.h" />
-    <ClInclude Include="EditorUI\Sequencer\ImSequencer.h" />
+    <ClInclude Include="EditorUI\Sequencer\Sequencer.h" />
     <ClInclude Include="EditorUI\Sequencer\MySequence.h" />
     <ClInclude Include="EditorUI\Viewport\CameraRenderData.h" />
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
@@ -209,7 +209,7 @@
     <ClInclude Include="Main\Componenets\AnimationComponent.h" />
     <ClInclude Include="Main\Componenets\BoneComponenet.h" />
     <ClInclude Include="Main\Componenets\CameraComponent.h" />
-    <ClInclude Include="Main\Componenets\ModelComponent.h" />
+    <ClInclude Include="Main\Componenets\StaticModelComponent.h" />
     <ClInclude Include="Main\Componenets\RelationshipComponent.h" />
     <ClInclude Include="Main\Componenets\SkeletalModelComponent.h" />
     <ClInclude Include="Main\Componenets\SkeletonComponent.h" />
@@ -231,7 +231,7 @@
     <ClInclude Include="Wrappers\BonedVertex.h" />
     <ClInclude Include="Wrappers\HostLocalBuffer.h" />
     <ClInclude Include="Wrappers\Singletons\DescriptorPool.h" />
-    <ClInclude Include="Wrappers\Singletons\PerRenderableData.h" />
+    <ClInclude Include="Wrappers\Singletons\PerStaticModelData.h" />
     <ClInclude Include="Wrappers\Singletons\PerSkeletonData.h" />
     <ClInclude Include="Wrappers\Singletons\Renderer.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h" />

@@ -45,6 +45,9 @@ namespace std
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes common interface for further shader effects
+	 */
 	struct ShaderEffect
 	{
 		virtual ~ShaderEffect() = default;

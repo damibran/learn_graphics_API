@@ -2,6 +2,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes entity which is bone of some skeleton
+	 */
 	struct BoneComponent
 	{
 		BoneComponent(glm::mat4 o_mat,size_t ind): offset_mat(o_mat),bone_ind(ind)

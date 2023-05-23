@@ -9,6 +9,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief helps with creation of graphics pipeline for UnlitTexturedShaderEffect
+	 */
 	class UnLitTexturedGraphicsPipeline
 	{
 	public:

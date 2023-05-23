@@ -10,6 +10,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief container for singletons
+	 */
 	struct Singletons
 	{
 		Singletons() = delete;

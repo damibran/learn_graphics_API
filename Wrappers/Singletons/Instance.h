@@ -17,6 +17,9 @@ namespace dmbrn
 		"VK_LAYER_KHRONOS_validation"
 	};
 
+	/**
+	 * \brief wrapper for vkInstance and debug validation layer handling
+	 */
 	class Instance
 	{
 		friend struct Singletons;

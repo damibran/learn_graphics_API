@@ -11,6 +11,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages diffuse material simple GPU data
+	 */
 	class DiffusionUniformBuffer
 	{
 	public:

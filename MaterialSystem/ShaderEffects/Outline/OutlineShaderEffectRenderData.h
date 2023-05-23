@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages outline GPU render data 
+	 */
 	class OutlineShaderEffectRenderData
 	{
 	public:

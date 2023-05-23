@@ -1,11 +1,14 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "Wrappers/Singletons/Singletons.h"
-#include "Wrappers/Singletons/PerRenderableData.h"
+#include "Wrappers/Singletons/PerStaticModelData.h"
 #include "Wrappers/BonedVertex.h"
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages uniform GPU data for every skeletal model in scene
+	 */
 	class PerSkeletonData
 	{
 	public:

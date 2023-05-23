@@ -9,6 +9,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief wrapper for vkPhysicalDevice
+	 */
 	class PhysicalDevice
 	{
 		friend struct Singletons;

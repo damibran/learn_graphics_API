@@ -9,6 +9,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents frame of editor UI with it synchronization data
+	 */
 	struct EditorFrame
 	{
 		vk::raii::CommandBuffer command_buffer;

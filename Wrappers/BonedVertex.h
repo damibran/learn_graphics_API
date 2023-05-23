@@ -5,6 +5,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes one vertex of skeletal mesh
+	 */
 	struct BonedVertex
 	{
 		static inline constexpr uint8_t max_count_of_bones_per_vrtx = 4;

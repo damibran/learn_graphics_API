@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes one vertex of static mesh
+	 */
 	struct Vertex
 	{
 		glm::vec3 pos={0.f,0.f,0.f};

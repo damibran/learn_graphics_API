@@ -3,6 +3,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents scene tree UI window
+	 */
 	class SceneTree
 	{
 	public:

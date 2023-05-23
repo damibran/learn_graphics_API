@@ -6,6 +6,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes properties of camera
+	 */
 	class CameraComponent
 	{
 	public:

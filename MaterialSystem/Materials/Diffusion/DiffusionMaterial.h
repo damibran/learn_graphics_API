@@ -11,8 +11,14 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes surface properties of object
+	 */
 	class DiffusionMaterial
 	{
+		/**
+		 * \brief key into material registry
+		 */
 		struct MaterialRegistryHandle
 		{
 			image_data diffuse_texture;

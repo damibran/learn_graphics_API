@@ -8,6 +8,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents depth buffer of viewport
+	 */
 	class DepthBuffer
 	{
 	public:

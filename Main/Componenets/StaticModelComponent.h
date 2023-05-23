@@ -5,6 +5,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes an entity with static model visual representation
+	 */
 	struct StaticModelComponent
 	{
 		StaticModelComponent() = default;

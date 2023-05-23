@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief wrapper for vkDescriptorPool
+	 */
 	class DescriptorPool
 	{
 		friend struct Singletons;

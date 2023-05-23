@@ -2,13 +2,16 @@
 #include <stack>
 #include<entt/entt.hpp>
 
-#include "Main/Componenets/ModelComponent.h"
+#include "Main/Componenets/StaticModelComponent.h"
 #include "Componenets/TagComponent.h"
 
 namespace dmbrn
 {
 	struct SkeletalModelComponent;
 
+	/**
+	 * \brief is wrapper for entt::entity identificator for convenience
+	 */
 	class Enttity
 	{
 	public:

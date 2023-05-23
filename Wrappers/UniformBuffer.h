@@ -4,6 +4,10 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents CPU visible and coherent data buffer on GPU
+	 * \tparam UniformBufferObject type of objects stored in buffer
+	 */
 	template <class UniformBufferObject>
 	class UniformBuffer
 	{

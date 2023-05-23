@@ -12,6 +12,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief represents camera of viewport
+	 */
 	class ViewportCamera
 	{
 		friend class Viewport;

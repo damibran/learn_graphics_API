@@ -10,6 +10,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief stores keyframe values for one entity
+	 */
 	struct AnimationChannels
 	{
 		struct PosKeyTag;
@@ -119,6 +122,9 @@ namespace dmbrn
 
 	};
 
+	/**
+	 * \brief stores animation channels for all entities participating in this clip
+	 */
 	struct AnimationClip
 	{
 		std::string name;

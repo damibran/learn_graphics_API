@@ -4,6 +4,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief manages GPU data of viewport camera
+	 */
 	class CameraRenderData
 	{
 	public:

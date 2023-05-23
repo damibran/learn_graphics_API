@@ -18,52 +18,22 @@
 
 namespace dmbrn
 {
-	// need interface implementation for scene tree
+	/**
+	 * \brief is container and manager of all entities 
+	 * need interface implementation for scene tree
+	 */
 	class Scene
 	{
 	public:
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
-			//ModelImporter::Import(*this, true, "Models\\SkinTest\\RiggedSimple.gltf");
-
-			//ModelImporter::Import(*this,false,"Models\\DoubleTestCube\\DoubleTestCube.dae");
-
-			//ModelImporter::Import(*this,true,"Models\\anim_test.fbx");
-
-			//ModelImporter::Import(*this, true, "Models\\MyTest\\Test.dae");
-
-			//ModelImporter::Import(*this, true, "Models\\Char\\TwoChar@Taunt.gltf");
-
 			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
 			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
 			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae", true, true);
 
-			//ModelImporter::Import(*this, false,"Models\\DoubleTestCube\\QuadTestCube.dae");
-
-			printSceneRecursively(scene_root_, "");
-
 			animation_sequence_.mFrameMin = 0;
 			animation_sequence_.mFrameMax = 800;
-
-			//auto view = registry_.view<AnimationComponent>();
-			//for (auto ent : view)
-			//{
-			//	AnimationComponent& anim = view.get<AnimationComponent>(ent);
-			//
-			//	for (int i = 1; i < 4; ++i)
-			//	{
-			//		animation_sequence_.entries_[Enttity{registry_, ent}].insert(std::pair<float, AnimationClip>{
-			//			i * 200, *anim.animation_clips.begin()
-			//		});
-			//	}
-			//}
-
-			//addModel("Models\\Char\\Warrok W Kurniawan.fbx"); //Models\Char\Warrok W Kurniawan.fbx
-			//addModel("Models\\Char\\TwoChar.fbx"); //Models\Char\Warrok W Kurniawan.fbx
-			//addModel("Models\\SkinTest\\RiggedSimple.dae");
-			//addModel("F:\\3D_Scenes\\Sponza\\NewSponza_Main_glTF_002.gltf");
-			//addModel("Models\\DoubleTestCube\\DoubleTestCube.fbx");
 		}
 
 		void printSceneRecursively(Enttity node, std::string tab)
@@ -233,6 +203,9 @@ namespace dmbrn
 		Enttity scene_root_;
 		AnimationSequence animation_sequence_;
 
+		/**
+		 * \brief performs importing of model data from file
+		 */
 		class ModelImporter
 		{
 		public:

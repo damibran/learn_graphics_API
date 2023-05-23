@@ -17,12 +17,15 @@
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
 #include "Inspector.h"
-#include "Sequencer/ImSequencer.h"
+#include "Sequencer/Sequencer.h"
 
 #include <ImCurveEdit.h>
 
 namespace dmbrn
 {
+	/**
+	 * \brief is main orchestrator and container for all UI elements
+	 */
 	class EditorUI
 	{
 	public:

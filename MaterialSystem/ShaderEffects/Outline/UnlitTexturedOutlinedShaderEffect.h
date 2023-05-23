@@ -5,6 +5,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief describes shader effect for drawing object as outlined unlited textured
+	 */
 	struct UnlitTexturedOutlinedShaderEffect : public ShaderEffect
 	{
 		//UnlitTexturedOutlinedShaderEffect()=default;

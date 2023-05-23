@@ -7,6 +7,9 @@
 
 namespace dmbrn
 {
+	/**
+	 * \brief  represents viewport render pass
+	 */
 	class ViewportRenderPass
 	{
 	public:

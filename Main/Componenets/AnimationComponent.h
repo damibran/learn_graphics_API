@@ -12,6 +12,9 @@ namespace dmbrn
 		std::unique_ptr<glm::vec3> scale;
 	};
 
+	/**
+	 * \brief presence means that this entity and it subtree can be animated
+	 */
 	struct AnimationComponent
 	{
 		bool is_recording=false;
