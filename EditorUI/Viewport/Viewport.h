@@ -119,11 +119,14 @@ namespace dmbrn
 								if (rec_parent)
 								{
 									if (new_trans.position != t_c.position)
-										sequencer_.processKey<AnimationChannels::PosKeyTag>(selected_,rec_parent,new_trans.position);
+										sequencer_.processKey<AnimationChannels::PosKeyTag>(
+											selected_, rec_parent, new_trans.position);
 									if (new_trans.rotation != t_c.getRotationDegrees())
-										sequencer_.processKey<AnimationChannels::RotKeyTag>(selected_,rec_parent,glm::quat{glm::radians(new_trans.rotation)});
+										sequencer_.processKey<AnimationChannels::RotKeyTag>(
+											selected_, rec_parent, glm::quat{glm::radians(new_trans.rotation)});
 									if (new_trans.scale != t_c.scale)
-										sequencer_.processKey<AnimationChannels::ScaleKeyTag>(selected_,rec_parent,new_trans.scale);
+										sequencer_.processKey<AnimationChannels::ScaleKeyTag>(
+											selected_, rec_parent, new_trans.scale);
 								}
 							}
 
@@ -142,16 +145,24 @@ namespace dmbrn
 			ImGui::PopStyleVar();
 		}
 
+		/**
+		 * \brief record commands drawing scene to viewport
+		 * \param command_buffer command buffer to record comands
+		 * \param current_frame current frame index to bind proper descriptor sets
+		 * \param imageIndex swap chain image index to access frame buffer
+		 */
 		void render(const vk::raii::CommandBuffer& command_buffer,
 		            uint32_t current_frame,
 		            uint32_t imageIndex)
 		{
+			// set color of background
 			const std::array<vk::ClearValue, 2> clear_values
 			{
 				vk::ClearValue{vk::ClearColorValue{std::array<float, 4>{0.3f, 0.3f, 0.3f, 1.0f}}},
 				vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}}
 			};
 
+			// begin viewport render pass with proper frame buffer
 			const vk::RenderPassBeginInfo renderPassInfo
 			{
 				**render_pass_,
@@ -159,9 +170,9 @@ namespace dmbrn
 				vk::Rect2D{vk::Offset2D{0, 0}, swap_chain_.getExtent()},
 				clear_values
 			};
-
 			command_buffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
+			// set dynamic viewport
 			const vk::Viewport viewport
 			{
 				0.0f, 0.0f,
@@ -171,6 +182,7 @@ namespace dmbrn
 			};
 			command_buffer.setViewport(0, viewport);
 
+			// set dynamic scissors
 			const vk::Rect2D scissor
 			{
 				vk::Offset2D{0, 0},
@@ -178,9 +190,10 @@ namespace dmbrn
 			};
 			command_buffer.setScissor(0, scissor);
 
+			// update and bind new view
 			Renderer::newView(current_frame, camera_, command_buffer);
 
-			// static model drawing
+			// add static models to corresponding shader queue
 			auto static_view = scene_.getModelsToDraw();
 			for (auto entity : static_view)
 			{
@@ -188,7 +201,7 @@ namespace dmbrn
 				model.getShader()->addToRenderQueue({&model.mesh, model.inGPU_transform_offset});
 			}
 
-			// skeletal model drawing
+			// add skeletal models to corresponding shader queue
 			auto skeletal_group = scene_.getSkeletalModelsToDraw();
 			for (auto entity : skeletal_group)
 			{
@@ -200,6 +213,7 @@ namespace dmbrn
 				});
 			}
 
+			// draw all shader effects
 			Renderer::un_lit_textured.draw(current_frame, command_buffer);
 			Renderer::outlined_.draw(current_frame, command_buffer);
 

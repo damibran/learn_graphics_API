@@ -72,8 +72,13 @@ namespace dmbrn
 			enttity.destroy();
 		}
 
+		/**
+		 * \brief hierarchically update transforms
+		 * \param frame index of current in flight frame
+		 */
 		void updateGlobalTransforms(uint32_t frame)
 		{
+			// begin traversing tree starting from scene root
 			dirtyTraverseTree(scene_root_, frame);
 		}
 
@@ -136,24 +141,40 @@ namespace dmbrn
 			}
 		}
 
+		/**
+		 * \brief update transforms according to current animation states
+		 * \param anim_frame current global animation frame
+		 * \param frame index of inflight frame
+		 */
 		void updateAnimations(float anim_frame, uint32_t frame)
 		{
 			auto view = registry_.view<AnimationComponent>();
 
+			// iterate all animated entities
 			for (auto ent : view)
 			{
+				// if it has some animations in sequence
 				if (!animation_sequence_.entries_[Enttity{registry_, ent}].empty())
 				{
+					// get clip which start time is grater or equal to global time 
 					auto clip_it = animation_sequence_.entries_[Enttity{registry_, ent}].lower_bound(
 						anim_frame);
 
-					if (clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin())
+					// if it is past-the-end or (is not the first in sequence and not equal)
+					if (clip_it == animation_sequence_.entries_[Enttity{registry_, ent}].end() ||
+						clip_it != animation_sequence_.entries_[Enttity{registry_, ent}].begin() && clip_it->first !=
+						anim_frame)
+						// move back to get less not equal
 						--clip_it;
 
+					// here clip_it have less or equal
+
+					// calculate clip local time
 					const float local_time = glm::clamp(clip_it->second.min + anim_frame - clip_it->first,
 					                                    clip_it->second.min,
 					                                    clip_it->second.max);
 
+					// actually updating transform with local time
 					clip_it->second.updateTransforms(local_time, frame);
 				}
 			}
@@ -167,7 +188,7 @@ namespace dmbrn
 		void importModel(const std::string& path, bool with_bones, bool with_anim)
 		{
 			ModelImporter::ImportModel(*this, path, with_anim, with_bones);
-			for(int i=0;i<Singletons::device.MAX_FRAMES_IN_FLIGHT;++i)
+			for (int i = 0; i < Singletons::device.MAX_FRAMES_IN_FLIGHT; ++i)
 				scene_root_.markTransformAsEdited(i);
 		}
 
@@ -276,7 +297,7 @@ namespace dmbrn
 				{
 					throw std::runtime_error(std::string("ERROR::ASSIMP:: ") + importer.GetErrorString());
 				}
-				
+
 				collectAnimNodeToEnttity(root_ent, scene);
 				// TODO check if there is no empty anim node (that means, that user renamed entities)
 
@@ -429,7 +450,8 @@ namespace dmbrn
 						std::string mesh_name = name_this + "." + std::string(mesh->mName.C_Str());
 
 						const aiMaterial* ai_material = ai_scene->mMaterials[mesh->mMaterialIndex];
-						const DiffusionMaterial* material = DiffusionMaterial::GetMaterialPtr(directory, ai_scene, ai_material);
+						const DiffusionMaterial* material = DiffusionMaterial::GetMaterialPtr(
+							directory, ai_scene, ai_material);
 
 						if (mesh->HasBones() && with_bones_)
 						{
@@ -541,35 +563,49 @@ namespace dmbrn
 			}
 		};
 
+		/**
+		 * \brief traversing all dirty paths in tree to find edited entities
+		 * \param ent current entity
+		 * \param frame index of current in flight frame
+		 */
 		void dirtyTraverseTree(Enttity ent, uint32_t frame)
 		{
+			// transform component of this entity
 			TransformComponent& this_trans = ent.getComponent<TransformComponent>();
 
 			if (this_trans.isEditedForFrame(frame))
-			// if is edited treaverse tree up until leaves to update global trans mtx's
+			// if is edited traverse tree up until leaves to update global trans mtx's
 			{
+				// unedit and clear
 				this_trans.edited[frame] = false;
 				this_trans.dirty[frame] = false;
 
+				// get relationship component of entity
 				const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
 				glm::mat4 parent_trans = glm::mat4(1.0f);
 
-				// if this is not a root
+				// if this is not a root, parent could be null only for scene root
 				if (ent_rc.parent)
 				{
 					parent_trans = ent_rc.parent.getComponent<TransformComponent>().globalTransformMatrix;
 					//ent_rc.parent.getComponent<TransformComponent>().getMatrix();
 				}
 
+				// traverse tree up until leaves to update global trans mtx's
 				editedTraverseTree(ent, parent_trans, frame);
 			}
-			else if (this_trans.isDirtyForFrame(frame)) // if is dirty traverse tree while edited not found
+			else if (this_trans.isDirtyForFrame(frame))
+			// if is dirty traverse tree while edited not found
 			{
+				// clear transform of this
 				this_trans.dirty[frame] = false;
 
+				// get relationship component of this entity
 				const RelationshipComponent& cur_comp = ent.getComponent<RelationshipComponent>();
+				// get first child
 				Enttity cur_child = cur_comp.first;
 
+				// recursively call dirtyTraverseTree for all children
 				while (cur_child)
 				{
 					dirtyTraverseTree(cur_child, frame);
@@ -578,26 +614,38 @@ namespace dmbrn
 			}
 		}
 
+		/**
+		 * \brief traverse tree accumulating transformation matrix of each entity
+		 * \param ent current entity
+		 * \param parent_trans_mtx parent transformation matrix
+		 * \param frame index of current in flight frame
+		 */
 		void editedTraverseTree(Enttity ent, glm::mat4 parent_trans_mtx, uint32_t frame)
 		{
+			// transformation of this node is mul of parent and this
 			TransformComponent& ent_tc = ent.getComponent<TransformComponent>();
 			const glm::mat4 this_matrix = parent_trans_mtx * ent_tc.getMatrix();
 
+			// unedit and clear
 			ent_tc.edited[frame] = false;
 			ent_tc.dirty[frame] = false;
 
+			// memorize new global transformation matrix
 			ent_tc.globalTransformMatrix = this_matrix;
 
+			// if this node have model its model matrix GPU state should be updated too
 			if (StaticModelComponent* static_model_component = ent.tryGetComponent<StaticModelComponent>())
 			{
 				static_model_component->need_GPU_state_update = true;
 			}
 
+			// if this node is bone its transform matrix GPU state should be updated too
 			if (BoneComponent* bone = ent.tryGetComponent<BoneComponent>())
 			{
 				bone->need_gpu_state_update = true;
 			}
 
+			// further traverse tree up util the leaves
 			const RelationshipComponent& ent_rc = ent.getComponent<RelationshipComponent>();
 			Enttity cur_child = ent_rc.first;
 			while (cur_child)

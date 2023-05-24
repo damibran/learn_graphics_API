@@ -45,17 +45,25 @@ namespace dmbrn
 			ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 		}
 
+		/**
+		 * \brief draw UI, update scene both CPU and GPU states, record and submit command buffers
+		 * \param delta_time time of previous frame in ms
+		 */
 		void drawFrame(double delta_time)
 		{
+			// get current Editor Frame from swap chain
 			const EditorFrame& frame = swap_chain_.getFrame(current_frame_);
 
+			// get an image index of it and be sure that all synchronization is done
 			const uint32_t imageIndex = newFrame(Singletons::device, frame);
 
+			// begin drawing all the UI
 			beginDockSpace();
 
 			showAppMainMenuBar();
 			ImGui::ShowDemoWindow();
 
+			// draw all windows
 			viewport_.newImGuiFrame(delta_time, current_frame_, imageIndex);
 			viewport2_.newImGuiFrame(delta_time, current_frame_, imageIndex);
 			scene_tree_.newImGuiFrame();
@@ -63,15 +71,22 @@ namespace dmbrn
 			drawStatsWindow();
 			drawSequencer(static_cast<float>(delta_time));
 
+			// end drawing all the UI
 			endDockSpace();
 
+			// update transforms according to current animation states
 			scene_.updateAnimations(sequencer_.getCurrentFrame(), current_frame_);
+			// hierarchically update transforms
 			scene_.updateGlobalTransforms(current_frame_);
+			// update GPU data of static models
 			scene_.updatePerStaticModelData(current_frame_);
+			// update GPU data of skeletal modes
 			scene_.updatePerSkeletalData(current_frame_);
 
+			// record render commands to frame command buffer
 			render(frame, imageIndex);
 
+			// submit command buffer to queue and call present
 			submitAndPresent(Singletons::present_queue, Singletons::graphics_queue, Singletons::window, frame,
 			                 imageIndex);
 
@@ -171,6 +186,13 @@ namespace dmbrn
 		void endDockSpace()
 		{
 			ImGui::End();
+			const ImGuiIO& io = ImGui::GetIO();
+			ImGui::Render();
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
 		}
 
 		void showAppMainMenuBar()
@@ -206,16 +228,25 @@ namespace dmbrn
 			ImGui::End();
 		}
 
+		/**
+		 * \brief get an image index for frame and be sure that all synchronization is done
+		 * \param device vulkan logical device for fence manipulation
+		 * \param frame editor ui frame data
+		 * \return index of acquired image
+		 */
 		uint32_t newFrame(const LogicalDevice& device, const EditorFrame& frame)
 		{
+			// wait while all previous work for this frame wasn't done
 			device->waitForFences(*frame.in_flight_fence, true, UINT64_MAX);
 
+			// acquire image and signal semaphore when we can start render to it
 			const auto result = swap_chain_->acquireNextImage(UINT64_MAX, *frame.image_available_semaphore);
 
 			device->resetFences(*frame.in_flight_fence);
 
 			frame.command_buffer.reset();
 
+			// ImGui new frame
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
@@ -225,25 +256,21 @@ namespace dmbrn
 		}
 
 		/**
-		* \brief record command buffer with ImGUIRenderPass
-		*/
+		 * \brief record render commands to frame command buffer
+		 * \param frame editor frame for command buffer access
+		 * \param imageIndex swap chain image index of frame buffer
+		 */
 		void render(const EditorFrame& frame, uint32_t imageIndex)
 		{
-			const ImGuiIO& io = ImGui::GetIO();
-			ImGui::Render();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-			}
-
 			const vk::raii::CommandBuffer& command_buffer = frame.command_buffer;
 
 			command_buffer.begin({vk::CommandBufferUsageFlags()});
 
-			viewport_.render( command_buffer, current_frame_, imageIndex);
-			viewport2_.render( command_buffer, current_frame_, imageIndex);
+			// record commands of viewports
+			viewport_.render(command_buffer, current_frame_, imageIndex);
+			viewport2_.render(command_buffer, current_frame_, imageIndex);
 
+			// begin imgui render pass
 			vk::ClearValue clearValue;
 			clearValue.color = vk::ClearColorValue(std::array<float, 4>({0.5f, 0.5f, 0.5f, 1.0f}));
 			command_buffer.beginRenderPass({
@@ -252,13 +279,21 @@ namespace dmbrn
 				                               {{0, 0}, swap_chain_.getExtent()},
 				                               1, &clearValue
 			                               }, vk::SubpassContents::eInline);
-
+			// record imgui commands
 			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *command_buffer);
 
 			command_buffer.endRenderPass();
 			command_buffer.end();
 		}
 
+		/**
+		 * \brief submit command buffer to queue and call present
+		 * \param present present queue
+		 * \param graphics graphics queue
+		 * \param window window wrapper to handle window resize
+		 * \param frame editor frame data
+		 * \param imageIndex swap chain image index for presenting
+		 */
 		void submitAndPresent(vk::raii::Queue& present, vk::raii::Queue& graphics, GLFWwindowWrapper& window,
 		                      const EditorFrame& frame, uint32_t imageIndex)
 		{
