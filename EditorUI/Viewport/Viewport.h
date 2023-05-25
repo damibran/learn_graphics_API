@@ -1,12 +1,12 @@
 #pragma once
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-#include "Main/Enttity.h"
+#include "ECS/Enttity.h"
 #include "ViewportRenderPass.h"
 #include "ViewportSwapChain.h"
 #include "EditorUI/Viewport/ViewportCamera.h"
 #include "Utils/Transform.h"
-#include "EditorUI/Sequencer/Sequencer.h"
+#include "EditorUI/Sequencer.h"
 
 namespace dmbrn
 {

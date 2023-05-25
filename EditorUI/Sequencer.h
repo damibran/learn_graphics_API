@@ -27,8 +27,8 @@
 
 #include <cstddef>
 #include <cmath>
-#include "Main/Enttity.h"
-#include "Main/AnimationSequence.h"
+#include "ECS/Enttity.h"
+#include "ECS/AnimationSequence.h"
 
 struct ImDrawList;
 struct ImRect;

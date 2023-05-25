@@ -18,7 +18,7 @@
     <ClCompile Include="MainHpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main\Enttity.cpp">
+    <ClCompile Include="ECS\Enttity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\UtilsFunctions.cpp">
@@ -153,16 +153,16 @@
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Scene.h">
+    <ClInclude Include="ECS\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Enttity.h">
+    <ClInclude Include="ECS\Enttity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\CameraComponent.h">
+    <ClInclude Include="ECS\Componenets\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MaterialSystem\ShaderEffects\UnLitTextured\UnLitTexturedGraphicsPipelineStatics.h">
@@ -243,40 +243,37 @@
     <ClInclude Include="Wrappers\Singletons\PerSkeletonData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\TransformComponent.h">
+    <ClInclude Include="ECS\Componenets\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\TagComponent.h">
+    <ClInclude Include="ECS\Componenets\TagComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\RelationshipComponent.h">
+    <ClInclude Include="ECS\Componenets\RelationshipComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\StaticModelComponent.h">
+    <ClInclude Include="ECS\Componenets\StaticModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\SkeletalModelComponent.h">
+    <ClInclude Include="ECS\Componenets\SkeletalModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\BoneComponenet.h">
+    <ClInclude Include="ECS\Componenets\BoneComponenet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\Componenets\AnimationComponent.h">
+    <ClInclude Include="ECS\Componenets\AnimationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Wrappers\Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Sequencer\MySequence.h">
+    <ClInclude Include="EditorUI\Sequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorUI\Sequencer\Sequencer.h">
+    <ClInclude Include="ECS\AnimationSequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main\AnimationSequence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Main\Componenets\SkeletonComponent.h">
+    <ClInclude Include="ECS\Componenets\SkeletonComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

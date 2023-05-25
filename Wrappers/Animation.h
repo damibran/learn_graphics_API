@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <variant>
 
-#include "Main/Enttity.h"
+#include "ECS/Enttity.h"
 
 namespace dmbrn
 {

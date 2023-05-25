@@ -1,5 +1,5 @@
 #pragma once
-#include "Main/Scene.h"
+#include "ECS/Scene.h"
 
 namespace dmbrn
 {

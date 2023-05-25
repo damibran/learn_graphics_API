@@ -17,7 +17,7 @@
 #include "Viewport/Viewport.h"
 #include "SceneTree.h"
 #include "Inspector.h"
-#include "Sequencer/Sequencer.h"
+#include "Sequencer.h"
 
 #include <ImCurveEdit.h>
 

@@ -18,7 +18,7 @@ namespace dmbrn
 		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> dirty;
 		std::array<bool, LogicalDevice::MAX_FRAMES_IN_FLIGHT> edited;
 
-		glm::mat4 globalTransformMatrix = glm::mat4(1.0f); // hierarchy transform without self trans matrix
+		glm::mat4 globalTransformMatrix = glm::mat4(1.0f); // hierarchy transform with self trans matrix
 
 		TransformComponent(glm::vec3 pos = {0, 0, 0},
 		                   glm::vec3 rot = {0, 0, 0},

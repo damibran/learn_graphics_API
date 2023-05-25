@@ -11,7 +11,7 @@ using sys_clock = std::chrono::system_clock;
 using time_point = std::chrono::time_point<sys_clock, duration>;
 
 #include "Wrappers/Singletons/Singletons.h"
-#include "Main/Scene.h"
+#include "ECS/Scene.h"
 #include "EditorUI/EditorUI.h"
 
 namespace dmbrn

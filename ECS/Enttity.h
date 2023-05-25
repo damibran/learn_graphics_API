@@ -2,7 +2,7 @@
 #include <stack>
 #include<entt/entt.hpp>
 
-#include "Main/Componenets/StaticModelComponent.h"
+#include "ECS/Componenets/StaticModelComponent.h"
 #include "Componenets/TagComponent.h"
 
 namespace dmbrn

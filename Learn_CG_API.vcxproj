@@ -176,7 +176,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MainHpp.cpp" />
-    <ClCompile Include="Main\Enttity.cpp" />
+    <ClCompile Include="ECS\Enttity.cpp" />
     <ClCompile Include="Utils\AI_GLM_utils.cpp" />
     <ClCompile Include="Utils\UtilsFunctions.cpp" />
   </ItemGroup>
@@ -198,25 +198,24 @@
     <ClInclude Include="EditorUI\Helpers\EditorSwapChain.h" />
     <ClInclude Include="EditorUI\Inspector.h" />
     <ClInclude Include="EditorUI\SceneTree.h" />
-    <ClInclude Include="EditorUI\Sequencer\Sequencer.h" />
-    <ClInclude Include="EditorUI\Sequencer\MySequence.h" />
+    <ClInclude Include="EditorUI\Sequencer.h" />
     <ClInclude Include="EditorUI\Viewport\CameraRenderData.h" />
     <ClInclude Include="EditorUI\Viewport\Viewport.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportCamera.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportRenderPass.h" />
     <ClInclude Include="EditorUI\Viewport\ViewportSwapChain.h" />
-    <ClInclude Include="Main\AnimationSequence.h" />
-    <ClInclude Include="Main\Componenets\AnimationComponent.h" />
-    <ClInclude Include="Main\Componenets\BoneComponenet.h" />
-    <ClInclude Include="Main\Componenets\CameraComponent.h" />
-    <ClInclude Include="Main\Componenets\StaticModelComponent.h" />
-    <ClInclude Include="Main\Componenets\RelationshipComponent.h" />
-    <ClInclude Include="Main\Componenets\SkeletalModelComponent.h" />
-    <ClInclude Include="Main\Componenets\SkeletonComponent.h" />
-    <ClInclude Include="Main\Componenets\TagComponent.h" />
-    <ClInclude Include="Main\Componenets\TransformComponent.h" />
-    <ClInclude Include="Main\Enttity.h" />
-    <ClInclude Include="Main\Scene.h" />
+    <ClInclude Include="ECS\AnimationSequence.h" />
+    <ClInclude Include="ECS\Componenets\AnimationComponent.h" />
+    <ClInclude Include="ECS\Componenets\BoneComponenet.h" />
+    <ClInclude Include="ECS\Componenets\CameraComponent.h" />
+    <ClInclude Include="ECS\Componenets\StaticModelComponent.h" />
+    <ClInclude Include="ECS\Componenets\RelationshipComponent.h" />
+    <ClInclude Include="ECS\Componenets\SkeletalModelComponent.h" />
+    <ClInclude Include="ECS\Componenets\SkeletonComponent.h" />
+    <ClInclude Include="ECS\Componenets\TagComponent.h" />
+    <ClInclude Include="ECS\Componenets\TransformComponent.h" />
+    <ClInclude Include="ECS\Enttity.h" />
+    <ClInclude Include="ECS\Scene.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionUniformBuffer.h" />
     <ClInclude Include="MaterialSystem\Materials\Diffusion\DiffusionMaterial.h" />
     <ClInclude Include="MaterialSystem\ShaderEffects\Outline\OutlineGraphicsPipeline.h" />

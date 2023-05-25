@@ -28,8 +28,8 @@ namespace dmbrn
 		Scene():
 			scene_root_(registry_, "SceneRoot")
 		{
-			ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
-			ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Char\\Defeated.dae", true, true);
+			//ModelImporter::ImportModel(*this, "Models\\Char2\\Rumba Dancing.dae", true, true);
 			//ModelImporter::ImportModel(*this, "Models\\Remy\\Remy.dae", true, true);
 
 			animation_sequence_.mFrameMin = 0;

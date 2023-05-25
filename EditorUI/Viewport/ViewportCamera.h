@@ -7,8 +7,8 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
-#include "Main/Componenets/TransformComponent.h"
-#include "Main/Componenets/CameraComponent.h"
+#include "ECS/Componenets/TransformComponent.h"
+#include "ECS/Componenets/CameraComponent.h"
 
 namespace dmbrn
 {

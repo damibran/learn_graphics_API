@@ -1,5 +1,5 @@
 #pragma once
-#include "Main/Enttity.h"
+#include "ECS/Enttity.h"
 
 
 namespace dmbrn
